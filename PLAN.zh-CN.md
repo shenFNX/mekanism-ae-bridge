@@ -564,3 +564,43 @@ GUI 二次调整：
 2. 在 AE2 样板编码终端中打开 Mekanism 富集配方并点击 JEI 的 `+`，输入和产物能够直接填入处理样板。
 
 Jade 状态显示与 JEI 到 AE2 处理样板的传输兼容已通过实机验收。
+
+### 15.14 ME 冶金灌注机双输入账本（2026-08-10）
+
+本轮新增 ME 冶金灌注机，并把 GTNH 式预投递模型扩展为真正的物品＋化学品双输入任务：
+
+- 处理样板必须包含一个 `AEItemKey` 物品输入、一个 Applied Mekanistics `MekanismKey` 化学品输入和一个物品产物。
+- 配方识别使用 Mekanism 10.7.19.85 的 `TYPE_METALLURGIC_INFUSING` 与 `SingleItemChemicalRecipeInput`；单次物品用量和化学品用量均由配方 ingredient 计算。
+- 对 `perTickUsage` 配方，化学品总量按冶金灌注机基础 200 tick 换算，与 Mekanism JEI 分类写入处理样板的数量保持一致。
+- 每个活动/等待任务独立保存编码样板身份、物品键与 long 数量、化学品键与 long 数量、两类单次用量和剩余操作数。只有这些字段全部一致时任务才允许聚合。
+- 当前配方仍有完整材料时持续加工，耗尽并清空待输出后才切换下一任务；共享物品输入但使用红石、钻石等不同化学品的样板不会串料。
+- 0~8 张并行卡继续使用 `x1/x2/x3/x4/x6/x8/x10/x12/x16` 曲线；AE2 预投递深度与并行倍率相互独立。
+- 返还按钮先模拟物品与化学品两边可接收的完整操作数，再共同返还；异常残数进入故障恢复路径，可分别送回网络，避免资源永久卡死。
+- 新机器使用 `TaskDataVersion = 3` 保存双输入活动任务、等待队列、待输出、能量、样板和升级卡。
+
+GUI 与兼容：
+
+- 复用已验收的 Mekanism 风格布局：9 个顶部样板槽、8 个升级槽、ME 接入与返还按钮、内部能量状态。
+- 数字状态框新增当前化学品名称与缓存量；Jade provider 从服务端同步化学品注册名和 long 数量，客户端不读取滞后的方块实体字段。
+- JEI 到 AE2 处理样板仍由 AE2 JEI Integration 负责；Applied Mekanistics 的 JEI 转换器会把 Mekanism `ChemicalStack` 编码成 `MekanismKey`，本机直接消费该官方键类型。
+
+实现分工与依据：
+
+- OpenCode `deepseek/deepseek-v4-flash` 负责新方块注册/资源/基础 GUI 脚手架、后端基线机械复制，以及 Jade/语言重复适配；主代理审查了全部改动范围。
+- 双输入解析、配方核算、隔离账本、加工调度、返还安全和 NBT 持久化由主代理实现。
+- 接口依据来自锁定版本的 [Mekanism 官方源码](https://github.com/mekanism/Mekanism) 与 [Applied Mekanistics 官方源码](https://github.com/AppliedEnergistics/Applied-Mekanistics)，没有自行假设化学品 AEKey 或配方格式。
+
+自动验证：
+
+- 中英文语言 JSON 以 UTF-8 解析通过，`git diff --check` 无空白错误。
+- `compileJava --offline --no-daemon --rerun-tasks --console=plain`：`BUILD SUCCESSFUL`。
+- 客户端完成 Mekanism、AE2、Applied Mekanistics、JEI、Jade 和本模组资源加载；Jade 成功加载包含新冶金灌注机 provider 的插件，无注册崩溃或配置翻译断言。
+
+实机验收结果（用户于 2026-08-10 确认）：
+
+1. AE2 能读取机器中的冶金灌注处理样板，正常倍率样板可以成功发配并加工。
+2. 大倍率样板同样能够参与调度；测试中出现的阻塞最终确认是样板把红石化学品写多了 10 倍：`1000` 次铜锭灌注应填写 `10 B`，而不是 `100 B`，并非机器容量或投递深度限制。
+3. 物品与化学品的双输入识别、样板专属任务账本和 GTNH 式预投递流程整体测试无问题。
+4. 最终测试日志没有出现冶金灌注样板拒绝、任务故障或本模组异常；客户端退出时所有维度均正常保存。
+
+在正式发布前仍应把双配方串料、返回至 ME、任务中途重进存档和 0/1/8 张并行卡列入完整回归测试，避免后续通用化改造引入倒退。

@@ -1,6 +1,7 @@
 {
   "mod.mekanismae.name": "Mekanism AE Bridge",
   "block.mekanismae.me_enrichment_chamber": "ME Enrichment Chamber",
+  "block.mekanismae.me_metallurgic_infuser": "ME Metallurgic Infuser",
   "item.mekanismae.speed_card": "ME Speed Card",
   "item.mekanismae.parallel_card": "ME Parallel Card",
   "item.mekanismae.energy_card": "ME Energy Card",
@@ -31,6 +32,9 @@
   "gui.mekanismae.energy_storage": "Internal Energy Buffer",
   "gui.mekanismae.energy_storage.hint": "Requires external FE or a Mekanism energy cable",
   "gui.mekanismae.progress": "Progress: %s%%",
+  "gui.mekanismae.chemical": "Chemical: %s (%s)",
+  "gui.mekanismae.chemical.empty": "Chemical: Empty",
+  "gui.mekanismae.chemical.unknown": "Chemical: Unknown (%s)",
   "gui.mekanismae.available_upgrades": "Available Upgrades:",
   "gui.mekanismae.upgrades.hint": "Up to 8 of each upgrade; any card can use any upgrade slot",
   "jade.mekanismae.network": "ME: %s",
@@ -45,5 +49,7 @@
   "jade.mekanismae.current.idle": "Current: Idle",
   "jade.mekanismae.parallel": "Parallel: ×%s",
   "jade.mekanismae.energy": "Energy: %s / %s FE",
-  "config.jade.plugin_mekanismae.me_enrichment_chamber_status": "ME Enrichment Chamber Status"
+  "jade.mekanismae.chemical": "Chemical: %s (%s)",
+  "config.jade.plugin_mekanismae.me_enrichment_chamber_status": "ME Enrichment Chamber Status",
+  "config.jade.plugin_mekanismae.me_metallurgic_infuser_status": "ME Metallurgic Infuser Status"
 }

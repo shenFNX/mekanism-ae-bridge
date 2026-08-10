@@ -2,6 +2,7 @@ package io.github.shenfnx.mekanismae.registry;
 
 import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.block.MeEnrichmentChamberBlock;
+import io.github.shenfnx.mekanismae.block.MeMetallurgicInfuserBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -24,6 +25,17 @@ public final class ModBlocks {
 
     public static final DeferredItem<BlockItem> ME_ENRICHMENT_CHAMBER_ITEM =
             ITEMS.registerSimpleBlockItem("me_enrichment_chamber", ME_ENRICHMENT_CHAMBER);
+
+    public static final DeferredBlock<MeMetallurgicInfuserBlock> ME_METALLURGIC_INFUSER = BLOCKS.registerBlock(
+            "me_metallurgic_infuser",
+            MeMetallurgicInfuserBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                    .strength(5.0F, 6.0F)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops());
+
+    public static final DeferredItem<BlockItem> ME_METALLURGIC_INFUSER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_metallurgic_infuser", ME_METALLURGIC_INFUSER);
 
     private ModBlocks() {
     }

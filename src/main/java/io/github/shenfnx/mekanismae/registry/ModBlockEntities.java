@@ -2,6 +2,7 @@ package io.github.shenfnx.mekanismae.registry;
 
 import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.block.entity.MeEnrichmentChamberBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeMetallurgicInfuserBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -17,6 +18,13 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             MeEnrichmentChamberBlockEntity::new,
                             ModBlocks.ME_ENRICHMENT_CHAMBER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeMetallurgicInfuserBlockEntity>>
+            ME_METALLURGIC_INFUSER = BLOCK_ENTITY_TYPES.register(
+                    "me_metallurgic_infuser",
+                    () -> BlockEntityType.Builder.of(
+                            MeMetallurgicInfuserBlockEntity::new,
+                            ModBlocks.ME_METALLURGIC_INFUSER.get()).build(null));
 
     private ModBlockEntities() {
     }

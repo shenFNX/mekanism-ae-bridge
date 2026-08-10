@@ -1,6 +1,7 @@
 {
   "mod.mekanismae.name": "Mekanism ME 附属",
   "block.mekanismae.me_enrichment_chamber": "ME 富集仓",
+  "block.mekanismae.me_metallurgic_infuser": "ME 冶金灌注机",
   "item.mekanismae.speed_card": "ME 加速卡",
   "item.mekanismae.parallel_card": "ME 并行卡",
   "item.mekanismae.energy_card": "ME 能量卡",
@@ -30,6 +31,9 @@
   "gui.mekanismae.energy_storage": "内部能量缓存",
   "gui.mekanismae.energy_storage.hint": "需要从外部 FE 或 Mekanism 能量线缆供能",
   "gui.mekanismae.progress": "进度：%s%%",
+  "gui.mekanismae.chemical": "化学品：%s（%s）",
+  "gui.mekanismae.chemical.empty": "化学品：空",
+  "gui.mekanismae.chemical.unknown": "化学品：未知（%s）",
   "gui.mekanismae.available_upgrades": "可用升级：",
   "gui.mekanismae.upgrades.hint": "每种升级最多安装 8 张，可放入任意升级槽",
   "jade.mekanismae.network": "ME：%s",
@@ -44,5 +48,7 @@
   "jade.mekanismae.current.idle": "当前：空闲",
   "jade.mekanismae.parallel": "并行：×%s",
   "jade.mekanismae.energy": "能量：%s / %s FE",
-  "config.jade.plugin_mekanismae.me_enrichment_chamber_status": "ME 富集仓状态"
+  "jade.mekanismae.chemical": "化学品：%s（%s）",
+  "config.jade.plugin_mekanismae.me_enrichment_chamber_status": "ME 富集仓状态",
+  "config.jade.plugin_mekanismae.me_metallurgic_infuser_status": "ME 冶金灌注机状态"
 }
