@@ -112,7 +112,7 @@ public final class MeEnrichmentChamberScreen extends AbstractContainerScreen<MeE
         drawSideTab(graphics, left + UPGRADE_PANEL_X, top + 4, 24, 24, 0xFF8D969C);
         graphics.blit(UPGRADE_ICON, left + UPGRADE_PANEL_X + 3, top + 7,
                 0, 0, 18, 18, 18, 18);
-        drawMekanismPanel(graphics, left + UPGRADE_PANEL_X, top + 28, 48, 63);
+        drawMekanismPanel(graphics, left + UPGRADE_PANEL_X, top + 28, 48, 81);
         for (int index = 0; index < MeEnrichmentChamberBlockEntity.UPGRADE_SLOT_COUNT; index++) {
             drawSlot(graphics, left + 262 + (index % 2) * 18, top + 32 + (index / 2) * 18);
         }
@@ -153,10 +153,12 @@ public final class MeEnrichmentChamberScreen extends AbstractContainerScreen<MeE
         graphics.drawString(font, Component.translatable("gui.mekanismae.current_process"), 31, 56, 0xFF404040, false);
         graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFF404040, false);
 
-        int statusColor = !menu.networkEnabled() ? 0xFFFFB347
-                : menu.networkOnline() ? 0xFF53E2AC : 0xFFFF6868;
+        int statusColor = menu.processingFaulted() ? 0xFFFF6868
+                : !menu.networkEnabled() ? 0xFFFFB347
+                : menu.networkOnline() && !menu.processingFaulted() ? 0xFF53E2AC : 0xFFFF6868;
         graphics.drawString(font, menu.statusText(), 121, 59, statusColor, false);
-        graphics.drawString(font, Component.translatable("gui.mekanismae.pending", menu.pendingOperations()),
+        graphics.drawString(font, Component.translatable("gui.mekanismae.buffer_info",
+                formatAmount(menu.bufferOps()), formatAmount(menu.bufferOpsCap())),
                 121, 72, 0xFFE0E0E0, false);
         graphics.drawString(font, compactEnergyLine(), 121, 85, 0xFFE0E0E0, false);
         graphics.drawString(font, Component.translatable("gui.mekanismae.progress",
@@ -194,12 +196,14 @@ public final class MeEnrichmentChamberScreen extends AbstractContainerScreen<MeE
                             String.format(Locale.ROOT, "%,d", menu.maxEnergyReceive())),
                     Component.translatable("gui.mekanismae.energy_storage.hint").withStyle(ChatFormatting.GRAY)),
                     Optional.empty(), mouseX, mouseY);
-        } else if (isOver(mouseX, mouseY, UPGRADE_PANEL_X, 4, 48, 87)
+        } else if (isOver(mouseX, mouseY, UPGRADE_PANEL_X, 4, 48, 105)
                 && (hoveredSlot == null || !hoveredSlot.hasItem())) {
             graphics.renderTooltip(font, List.of(
                     Component.translatable("gui.mekanismae.available_upgrades").withStyle(ChatFormatting.AQUA),
                     upgradeLine(ModItems.SPEED_CARD.get().getDescription(), menu.speedUpgrades()),
-                    upgradeLine(ModItems.PARALLEL_CARD.get().getDescription(), menu.parallelUpgrades()),
+                    upgradeLine(ModItems.PARALLEL_CARD.get().getDescription(), menu.parallelUpgrades(),
+                            menu.parallelMultiplier()),
+                    Component.translatable("gui.mekanismae.parallel_curve").withStyle(ChatFormatting.GRAY),
                     upgradeLine(ModItems.ENERGY_CARD.get().getDescription(), menu.energyUpgrades()),
                     Component.translatable("gui.mekanismae.upgrades.hint").withStyle(ChatFormatting.GRAY)),
                     Optional.empty(), mouseX, mouseY);
@@ -210,6 +214,13 @@ public final class MeEnrichmentChamberScreen extends AbstractContainerScreen<MeE
         return Component.literal("  ").append(itemName.copy())
                 .append(Component.literal(" (" + installed + "/"
                         + MeEnrichmentChamberBlockEntity.MAX_UPGRADES_PER_TYPE + ")"));
+    }
+
+    private Component upgradeLine(Component itemName, int installed, int multiplier) {
+        return Component.literal("  ").append(itemName.copy())
+                .append(Component.literal(" (" + installed + "/"
+                        + MeEnrichmentChamberBlockEntity.MAX_UPGRADES_PER_TYPE
+                        + ", x" + multiplier + ")"));
     }
 
     private boolean isOver(double mouseX, double mouseY, int x, int y, int width, int height) {
@@ -243,6 +254,20 @@ public final class MeEnrichmentChamberScreen extends AbstractContainerScreen<MeE
             return String.format(Locale.ROOT, "%.0fk", energy / 1_000.0);
         }
         return Integer.toString(energy);
+    }
+
+    private String formatAmount(int amount) {
+        if (amount >= 1_000_000) {
+            return amount % 1_000_000 == 0
+                    ? (amount / 1_000_000) + "M"
+                    : String.format(Locale.ROOT, "%.2fM", amount / 1_000_000.0);
+        }
+        if (amount >= 1_000) {
+            return amount % 1_000 == 0
+                    ? (amount / 1_000) + "k"
+                    : String.format(Locale.ROOT, "%.1fk", amount / 1_000.0);
+        }
+        return Integer.toString(amount);
     }
 
     private Component compactEnergyLine() {

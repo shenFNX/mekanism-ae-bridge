@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.server.level.ServerPlayer;
 import appeng.api.crafting.PatternDetailsHelper;
@@ -83,6 +84,26 @@ public final class MeEnrichmentChamberBlock extends Block implements EntityBlock
             return ItemInteractionResult.CONSUME;
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @Override
+    public boolean onDestroyedByPlayer(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            boolean willHarvest,
+            FluidState fluid) {
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof MeEnrichmentChamberBlockEntity chamber && chamber.hasStoredContents()) {
+            if (!level.isClientSide()) {
+                player.displayClientMessage(
+                        net.minecraft.network.chat.Component.translatable("message.mekanismae.empty_before_breaking"),
+                        true);
+            }
+            return false;
+        }
+        return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
     }
 
     @Override

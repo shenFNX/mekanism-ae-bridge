@@ -17,7 +17,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 
 public final class MeEnrichmentChamberMenu extends AbstractContainerMenu {
-    private static final int DATA_COUNT = 11;
+    private static final int DATA_COUNT = 16;
     private static final int REAL_MACHINE_SLOT_COUNT = MeEnrichmentChamberBlockEntity.PATTERN_SLOT_COUNT
             + MeEnrichmentChamberBlockEntity.UPGRADE_SLOT_COUNT;
     private static final int DISPLAY_SLOT_COUNT = 2;
@@ -162,7 +162,30 @@ public final class MeEnrichmentChamberMenu extends AbstractContainerMenu {
         return data.get(10);
     }
 
+    public int bufferOps() {
+        return data.get(11);
+    }
+
+    public int bufferOpsCap() {
+        return data.get(12);
+    }
+
+    public int parallelMultiplier() {
+        return data.get(13);
+    }
+
+    public int pendingOutputDisplay() {
+        return data.get(14);
+    }
+
+    public boolean processingFaulted() {
+        return data.get(15) != 0;
+    }
+
     public Component statusText() {
+        if (processingFaulted()) {
+            return Component.translatable("gui.mekanismae.status.faulted");
+        }
         if (!networkEnabled()) {
             return Component.translatable("gui.mekanismae.status.disabled");
         }

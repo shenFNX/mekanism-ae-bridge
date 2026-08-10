@@ -11,6 +11,9 @@
 | Applied Energistics 2 | `19.2.17` |
 | Applied Mekanistics | `1.6.3` |
 | GuideME | `21.1.17` |
+| Just Enough Items | `19.27.0.335` |
+| AE2 JEI Integration | `1.2.1` |
+| Jade | `15.10.5` |
 | ModDevGradle | `2.0.143` |
 
 ## Local development jars
@@ -23,5 +26,19 @@ The jars under `libs/` are development/runtime inputs for this first compatibili
 | `appliedenergistics2-19.2.17.jar` | `49c18d6a4af487957d7e5a6ad5dcbf71090b8e14` |
 | `Applied-Mekanistics-1.6.3.jar` | `bec4a47269ec23bca2329742e13409bfde69c5c3` |
 | `guideme-21.1.17.jar` | `060e374f578db694a0b8f3ad409bd424cae86359` |
+| `jei-1.21.1-neoforge-19.27.0.335.jar` | `4e18d321bdc23762ff0bc19e9e7a08b49866c449` |
+| `ae2jeiintegration-1.2.1.jar` | `e99898b3e9c32bf6ac757e7ad50247746622cdfc` |
+| `Jade-1.21.1-NeoForge-15.10.5.jar` | `d5bf134b3dbde9f5258666823900e21341dc0a50` |
 
 Applied Mekanistics metadata confirms the runtime IDs `appmek`, `ae2`, and `mekanism`. AE2 requires `guideme` for this version.
+
+AE2 19.2.17 does not contain JEI integration. The separate open-source
+[AE2 JEI Integration](https://github.com/Tamaized/AE2-JEI-Integration) mod restores recipe transfer for the AE2
+Pattern Encoding Terminal, including using JEI's `+` button to encode non-crafting recipes as processing patterns.
+Mekanism supplies its own JEI recipe categories, so no Mekanism recipe duplication is implemented in this project.
+
+Release sources:
+
+- [JEI official source](https://github.com/mezz/JustEnoughItems)
+- [AE2 JEI Integration 1.2.1](https://www.curseforge.com/minecraft/mc-mods/ae2-jei-integration/files/7727898)
+- [Jade 15.10.5](https://www.curseforge.com/minecraft/mc-mods/jade/files/7545219)

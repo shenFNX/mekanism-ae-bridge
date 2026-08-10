@@ -46,19 +46,25 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
     private static final int ENERGY_PER_OPERATION = 10_000;
     private static final int BASE_PROCESSING_TICKS = 20;
     public static final int PATTERN_SLOT_COUNT = 9;
-    public static final int UPGRADE_SLOT_COUNT = 6;
+    public static final int UPGRADE_SLOT_COUNT = 8;
     public static final int MAX_UPGRADES_PER_TYPE = 8;
+    private static final long MAX_ACCEPTED_OPERATIONS = 1_048_576;
+    private static final int TASK_DATA_VERSION = 2;
+    private static final int[] PARALLEL_MULTIPLIER = {1, 2, 3, 4, 6, 8, 10, 12, 16};
 
     private final MachineEnergyStorage energyStorage = new MachineEnergyStorage(BASE_ENERGY_CAPACITY, BASE_ENERGY_RECEIVE);
     private final IStrictEnergyHandler strictEnergyHandler = new StrictEnergyHandler();
     private final NonNullList<ItemStack> patternSlots = NonNullList.withSize(PATTERN_SLOT_COUNT, ItemStack.EMPTY);
-    private ItemStack pendingInput = ItemStack.EMPTY;
-    private ItemStack pendingOutput = ItemStack.EMPTY;
+    private AEItemKey activeInputKey;
+    private long activeInputCount;
+    private AEItemKey pendingOutputKey;
+    private long pendingOutputCount;
     private ItemStack activePatternDefinition = ItemStack.EMPTY;
     private final List<ProcessingJob> queuedJobs = new ArrayList<>();
     private long pendingOperations;
     private int inputPerOperation = 1;
     private int progress;
+    private boolean processingFaulted;
 
     // These are intentionally data-driven entry points for the later upgrade system.
     private int speedUpgrades;
@@ -91,19 +97,22 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
 
     public ItemStack getProcessingInputDisplay() {
         activateNextJobIfIdle();
-        if (pendingInput.isEmpty()) {
+        if (activeInputKey == null || activeInputCount <= 0) {
             return ItemStack.EMPTY;
         }
-        return pendingInput.copyWithCount(Math.min(pendingInput.getCount(), Math.max(1, inputPerOperation)));
+        return createDisplayStack(activeInputKey, Math.min(activeInputCount, inputPerOperation));
     }
 
     public ItemStack getProcessingOutputDisplay() {
         activateNextJobIfIdle();
-        if (!pendingOutput.isEmpty()) {
-            return pendingOutput.copy();
+        if (pendingOutputKey != null && pendingOutputCount > 0) {
+            return createDisplayStack(pendingOutputKey, pendingOutputCount);
         }
-        ItemStack input = getProcessingInputDisplay();
-        return input.isEmpty() ? ItemStack.EMPTY : getRecipeOutput(input);
+        if (activeInputKey == null || activeInputCount <= 0) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack probe = activeInputKey.toStack(Math.max(1, inputPerOperation));
+        return getRecipeOutput(probe);
     }
 
     public boolean setPattern(ItemStack stack) {
@@ -173,6 +182,11 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
                     case 8 -> parallelUpgrades;
                     case 9 -> getUpgradeCount(ModItems.ENERGY_CARD.get());
                     case 10 -> energyStorage.getReceiveLimit();
+                    case 11 -> (int) Math.min(Integer.MAX_VALUE, getTotalQueuedOperations());
+                    case 12 -> (int) Math.min(Integer.MAX_VALUE, MAX_ACCEPTED_OPERATIONS);
+                    case 13 -> getParallelBatchSize();
+                    case 14 -> (int) Math.min(Integer.MAX_VALUE, pendingOutputCount);
+                    case 15 -> processingFaulted ? 1 : 0;
                     default -> 0;
                 };
             }
@@ -184,7 +198,7 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
 
             @Override
             public int getCount() {
-                return 11;
+                return 16;
             }
         };
     }
@@ -193,7 +207,51 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
         return networkEnabled;
     }
 
+    /**
+     * Read-only status used by overlays such as Jade. These accessors must not
+     * advance the work queue because tooltip requests can arrive independently
+     * from the server tick.
+     */
+    public boolean isNetworkOnline() {
+        return getMainNode().isOnline();
+    }
+
+    public boolean isProcessingFaulted() {
+        return processingFaulted;
+    }
+
+    public long getBufferedOperationCount() {
+        return getTotalQueuedOperations();
+    }
+
+    public long getBufferOperationLimit() {
+        return MAX_ACCEPTED_OPERATIONS;
+    }
+
+    public long getCurrentOperationCount() {
+        return Math.max(0, pendingOperations);
+    }
+
+    public int getParallelMultiplier() {
+        return getParallelBatchSize();
+    }
+
+    public ItemStack getBufferedInputDisplay() {
+        return activeInputKey == null || activeInputCount <= 0 ? ItemStack.EMPTY : activeInputKey.toStack(1);
+    }
+
+    public ItemStack getBufferedOutputDisplay() {
+        return pendingOutputKey == null || pendingOutputCount <= 0 ? ItemStack.EMPTY : pendingOutputKey.toStack(1);
+    }
+
+    public long getBufferedOutputCount() {
+        return Math.max(0, pendingOutputCount);
+    }
+
     public void toggleNetworkEnabled() {
+        if (!networkEnabled && processingFaulted && hasProcessingWork()) {
+            return;
+        }
         networkEnabled = !networkEnabled;
         ICraftingProvider.requestUpdate(getMainNode());
         setChanged();
@@ -229,81 +287,98 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
                 if (!(entry.getKey() instanceof AEItemKey itemKey)) {
                     return false;
                 }
+                long amount = entry.getLongValue();
+                if (amount <= 0 || inputCount > Long.MAX_VALUE - amount) {
+                    return false;
+                }
                 if (inputKey != null && !inputKey.equals(itemKey)) {
                     return false;
                 }
                 inputKey = itemKey;
-                inputCount += entry.getLongValue();
+                inputCount += amount;
             }
         }
 
-        if (inputKey == null || inputCount <= 0 || inputCount > Integer.MAX_VALUE) {
+        if (inputKey == null || inputCount <= 0) {
             return false;
         }
 
-        ItemStack input = inputKey.toStack((int) inputCount);
-        var recipe = findRecipe(input);
+        ItemStack probe = inputKey.toStack(1);
+        var recipe = findRecipe(probe);
         if (recipe == null || !matchesPatternOutput(recipe, details)) {
             return false;
         }
 
-        long needed = recipe.getInput().getNeededAmount(input);
-        if (needed <= 0 || needed > Integer.MAX_VALUE || inputCount % needed != 0) {
+        long neededAmount = recipe.getInput().getNeededAmount(probe);
+        if (neededAmount <= 0 || neededAmount > Integer.MAX_VALUE || inputCount % neededAmount != 0) {
             return false;
         }
-        enqueueJob(details.getDefinition().toStack(), input, inputCount / needed, (int) needed);
+
+        int needed = (int) neededAmount;
+        long operations = inputCount / neededAmount;
+        long current = getTotalQueuedOperations();
+        if (current > MAX_ACCEPTED_OPERATIONS || operations > MAX_ACCEPTED_OPERATIONS - current) {
+            return false;
+        }
+
+        enqueueJob(details.getDefinition().toStack(), inputKey, inputCount, operations, needed);
         setChanged();
         return true;
     }
 
     @Override
     public boolean isBusy() {
-        if (!pendingOutput.isEmpty()) {
+        if (!networkEnabled || processingFaulted) {
             return true;
         }
-        return getTotalQueuedOperations() >= getParallelBatchSize();
+        return getTotalQueuedOperations() >= MAX_ACCEPTED_OPERATIONS;
     }
 
-    private void enqueueJob(ItemStack patternDefinition, ItemStack input, long operations, int neededPerOperation) {
-        if (operations <= 0 || input.isEmpty()) {
+    private void enqueueJob(ItemStack patternDefinition, AEItemKey inputKey, long inputCount, long operations, int neededPerOperation) {
+        if (operations <= 0 || inputKey == null || inputCount <= 0) {
             return;
         }
 
-        if (pendingOperations <= 0 && pendingInput.isEmpty() && pendingOutput.isEmpty() && queuedJobs.isEmpty()) {
-            activateJob(new ProcessingJob(patternDefinition, input, operations, neededPerOperation));
+        ProcessingJob newJob = new ProcessingJob(patternDefinition, inputKey, inputCount, operations, neededPerOperation);
+
+        if (pendingOperations <= 0 && activeInputKey == null && pendingOutputKey == null && queuedJobs.isEmpty()) {
+            activateJob(newJob);
             return;
         }
 
-        if (sameJob(activePatternDefinition, pendingInput, inputPerOperation,
-                patternDefinition, input, neededPerOperation) && canGrow(pendingInput, input)) {
-            pendingInput.grow(input.getCount());
+        if (samePatternJob(activePatternDefinition, inputPerOperation, patternDefinition, neededPerOperation)
+                && (activeInputKey == null || activeInputKey.equals(inputKey))
+                && canAdd(activeInputCount, inputCount) && canAdd(pendingOperations, operations)) {
+            if (activeInputKey == null) {
+                activeInputKey = inputKey;
+            }
+            activeInputCount += inputCount;
             pendingOperations += operations;
             return;
         }
 
         for (ProcessingJob job : queuedJobs) {
-            if (job.matches(patternDefinition, input, neededPerOperation) && canGrow(job.input, input)) {
-                job.input.grow(input.getCount());
+            if (job.matches(patternDefinition, inputKey, neededPerOperation) && job.canGrow(inputCount, operations)) {
+                job.inputCount += inputCount;
                 job.operations += operations;
                 return;
             }
         }
-        queuedJobs.add(new ProcessingJob(patternDefinition, input, operations, neededPerOperation));
+        queuedJobs.add(newJob);
     }
 
-    private boolean canGrow(ItemStack existing, ItemStack addition) {
-        return (long) existing.getCount() + addition.getCount() <= Integer.MAX_VALUE;
-    }
-
-    private boolean sameJob(ItemStack firstPattern, ItemStack firstInput, int firstNeeded,
-            ItemStack secondPattern, ItemStack secondInput, int secondNeeded) {
+    private boolean samePatternJob(ItemStack firstPattern, int firstNeeded,
+            ItemStack secondPattern, int secondNeeded) {
         return firstNeeded == secondNeeded
-                && ItemStack.isSameItemSameComponents(firstPattern, secondPattern)
-                && ItemStack.isSameItemSameComponents(firstInput, secondInput);
+                && ItemStack.isSameItemSameComponents(firstPattern, secondPattern);
     }
 
     private int getParallelBatchSize() {
-        return 1 + Math.max(0, parallelUpgrades);
+        return PARALLEL_MULTIPLIER[Math.min(Math.max(0, parallelUpgrades), PARALLEL_MULTIPLIER.length - 1)];
+    }
+
+    private static boolean canAdd(long first, long second) {
+        return first >= 0 && second >= 0 && first <= Long.MAX_VALUE - second;
     }
 
     private long getTotalQueuedOperations() {
@@ -318,7 +393,12 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
     }
 
     private boolean hasProcessingWork() {
-        return getTotalQueuedOperations() > 0 || !pendingInput.isEmpty() || !pendingOutput.isEmpty();
+        return getTotalQueuedOperations() > 0 || (activeInputKey != null && activeInputCount > 0)
+                || (pendingOutputKey != null && pendingOutputCount > 0) || !queuedJobs.isEmpty();
+    }
+
+    public boolean hasStoredContents() {
+        return hasProcessingWork() || !isEmpty();
     }
 
     public static void serverTick(
@@ -334,26 +414,30 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
         flushOutput();
         finishActiveJobIfDrained();
         activateNextJobIfIdle();
-        // Match Mekanism's default redstone behavior: a powered machine pauses processing.
+        if (processingFaulted) {
+            return;
+        }
         if (level.hasNeighborSignal(worldPosition)) {
             return;
         }
-        if (!pendingOutput.isEmpty() || pendingOperations <= 0) {
+        if ((pendingOutputKey != null && pendingOutputCount > 0) || pendingOperations <= 0) {
             return;
         }
 
-        if (pendingInput.getCount() < inputPerOperation) {
-            discardInvalidActiveJob();
+        if (activeInputKey == null || activeInputCount < inputPerOperation) {
+            markProcessingFault();
             setChanged();
             return;
         }
-        ItemStack oneInput = pendingInput.copyWithCount(inputPerOperation);
+        ItemStack oneInput = activeInputKey.toStack(inputPerOperation);
         ItemStack result = getRecipeOutput(oneInput);
         if (result.isEmpty()) {
-            discardInvalidActiveJob();
+            markProcessingFault();
             setChanged();
             return;
         }
+        AEItemKey resultKey = AEItemKey.of(result);
+        int resultCount = result.getCount();
 
         int speed = Math.max(1, 1 + speedUpgrades);
         progress += speed;
@@ -361,16 +445,34 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
             return;
         }
 
-        int availableOperations = Math.min(getParallelBatchSize(),
-                (int) Math.min(Integer.MAX_VALUE, pendingOperations));
+        long availableOperations = Math.min(getParallelBatchSize(), pendingOperations);
         availableOperations = Math.min(availableOperations, energyStorage.getEnergyStored() / ENERGY_PER_OPERATION);
-        for (int operation = 0; operation < availableOperations; operation++) {
+        long consumedInput = availableOperations * inputPerOperation;
+        if (consumedInput > activeInputCount) {
+            availableOperations = activeInputCount / inputPerOperation;
+            consumedInput = availableOperations * inputPerOperation;
+        }
+        if (availableOperations <= 0) {
+            return;
+        }
+
+        long produced = availableOperations * resultCount;
+        if (pendingOutputKey != null
+                && (!pendingOutputKey.equals(resultKey) || !canAdd(pendingOutputCount, produced))) {
+            markProcessingFault();
+            setChanged();
+            return;
+        }
+        for (int i = 0; i < availableOperations; i++) {
             energyStorage.consumeEnergy(ENERGY_PER_OPERATION);
-            pendingInput.shrink(inputPerOperation);
-            pendingOperations--;
-            pendingOutput = ItemStack.isSameItemSameComponents(pendingOutput, result)
-                    ? addToStack(pendingOutput, result)
-                    : result.copy();
+        }
+        activeInputCount -= consumedInput;
+        pendingOperations -= availableOperations;
+        if (pendingOutputKey == null) {
+            pendingOutputKey = resultKey;
+            pendingOutputCount = produced;
+        } else {
+            pendingOutputCount += produced;
         }
         progress = 0;
         setChanged();
@@ -378,23 +480,28 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
         finishActiveJobIfDrained();
     }
 
-    private void discardInvalidActiveJob() {
-        pendingOperations = 0;
-        pendingInput = ItemStack.EMPTY;
+    private void markProcessingFault() {
+        processingFaulted = true;
         progress = 0;
-        activePatternDefinition = ItemStack.EMPTY;
     }
 
     private void finishActiveJobIfDrained() {
-        if (pendingOperations <= 0 && pendingInput.isEmpty() && pendingOutput.isEmpty()) {
+        if (pendingOperations <= 0 && activeInputCount <= 0 && activeInputKey != null) {
+            activeInputKey = null;
+        }
+        if (pendingOperations <= 0 && activeInputKey == null && pendingOutputKey == null) {
             activePatternDefinition = ItemStack.EMPTY;
             inputPerOperation = 1;
             progress = 0;
         }
+        if (!hasProcessingWork()) {
+            processingFaulted = false;
+        }
     }
 
     private void activateNextJobIfIdle() {
-        if (!pendingInput.isEmpty() || pendingOperations > 0 || !pendingOutput.isEmpty() || queuedJobs.isEmpty()) {
+        if (activeInputKey != null || pendingOperations > 0 || (pendingOutputKey != null && pendingOutputCount > 0)
+                || queuedJobs.isEmpty()) {
             return;
         }
         ProcessingJob next = queuedJobs.removeFirst();
@@ -404,14 +511,15 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
 
     private void activateJob(ProcessingJob job) {
         activePatternDefinition = job.patternDefinition.copy();
-        pendingInput = job.input.copy();
+        activeInputKey = job.inputKey;
+        activeInputCount = job.inputCount;
         pendingOperations = job.operations;
         inputPerOperation = Math.max(1, job.inputPerOperation);
         progress = 0;
     }
 
     private void flushOutput() {
-        if (pendingOutput.isEmpty() || !getMainNode().isOnline()) {
+        if (pendingOutputKey == null || pendingOutputCount <= 0 || !getMainNode().isOnline()) {
             return;
         }
 
@@ -421,12 +529,16 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
         }
 
         long inserted = grid.getStorageService().getInventory().insert(
-                AEItemKey.of(pendingOutput),
-                pendingOutput.getCount(),
+                pendingOutputKey,
+                pendingOutputCount,
                 Actionable.MODULATE,
                 IActionSource.ofMachine(this));
         if (inserted > 0) {
-            pendingOutput.shrink((int) Math.min(inserted, pendingOutput.getCount()));
+            pendingOutputCount = Math.max(0, pendingOutputCount - inserted);
+            if (pendingOutputCount <= 0) {
+                pendingOutputKey = null;
+                pendingOutputCount = 0;
+            }
             setChanged();
         }
     }
@@ -442,47 +554,69 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
             return false;
         }
         flushOutput();
-        if (!pendingInput.isEmpty()) {
-            long inserted = insertToNetwork(pendingInput);
+        if (activeInputKey != null && activeInputCount > 0) {
+            long inserted = insertWholeOperationsToNetwork(activeInputKey, activeInputCount, inputPerOperation);
             if (inserted > 0) {
-                pendingInput.shrink((int) Math.min(inserted, pendingInput.getCount()));
-                pendingOperations = pendingInput.getCount() / Math.max(1, inputPerOperation);
+                activeInputCount -= inserted;
+                pendingOperations = activeInputCount / Math.max(1, inputPerOperation);
+                if (activeInputCount % Math.max(1, inputPerOperation) != 0) {
+                    processingFaulted = true;
+                }
+                if (activeInputCount <= 0) {
+                    activeInputKey = null;
+                }
             }
         }
         for (int index = queuedJobs.size() - 1; index >= 0; index--) {
             ProcessingJob job = queuedJobs.get(index);
-            long inserted = insertToNetwork(job.input);
+            long inserted = insertWholeOperationsToNetwork(job.inputKey, job.inputCount, job.inputPerOperation);
             if (inserted > 0) {
-                job.input.shrink((int) Math.min(inserted, job.input.getCount()));
-                job.operations = job.input.getCount() / Math.max(1, job.inputPerOperation);
+                job.inputCount -= inserted;
+                job.operations = job.inputCount / Math.max(1, job.inputPerOperation);
+                if (job.inputCount % Math.max(1, job.inputPerOperation) != 0) {
+                    processingFaulted = true;
+                }
             }
-            if (job.input.isEmpty()) {
+            if (job.inputCount <= 0) {
                 queuedJobs.remove(index);
             }
         }
-        if (pendingInput.isEmpty()) {
+        if (activeInputKey == null) {
             pendingOperations = 0;
             progress = 0;
             activePatternDefinition = ItemStack.EMPTY;
         }
+        if (activeInputKey == null && pendingOutputKey == null && queuedJobs.isEmpty()) {
+            processingFaulted = false;
+        }
         setChanged();
-        return pendingInput.isEmpty() && pendingOutput.isEmpty() && queuedJobs.isEmpty();
+        return activeInputKey == null && pendingOutputKey == null && queuedJobs.isEmpty();
     }
 
-    private long insertToNetwork(ItemStack stack) {
+    private long insertWholeOperationsToNetwork(AEItemKey key, long count, int inputPerOperation) {
         var grid = getMainNode().getGrid();
-        if (grid == null || stack.isEmpty()) {
+        if (grid == null || key == null || count <= 0) {
             return 0;
         }
-        return grid.getStorageService().getInventory().insert(
-                AEItemKey.of(stack), stack.getCount(), Actionable.MODULATE,
-                IActionSource.ofMachine(this));
+        long unit = Math.max(1, inputPerOperation);
+        var inventory = grid.getStorageService().getInventory();
+        long accepted = inventory.insert(key, count, Actionable.SIMULATE, IActionSource.ofMachine(this));
+        long wholeAmount = Math.min(count, Math.max(0, accepted));
+        wholeAmount -= wholeAmount % unit;
+        if (wholeAmount <= 0) {
+            return 0;
+        }
+        long inserted = inventory.insert(key, wholeAmount, Actionable.MODULATE, IActionSource.ofMachine(this));
+        if (inserted % unit != 0) {
+            processingFaulted = true;
+        }
+        return Math.min(wholeAmount, Math.max(0, inserted));
     }
 
-    private ItemStack addToStack(ItemStack target, ItemStack addition) {
-        ItemStack result = target.copy();
-        result.grow(addition.getCount());
-        return result;
+    private static ItemStack createDisplayStack(AEItemKey key, long count) {
+        ItemStack display = key.toStack(1);
+        display.setCount((int) Math.max(1, Math.min(count, display.getMaxStackSize())));
+        return display;
     }
 
     private ItemStack getRecipeOutput(ItemStack input) {
@@ -547,6 +681,7 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
     @Override
     public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
+        tag.putInt("TaskDataVersion", TASK_DATA_VERSION);
         net.minecraft.nbt.ListTag patterns = new net.minecraft.nbt.ListTag();
         for (int index = 0; index < patternSlots.size(); index++) {
             ItemStack stack = patternSlots.get(index);
@@ -557,11 +692,17 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
             }
         }
         tag.put("Patterns", patterns);
-        if (!pendingInput.isEmpty()) {
-            tag.put("PendingInput", pendingInput.save(registries));
+        if (activeInputKey != null && activeInputCount > 0) {
+            CompoundTag inputTag = new CompoundTag();
+            saveItemKey(activeInputKey, inputTag, registries);
+            tag.put("PendingInputItem", inputTag);
+            tag.putLong("PendingInputCount", activeInputCount);
         }
-        if (!pendingOutput.isEmpty()) {
-            tag.put("PendingOutput", pendingOutput.save(registries));
+        if (pendingOutputKey != null && pendingOutputCount > 0) {
+            CompoundTag outputTag = new CompoundTag();
+            saveItemKey(pendingOutputKey, outputTag, registries);
+            tag.put("PendingOutputItem", outputTag);
+            tag.putLong("PendingOutputCount", pendingOutputCount);
         }
         if (!activePatternDefinition.isEmpty()) {
             tag.put("ActivePattern", activePatternDefinition.save(registries));
@@ -570,7 +711,10 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
         for (ProcessingJob job : queuedJobs) {
             CompoundTag savedJob = new CompoundTag();
             savedJob.put("Pattern", job.patternDefinition.save(registries));
-            savedJob.put("Input", job.input.save(registries));
+            CompoundTag inputTag = new CompoundTag();
+            saveItemKey(job.inputKey, inputTag, registries);
+            savedJob.put("InputItem", inputTag);
+            savedJob.putLong("InputCount", job.inputCount);
             savedJob.putLong("Operations", job.operations);
             savedJob.putInt("InputPerOperation", job.inputPerOperation);
             jobs.add(savedJob);
@@ -580,6 +724,7 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
         tag.putLong("PendingOperations", pendingOperations);
         tag.putInt("InputPerOperation", inputPerOperation);
         tag.putInt("Progress", progress);
+        tag.putBoolean("ProcessingFaulted", processingFaulted);
         tag.putInt("SpeedUpgrades", speedUpgrades);
         tag.putInt("ParallelUpgrades", parallelUpgrades);
         tag.putBoolean("NetworkEnabled", networkEnabled);
@@ -593,6 +738,10 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
             }
         }
         tag.put("Upgrades", upgrades);
+    }
+
+    private static void saveItemKey(AEItemKey key, CompoundTag tag, HolderLookup.Provider registries) {
+        tag.put("Item", key.toStack(1).save(registries));
     }
 
     @Override
@@ -609,11 +758,53 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
                 }
             }
         } else if (tag.contains("Pattern")) {
-            // Migrate the single pattern slot used by 0.1.0 development worlds.
             patternSlots.set(0, ItemStack.parseOptional(registries, tag.getCompound("Pattern")));
         }
-        pendingInput = tag.contains("PendingInput") ? ItemStack.parseOptional(registries, tag.getCompound("PendingInput")) : ItemStack.EMPTY;
-        pendingOutput = tag.contains("PendingOutput") ? ItemStack.parseOptional(registries, tag.getCompound("PendingOutput")) : ItemStack.EMPTY;
+
+        int dataVersion = tag.contains("TaskDataVersion")
+                ? tag.getInt("TaskDataVersion")
+                : tag.contains("PendingInputItem") || tag.contains("PendingOutputItem") ? 2 : 1;
+        activeInputKey = null;
+        activeInputCount = 0;
+        pendingOutputKey = null;
+        pendingOutputCount = 0;
+
+        if (dataVersion >= 2) {
+            if (tag.contains("PendingInputItem")) {
+                ItemStack template = ItemStack.parseOptional(registries, tag.getCompound("PendingInputItem").getCompound("Item"));
+                if (!template.isEmpty()) {
+                    activeInputKey = AEItemKey.of(template);
+                    activeInputCount = Math.max(0, tag.getLong("PendingInputCount"));
+                }
+            }
+            if (tag.contains("PendingOutputItem")) {
+                ItemStack template = ItemStack.parseOptional(registries, tag.getCompound("PendingOutputItem").getCompound("Item"));
+                if (!template.isEmpty()) {
+                    pendingOutputKey = AEItemKey.of(template);
+                    pendingOutputCount = Math.max(0, tag.getLong("PendingOutputCount"));
+                    if (pendingOutputCount == 0) {
+                        pendingOutputKey = null;
+                    }
+                }
+            }
+        } else {
+            // Migrate from v1 NBT (ItemStack-based pending input/output).
+            if (tag.contains("PendingInput")) {
+                ItemStack input = ItemStack.parseOptional(registries, tag.getCompound("PendingInput"));
+                if (!input.isEmpty()) {
+                    activeInputKey = AEItemKey.of(input);
+                    activeInputCount = input.getCount();
+                }
+            }
+            if (tag.contains("PendingOutput")) {
+                ItemStack output = ItemStack.parseOptional(registries, tag.getCompound("PendingOutput"));
+                if (!output.isEmpty()) {
+                    pendingOutputKey = AEItemKey.of(output);
+                    pendingOutputCount = output.getCount();
+                }
+            }
+        }
+
         activePatternDefinition = tag.contains("ActivePattern")
                 ? ItemStack.parseOptional(registries, tag.getCompound("ActivePattern"))
                 : ItemStack.EMPTY;
@@ -623,18 +814,49 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
             for (int index = 0; index < jobs.size(); index++) {
                 CompoundTag savedJob = jobs.getCompound(index);
                 ItemStack pattern = ItemStack.parseOptional(registries, savedJob.getCompound("Pattern"));
-                ItemStack input = ItemStack.parseOptional(registries, savedJob.getCompound("Input"));
+                AEItemKey inputKey;
+                long inputCount;
+                if (dataVersion >= 2 && savedJob.contains("InputItem")) {
+                    ItemStack template = ItemStack.parseOptional(registries, savedJob.getCompound("InputItem").getCompound("Item"));
+                    inputKey = template.isEmpty() ? null : AEItemKey.of(template);
+                    inputCount = Math.max(0, savedJob.getLong("InputCount"));
+                } else if (savedJob.contains("Input")) {
+                    // Migrate from v1.
+                    ItemStack input = ItemStack.parseOptional(registries, savedJob.getCompound("Input"));
+                    inputKey = input.isEmpty() ? null : AEItemKey.of(input);
+                    inputCount = input.getCount();
+                } else {
+                    inputKey = null;
+                    inputCount = 0;
+                }
                 long operations = Math.max(0, savedJob.getLong("Operations"));
                 int needed = Math.max(1, savedJob.getInt("InputPerOperation"));
-                if (!pattern.isEmpty() && !input.isEmpty() && operations > 0) {
-                    queuedJobs.add(new ProcessingJob(pattern, input, operations, needed));
+                if (inputKey != null && inputCount > 0) {
+                    queuedJobs.add(new ProcessingJob(pattern, inputKey, inputCount, operations, needed));
                 }
             }
         }
         int savedEnergy = tag.getInt("Energy");
-        pendingOperations = tag.getLong("PendingOperations");
+        pendingOperations = Math.max(0, tag.getLong("PendingOperations"));
         inputPerOperation = Math.max(1, tag.getInt("InputPerOperation"));
-        progress = tag.getInt("Progress");
+        progress = Math.max(0, tag.getInt("Progress"));
+        processingFaulted = tag.getBoolean("ProcessingFaulted");
+        if (activeInputKey == null || activeInputCount <= 0) {
+            activeInputKey = null;
+            activeInputCount = 0;
+            pendingOperations = 0;
+        } else if (activePatternDefinition.isEmpty()
+                || activeInputCount % inputPerOperation != 0
+                || pendingOperations != activeInputCount / inputPerOperation) {
+            processingFaulted = true;
+        }
+        for (ProcessingJob job : queuedJobs) {
+            if (job.patternDefinition.isEmpty()
+                    || job.inputCount % job.inputPerOperation != 0
+                    || job.operations != job.inputCount / job.inputPerOperation) {
+                processingFaulted = true;
+            }
+        }
         speedUpgrades = Math.max(0, tag.getInt("SpeedUpgrades"));
         parallelUpgrades = Math.max(0, tag.getInt("ParallelUpgrades"));
         networkEnabled = !tag.contains("NetworkEnabled") || tag.getBoolean("NetworkEnabled");
@@ -768,24 +990,31 @@ public final class MeEnrichmentChamberBlockEntity extends AENetworkedBlockEntity
      * One isolated AE crafting submission. The encoded pattern identity stays
      * attached to its own input buffer so future multi-input/chemical machines
      * can extend this job without allowing resources from another pattern to mix.
+     * Uses AEItemKey plus long counts so Int32 overflow is never a concern.
      */
     private static final class ProcessingJob {
         private final ItemStack patternDefinition;
-        private final ItemStack input;
+        private final AEItemKey inputKey;
+        private long inputCount;
         private long operations;
         private final int inputPerOperation;
 
-        private ProcessingJob(ItemStack patternDefinition, ItemStack input, long operations, int inputPerOperation) {
+        private ProcessingJob(ItemStack patternDefinition, AEItemKey inputKey, long inputCount, long operations, int inputPerOperation) {
             this.patternDefinition = patternDefinition.copyWithCount(1);
-            this.input = input.copy();
+            this.inputKey = inputKey;
+            this.inputCount = Math.max(0, inputCount);
             this.operations = Math.max(0, operations);
             this.inputPerOperation = Math.max(1, inputPerOperation);
         }
 
-        private boolean matches(ItemStack pattern, ItemStack otherInput, int neededPerOperation) {
+        private boolean matches(ItemStack pattern, AEItemKey otherInput, int neededPerOperation) {
             return inputPerOperation == neededPerOperation
                     && ItemStack.isSameItemSameComponents(patternDefinition, pattern)
-                    && ItemStack.isSameItemSameComponents(input, otherInput);
+                    && inputKey.equals(otherInput);
+        }
+
+        private boolean canGrow(long inputAddition, long operationAddition) {
+            return canAdd(inputCount, inputAddition) && canAdd(operations, operationAddition);
         }
     }
 
