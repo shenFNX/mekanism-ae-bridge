@@ -28,6 +28,7 @@ public enum MeMetallurgicInfuserJadeProvider implements IBlockComponentProvider,
     private static final String BUFFERED_OPERATIONS = "BufferedOperations";
     private static final String BUFFER_LIMIT = "BufferLimit";
     private static final String CURRENT_OPERATIONS = "CurrentOperations";
+    private static final String SPEED = "Speed";
     private static final String PARALLEL = "Parallel";
     private static final String ENERGY = "Energy";
     private static final String ENERGY_CAPACITY = "EnergyCapacity";
@@ -50,6 +51,7 @@ public enum MeMetallurgicInfuserJadeProvider implements IBlockComponentProvider,
         machine.putLong(BUFFERED_OPERATIONS, infuser.getBufferedOperationCount());
         machine.putLong(BUFFER_LIMIT, infuser.getBufferOperationLimit());
         machine.putLong(CURRENT_OPERATIONS, infuser.getCurrentOperationCount());
+        machine.putInt(SPEED, infuser.getSpeedMultiplier());
         machine.putInt(PARALLEL, infuser.getParallelMultiplier());
         machine.putLong(ENERGY, infuser.getEnergyStorage().getEnergyStored());
         machine.putLong(ENERGY_CAPACITY, infuser.getEnergyStorage().getMaxEnergyStored());
@@ -137,7 +139,10 @@ public enum MeMetallurgicInfuserJadeProvider implements IBlockComponentProvider,
             }
         }
 
-        tooltip.add(Component.translatable("jade.mekanismae.parallel", machine.getInt(PARALLEL)));
+        tooltip.add(Component.translatable(
+                "jade.mekanismae.upgrades",
+                machine.getInt(SPEED),
+                machine.getInt(PARALLEL)));
         tooltip.add(Component.translatable(
                 "jade.mekanismae.energy",
                 machine.getLong(ENERGY),

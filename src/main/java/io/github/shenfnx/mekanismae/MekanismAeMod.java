@@ -2,6 +2,7 @@ package io.github.shenfnx.mekanismae;
 
 import com.mojang.logging.LogUtils;
 import appeng.api.AECapabilities;
+import io.github.shenfnx.mekanismae.config.MekanismAeConfig;
 import io.github.shenfnx.mekanismae.registry.ModBlocks;
 import io.github.shenfnx.mekanismae.registry.ModBlockEntities;
 import io.github.shenfnx.mekanismae.registry.ModItems;
@@ -9,6 +10,7 @@ import io.github.shenfnx.mekanismae.registry.ModMenus;
 import io.github.shenfnx.mekanismae.registry.ModCreativeModeTabs;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
@@ -19,7 +21,8 @@ public final class MekanismAeMod {
     public static final String MOD_ID = "mekanismae";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public MekanismAeMod(IEventBus modEventBus) {
+    public MekanismAeMod(IEventBus modEventBus, ModContainer modContainer) {
+        MekanismAeConfig.register(modContainer);
         ModBlocks.BLOCKS.register(modEventBus);
         ModBlocks.ITEMS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);

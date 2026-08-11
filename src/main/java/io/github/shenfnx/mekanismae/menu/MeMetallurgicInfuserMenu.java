@@ -17,7 +17,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 
 public final class MeMetallurgicInfuserMenu extends AbstractContainerMenu {
-    private static final int DATA_COUNT = 18;
+    private static final int DATA_COUNT = 19;
     private static final int REAL_MACHINE_SLOT_COUNT = MeMetallurgicInfuserBlockEntity.PATTERN_SLOT_COUNT
             + MeMetallurgicInfuserBlockEntity.UPGRADE_SLOT_COUNT;
     private static final int DISPLAY_SLOT_COUNT = 2;
@@ -172,6 +172,10 @@ public final class MeMetallurgicInfuserMenu extends AbstractContainerMenu {
 
     public int parallelMultiplier() {
         return data.get(13);
+    }
+
+    public int speedMultiplier() {
+        return data.get(18);
     }
 
     public int pendingOutputDisplay() {

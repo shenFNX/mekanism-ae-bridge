@@ -23,6 +23,7 @@ public abstract class AbstractItemToItemMeMachineJadeProvider
     private static final String BUFFERED_OPERATIONS = "BufferedOperations";
     private static final String BUFFER_LIMIT = "BufferLimit";
     private static final String CURRENT_OPERATIONS = "CurrentOperations";
+    private static final String SPEED = "Speed";
     private static final String PARALLEL = "Parallel";
     private static final String ENERGY = "Energy";
     private static final String ENERGY_CAPACITY = "EnergyCapacity";
@@ -48,6 +49,7 @@ public abstract class AbstractItemToItemMeMachineJadeProvider
         machine.putLong(BUFFERED_OPERATIONS, chamber.getBufferedOperationCount());
         machine.putLong(BUFFER_LIMIT, chamber.getBufferOperationLimit());
         machine.putLong(CURRENT_OPERATIONS, chamber.getCurrentOperationCount());
+        machine.putInt(SPEED, chamber.getSpeedMultiplier());
         machine.putInt(PARALLEL, chamber.getParallelMultiplier());
         machine.putLong(ENERGY, chamber.getEnergyStorage().getEnergyStored());
         machine.putLong(ENERGY_CAPACITY, chamber.getEnergyStorage().getMaxEnergyStored());
@@ -111,7 +113,10 @@ public abstract class AbstractItemToItemMeMachineJadeProvider
             tooltip.add(Component.translatable("jade.mekanismae.current.idle"));
         }
 
-        tooltip.add(Component.translatable("jade.mekanismae.parallel", machine.getInt(PARALLEL)));
+        tooltip.add(Component.translatable(
+                "jade.mekanismae.upgrades",
+                machine.getInt(SPEED),
+                machine.getInt(PARALLEL)));
         tooltip.add(Component.translatable(
                 "jade.mekanismae.energy",
                 machine.getLong(ENERGY),

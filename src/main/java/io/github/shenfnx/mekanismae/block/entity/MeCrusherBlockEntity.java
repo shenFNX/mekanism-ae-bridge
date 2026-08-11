@@ -1,6 +1,7 @@
 package io.github.shenfnx.mekanismae.block.entity;
 
 import io.github.shenfnx.mekanismae.menu.MeCrusherMenu;
+import io.github.shenfnx.mekanismae.config.MachineType;
 import io.github.shenfnx.mekanismae.registry.ModBlockEntities;
 import io.github.shenfnx.mekanismae.registry.ModBlocks;
 import mekanism.api.recipes.MekanismRecipeTypes;
@@ -15,7 +16,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class MeCrusherBlockEntity extends AbstractItemToItemMeMachineBlockEntity {
     public MeCrusherBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ME_CRUSHER.get(), pos, state,
-                ModBlocks.ME_CRUSHER_ITEM.get(), MekanismRecipeTypes.TYPE_CRUSHING.value());
+                ModBlocks.ME_CRUSHER_ITEM.get(), MekanismRecipeTypes.TYPE_CRUSHING.value(),
+                MachineType.ME_CRUSHER);
     }
 
     @Override

@@ -9,6 +9,7 @@ import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.GenericStack;
 import appeng.api.stacks.KeyCounter;
 import io.github.shenfnx.mekanismae.registry.ModItems;
+import io.github.shenfnx.mekanismae.config.MachineType;
 import java.util.ArrayList;
 import java.util.List;
 import mekanism.api.recipes.ItemStackToItemStackRecipe;
@@ -40,8 +41,9 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
     private final RecipeType<ItemStackToItemStackRecipe> recipeType;
 
     protected AbstractItemToItemMeMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state,
-            ItemLike visualRepresentation, RecipeType<ItemStackToItemStackRecipe> recipeType) {
-        super(type, pos, state, visualRepresentation);
+            ItemLike visualRepresentation, RecipeType<ItemStackToItemStackRecipe> recipeType,
+            MachineType machineType) {
+        super(type, pos, state, visualRepresentation, machineType);
         this.recipeType = recipeType;
     }
 
@@ -73,7 +75,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
                     case 0 -> energyStorage.getEnergyStored();
                     case 1 -> progress;
                     case 2 -> (int) Math.min(Integer.MAX_VALUE, getTotalQueuedOperations());
-                    case 3 -> BASE_PROCESSING_TICKS;
+                    case 3 -> getProcessingTicks();
                     case 4 -> getMainNode().isOnline() ? 1 : 0;
                     case 5 -> energyStorage.getMaxEnergyStored();
                     case 6 -> networkEnabled ? 1 : 0;
@@ -82,10 +84,11 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
                     case 9 -> getUpgradeCount(ModItems.ENERGY_CARD.get());
                     case 10 -> energyStorage.getReceiveLimit();
                     case 11 -> (int) Math.min(Integer.MAX_VALUE, getTotalQueuedOperations());
-                    case 12 -> (int) Math.min(Integer.MAX_VALUE, MAX_ACCEPTED_OPERATIONS);
+                    case 12 -> (int) Math.min(Integer.MAX_VALUE, getBufferOperationLimit());
                     case 13 -> getParallelBatchSize();
                     case 14 -> (int) Math.min(Integer.MAX_VALUE, pendingOutputCount);
                     case 15 -> processingFaulted ? 1 : 0;
+                    case 16 -> getSpeedMultiplier();
                     default -> 0;
                 };
             }
@@ -97,7 +100,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
 
             @Override
             public int getCount() {
-                return 16;
+                return 17;
             }
         };
     }
@@ -170,7 +173,8 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         int needed = (int) neededAmount;
         long operations = inputCount / neededAmount;
         long current = getTotalQueuedOperations();
-        if (current > MAX_ACCEPTED_OPERATIONS || operations > MAX_ACCEPTED_OPERATIONS - current) {
+        long bufferLimit = getBufferOperationLimit();
+        if (current > bufferLimit || operations > bufferLimit - current) {
             return false;
         }
 
@@ -184,7 +188,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         if (!networkEnabled || processingFaulted) {
             return true;
         }
-        return getTotalQueuedOperations() >= MAX_ACCEPTED_OPERATIONS;
+        return getTotalQueuedOperations() >= getBufferOperationLimit();
     }
 
     private void enqueueJob(ItemStack patternDefinition, AEItemKey inputKey, long inputCount, long operations, int neededPerOperation) {
@@ -267,7 +271,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         if (processingFaulted) {
             return;
         }
-        if (level.hasNeighborSignal(worldPosition)) {
+        if (shouldPauseForRedstone()) {
             return;
         }
         if ((pendingOutputKey != null && pendingOutputCount > 0) || pendingOperations <= 0) {
@@ -289,14 +293,16 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         AEItemKey resultKey = AEItemKey.of(result);
         int resultCount = result.getCount();
 
-        int speed = Math.max(1, 1 + speedUpgrades);
-        progress += speed;
-        if (progress < BASE_PROCESSING_TICKS || energyStorage.getEnergyStored() < ENERGY_PER_OPERATION) {
+        int speed = getSpeedMultiplier();
+        int processingTicks = getProcessingTicks();
+        progress = (int) Math.min(processingTicks, (long) Math.max(0, progress) + speed);
+        int energyPerOperation = getEnergyPerOperation();
+        if (progress < processingTicks || energyStorage.getEnergyStored() < energyPerOperation) {
             return;
         }
 
         long availableOperations = Math.min(getParallelBatchSize(), pendingOperations);
-        availableOperations = Math.min(availableOperations, energyStorage.getEnergyStored() / ENERGY_PER_OPERATION);
+        availableOperations = Math.min(availableOperations, energyStorage.getEnergyStored() / energyPerOperation);
         long consumedInput = availableOperations * inputPerOperation;
         if (consumedInput > activeInputCount) {
             availableOperations = activeInputCount / inputPerOperation;
@@ -314,7 +320,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
             return;
         }
         for (int i = 0; i < availableOperations; i++) {
-            energyStorage.consumeEnergy(ENERGY_PER_OPERATION);
+            energyStorage.consumeEnergy(energyPerOperation);
         }
         activeInputCount -= consumedInput;
         pendingOperations -= availableOperations;

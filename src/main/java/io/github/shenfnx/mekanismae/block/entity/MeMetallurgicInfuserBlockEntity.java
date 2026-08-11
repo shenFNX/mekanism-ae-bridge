@@ -10,6 +10,7 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
 import appeng.api.stacks.KeyCounter;
 import io.github.shenfnx.mekanismae.MekanismAeMod;
+import io.github.shenfnx.mekanismae.config.MachineType;
 import io.github.shenfnx.mekanismae.registry.ModBlockEntities;
 import io.github.shenfnx.mekanismae.registry.ModBlocks;
 import io.github.shenfnx.mekanismae.registry.ModItems;
@@ -55,7 +56,7 @@ public final class MeMetallurgicInfuserBlockEntity extends AbstractMeProcessingB
 
     public MeMetallurgicInfuserBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ME_METALLURGIC_INFUSER.get(), pos, state,
-                ModBlocks.ME_METALLURGIC_INFUSER_ITEM.get());
+                ModBlocks.ME_METALLURGIC_INFUSER_ITEM.get(), MachineType.ME_METALLURGIC_INFUSER);
     }
 
     public ItemStack getProcessingInputDisplay() {
@@ -97,7 +98,7 @@ public final class MeMetallurgicInfuserBlockEntity extends AbstractMeProcessingB
                     case 0 -> energyStorage.getEnergyStored();
                     case 1 -> progress;
                     case 2 -> (int) Math.min(Integer.MAX_VALUE, getTotalQueuedOperations());
-                    case 3 -> BASE_PROCESSING_TICKS;
+                    case 3 -> getProcessingTicks();
                     case 4 -> getMainNode().isOnline() ? 1 : 0;
                     case 5 -> energyStorage.getMaxEnergyStored();
                     case 6 -> networkEnabled ? 1 : 0;
@@ -106,13 +107,14 @@ public final class MeMetallurgicInfuserBlockEntity extends AbstractMeProcessingB
                     case 9 -> getUpgradeCount(ModItems.ENERGY_CARD.get());
                     case 10 -> energyStorage.getReceiveLimit();
                     case 11 -> (int) Math.min(Integer.MAX_VALUE, getTotalQueuedOperations());
-                    case 12 -> (int) Math.min(Integer.MAX_VALUE, MAX_ACCEPTED_OPERATIONS);
+                    case 12 -> (int) Math.min(Integer.MAX_VALUE, getBufferOperationLimit());
                     case 13 -> getParallelBatchSize();
                     case 14 -> (int) Math.min(Integer.MAX_VALUE, pendingOutputCount);
                     case 15 -> processingFaulted ? 1 : 0;
                     case 16 -> activeChemicalKey == null ? -1
                             : MekanismAPI.CHEMICAL_REGISTRY.getId(activeChemicalKey.getStack().getChemical());
                     case 17 -> (int) Math.min(Integer.MAX_VALUE, activeChemicalCount);
+                    case 18 -> getSpeedMultiplier();
                     default -> 0;
                 };
             }
@@ -124,7 +126,7 @@ public final class MeMetallurgicInfuserBlockEntity extends AbstractMeProcessingB
 
             @Override
             public int getCount() {
-                return 18;
+                return 19;
             }
         };
     }
@@ -236,7 +238,8 @@ public final class MeMetallurgicInfuserBlockEntity extends AbstractMeProcessingB
             return rejectPattern("item and chemical operation counts differ", details, inputs);
         }
         long current = getTotalQueuedOperations();
-        if (current > MAX_ACCEPTED_OPERATIONS || operations > MAX_ACCEPTED_OPERATIONS - current) {
+        long bufferLimit = getBufferOperationLimit();
+        if (current > bufferLimit || operations > bufferLimit - current) {
             return rejectPattern("internal operation buffer full", details, inputs);
         }
 
@@ -278,7 +281,7 @@ public final class MeMetallurgicInfuserBlockEntity extends AbstractMeProcessingB
         if (!networkEnabled || processingFaulted) {
             return true;
         }
-        return getTotalQueuedOperations() >= MAX_ACCEPTED_OPERATIONS;
+        return getTotalQueuedOperations() >= getBufferOperationLimit();
     }
 
     private void enqueueJob(ItemStack patternDefinition, AEItemKey itemKey, long itemCount, int itemNeeded,
@@ -374,7 +377,7 @@ public final class MeMetallurgicInfuserBlockEntity extends AbstractMeProcessingB
         if (processingFaulted) {
             return;
         }
-        if (level.hasNeighborSignal(worldPosition)) {
+        if (shouldPauseForRedstone()) {
             return;
         }
         if ((pendingOutputKey != null && pendingOutputCount > 0) || pendingOperations <= 0) {
@@ -398,14 +401,16 @@ public final class MeMetallurgicInfuserBlockEntity extends AbstractMeProcessingB
         AEItemKey resultKey = AEItemKey.of(result);
         int resultCount = result.getCount();
 
-        int speed = Math.max(1, 1 + speedUpgrades);
-        progress += speed;
-        if (progress < BASE_PROCESSING_TICKS || energyStorage.getEnergyStored() < ENERGY_PER_OPERATION) {
+        int speed = getSpeedMultiplier();
+        int processingTicks = getProcessingTicks();
+        progress = (int) Math.min(processingTicks, (long) Math.max(0, progress) + speed);
+        int energyPerOperation = getEnergyPerOperation();
+        if (progress < processingTicks || energyStorage.getEnergyStored() < energyPerOperation) {
             return;
         }
 
         long availableOperations = Math.min(getParallelBatchSize(), pendingOperations);
-        availableOperations = Math.min(availableOperations, energyStorage.getEnergyStored() / ENERGY_PER_OPERATION);
+        availableOperations = Math.min(availableOperations, energyStorage.getEnergyStored() / energyPerOperation);
         availableOperations = Math.min(availableOperations, activeItemCount / itemPerOperation);
         availableOperations = Math.min(availableOperations, activeChemicalCount / chemicalPerOperation);
         if (availableOperations <= 0) {
@@ -422,7 +427,7 @@ public final class MeMetallurgicInfuserBlockEntity extends AbstractMeProcessingB
             return;
         }
         for (int i = 0; i < availableOperations; i++) {
-            energyStorage.consumeEnergy(ENERGY_PER_OPERATION);
+            energyStorage.consumeEnergy(energyPerOperation);
         }
         activeItemCount -= consumedItems;
         activeChemicalCount -= consumedChemical;

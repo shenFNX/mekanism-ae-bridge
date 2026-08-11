@@ -202,10 +202,10 @@ public final class MeMetallurgicInfuserScreen extends AbstractContainerScreen<Me
                 && (hoveredSlot == null || !hoveredSlot.hasItem())) {
             graphics.renderTooltip(font, List.of(
                     Component.translatable("gui.mekanismae.available_upgrades").withStyle(ChatFormatting.AQUA),
-                    upgradeLine(ModItems.SPEED_CARD.get().getDescription(), menu.speedUpgrades()),
+                    upgradeLine(ModItems.SPEED_CARD.get().getDescription(), menu.speedUpgrades(),
+                            menu.speedMultiplier()),
                     upgradeLine(ModItems.PARALLEL_CARD.get().getDescription(), menu.parallelUpgrades(),
                             menu.parallelMultiplier()),
-                    Component.translatable("gui.mekanismae.parallel_curve").withStyle(ChatFormatting.GRAY),
                     upgradeLine(ModItems.ENERGY_CARD.get().getDescription(), menu.energyUpgrades()),
                     Component.translatable("gui.mekanismae.upgrades.hint").withStyle(ChatFormatting.GRAY)),
                     Optional.empty(), mouseX, mouseY);

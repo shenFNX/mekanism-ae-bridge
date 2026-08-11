@@ -638,3 +638,36 @@ GUI 与兼容：
 3. 分别测试 0、1、8 张并行卡，以及加速卡、能量卡、暂停接入和“返还至 ME”。
 4. 任务处理中退出并重进存档，确认缓存数量、活动样板、等待队列、能量和升级卡完整恢复。
 5. 回归 ME 富集仓与 ME 冶金灌注机，尤其检查旧存档、化学品隔离、返还和方块拆除保护没有变化。
+
+### 15.16 双层平衡配置与 JEI 机器入口（2026-08-11）
+
+本轮为后续继续增加机器建立统一的平衡参数入口，并保持现有存档默认行为不变：
+
+- 注册 `config/mekanismae-server.toml` 作为整套实例的全局默认配置；NeoForge 在存档的 `serverconfig/` 中发现同名文件时，会原生改用该存档副本。
+- 存档覆盖默认关闭（即没有同名副本）；普通玩家只需改一次全局配置。需要单独调节某个存档时，把全局文件复制到该存档的 `serverconfig/` 后修改即可，不再维护重复的 COMMON/SERVER 规范或额外开关。
+- 在模组列表注册 NeoForge 标准配置界面，无需手动寻找文件即可查看和编辑当前配置。
+- 通用网络参数包含 AE2 频道要求、待机 AE 功耗和红石暂停；升级参数包含每张能量卡的容量/输入增量，以及 0～8 张加速卡、并行卡的完整倍率曲线。
+- `machines.defaults` 统一设置基础能量容量、最大 FE 输入、单次耗能、加工刻数和最大预投递缓存；ME 富集仓、ME 粉碎机、ME 冶金灌注机均可选择继承默认值或独立覆写。
+- 所有参数采用世界重载语义，并在方块实体构造时形成不可变快照；SERVER 配置由 NeoForge 在连接阶段同步，服务端加工逻辑保持权威，实际加工刻数、缓存上限、速度/并行倍率、能量容量与输入上限继续通过菜单或 Jade 同步给客户端。
+- 极端能量配置使用 `long` 中间值并钳制到 NeoForge FE 的 `int` 上限；倍率曲线缺少条目时沿用最后一个值，超过 9 项时忽略多余项；降低缓存上限不会删除已有任务。
+- 缺能量时加工进度现在封顶于 100%，避免高加速倍率下长期断电造成进度整数持续累加。
+
+JEI 不复制 Mekanism 配方或分类，而是复用官方分类：
+
+- ME 富集仓、ME 粉碎机、ME 冶金灌注机分别注册为 `ENRICHING`、`CRUSHING`、`METALLURGIC_INFUSING` 的 recipe catalyst。
+- 三种 Mekanism 配方类型需要 `RecipeHolder`；注册使用 Mekanism 自己的 `MekanismJEI.genericRecipeType(...)`，避免错误调用基础 `recipeType(...)` 导致运行时异常。
+- JEI 在 `neoforge.mods.toml` 中声明为客户端可选依赖；没有安装 JEI 时不会加载兼容类。
+
+实现与审查分工：
+
+- OpenCode `deepseek/deepseek-v4-flash` 完成 JEI catalyst 和中英文配置翻译的边界任务，并运行离线编译。
+- OpenCode `deepseek/deepseek-v4-pro` 对配置生命周期、客户端同步、数值边界、ContainerData 索引、JEI Holder 类型、Jade 与旧存档兼容做只读审查；未发现高严重度问题。
+- 主代理复核官方 NeoForge、Mekanism 与 JEI 源码，补充 JEI 可选依赖、断电进度封顶、Jade 实际速度倍率以及冗余字段清理。
+
+自动与运行时验证：
+
+- 中英文语言文件及全部资源 JSON 以 UTF-8 解析通过，`git diff --check` 通过。
+- `build --offline --no-daemon --rerun-tasks --console=plain`：`BUILD SUCCESSFUL`。
+- 最终客户端直接进入既有测试存档，旧方块实体正常加载；服务端载入 3460 个配方，玩家成功加入，未出现本模组配置、方块实体或任务账本异常。
+- JEI 完成 recipe catalyst、配方、传输处理器和运行时构建，三种 Mekanism 分类注册阶段无异常。
+- 新架构只生成 `config/mekanismae-server.toml`；NeoForge/FML 本地实现已核对为“存档同名文件存在时使用 `serverconfig` 覆盖，否则读取全局文件”。

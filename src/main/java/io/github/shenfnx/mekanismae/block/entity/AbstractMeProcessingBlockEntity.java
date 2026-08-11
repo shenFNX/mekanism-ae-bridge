@@ -6,6 +6,9 @@ import appeng.api.networking.GridFlags;
 import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.blockentity.grid.AENetworkedBlockEntity;
+import io.github.shenfnx.mekanismae.config.MachineSettings;
+import io.github.shenfnx.mekanismae.config.MachineType;
+import io.github.shenfnx.mekanismae.config.MekanismAeConfig;
 import io.github.shenfnx.mekanismae.registry.ModItems;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,20 +38,12 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
  */
 public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEntity
         implements ICraftingProvider, Container, MenuProvider {
-    protected static final int BASE_ENERGY_CAPACITY = 1_000_000;
-    protected static final int BASE_ENERGY_RECEIVE = 200_000;
-    protected static final int ENERGY_CAPACITY_PER_UPGRADE = 500_000;
-    protected static final int ENERGY_RECEIVE_PER_UPGRADE = 200_000;
-    protected static final int ENERGY_PER_OPERATION = 10_000;
-    protected static final int BASE_PROCESSING_TICKS = 20;
     public static final int PATTERN_SLOT_COUNT = 9;
     public static final int UPGRADE_SLOT_COUNT = 8;
     public static final int MAX_UPGRADES_PER_TYPE = 8;
-    protected static final long MAX_ACCEPTED_OPERATIONS = 1_048_576;
-    private static final int[] PARALLEL_MULTIPLIER = {1, 2, 3, 4, 6, 8, 10, 12, 16};
 
-    protected final MachineEnergyStorage energyStorage =
-            new MachineEnergyStorage(BASE_ENERGY_CAPACITY, BASE_ENERGY_RECEIVE);
+    protected final MachineSettings settings;
+    protected final MachineEnergyStorage energyStorage;
     private final IStrictEnergyHandler strictEnergyHandler = new StrictEnergyHandler();
     protected final NonNullList<ItemStack> patternSlots =
             NonNullList.withSize(PATTERN_SLOT_COUNT, ItemStack.EMPTY);
@@ -59,13 +54,17 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     protected boolean networkEnabled = true;
 
     protected AbstractMeProcessingBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state,
-            ItemLike visualRepresentation) {
+            ItemLike visualRepresentation, MachineType machineType) {
         super(type, pos, state);
-        getMainNode()
-                .setFlags(GridFlags.REQUIRE_CHANNEL)
-                .setIdlePowerUsage(2.0)
+        settings = MekanismAeConfig.settings(machineType);
+        energyStorage = new MachineEnergyStorage(settings.baseEnergyCapacity(), settings.baseEnergyReceive());
+        var mainNode = getMainNode()
+                .setIdlePowerUsage(settings.idleAePower())
                 .setVisualRepresentation(visualRepresentation)
                 .addService(ICraftingProvider.class, this);
+        if (settings.requireChannel()) {
+            mainNode.setFlags(GridFlags.REQUIRE_CHANNEL);
+        }
     }
 
     @Override
@@ -137,11 +136,15 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     public abstract boolean isProcessingFaulted();
 
     public final long getBufferOperationLimit() {
-        return MAX_ACCEPTED_OPERATIONS;
+        return settings.maxBufferedOperations();
     }
 
     public final int getParallelMultiplier() {
-        return getParallelBatchSize();
+        return settings.parallelMultiplier(parallelUpgrades);
+    }
+
+    public final int getSpeedMultiplier() {
+        return settings.speedMultiplier(speedUpgrades);
     }
 
     public final void toggleNetworkEnabled() {
@@ -175,7 +178,19 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     protected abstract boolean hasProcessingWork();
 
     protected final int getParallelBatchSize() {
-        return PARALLEL_MULTIPLIER[Math.min(parallelUpgrades, PARALLEL_MULTIPLIER.length - 1)];
+        return getParallelMultiplier();
+    }
+
+    protected final int getProcessingTicks() {
+        return settings.processingTicks();
+    }
+
+    protected final int getEnergyPerOperation() {
+        return settings.energyPerOperation();
+    }
+
+    protected final boolean shouldPauseForRedstone() {
+        return settings.redstonePausesProcessing() && level != null && level.hasNeighborSignal(worldPosition);
     }
 
     @Override
@@ -192,8 +207,6 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         }
         tag.put("Patterns", patterns);
         tag.putInt("Energy", energyStorage.getEnergyStored());
-        tag.putInt("SpeedUpgrades", speedUpgrades);
-        tag.putInt("ParallelUpgrades", parallelUpgrades);
         tag.putBoolean("NetworkEnabled", networkEnabled);
 
         var upgrades = new net.minecraft.nbt.ListTag();
@@ -360,9 +373,8 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         }
 
         private void updateUpgrades(int upgrades) {
-            int safeUpgrades = Math.max(0, upgrades);
-            capacity = BASE_ENERGY_CAPACITY + safeUpgrades * ENERGY_CAPACITY_PER_UPGRADE;
-            maxReceive = BASE_ENERGY_RECEIVE + safeUpgrades * ENERGY_RECEIVE_PER_UPGRADE;
+            capacity = settings.energyCapacity(upgrades);
+            maxReceive = settings.energyReceive(upgrades);
             energy = Math.min(energy, capacity);
         }
 

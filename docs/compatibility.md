@@ -36,6 +36,7 @@ AE2 19.2.17 does not contain JEI integration. The separate open-source
 [AE2 JEI Integration](https://github.com/Tamaized/AE2-JEI-Integration) mod restores recipe transfer for the AE2
 Pattern Encoding Terminal, including using JEI's `+` button to encode non-crafting recipes as processing patterns.
 Mekanism supplies its own JEI recipe categories, so no Mekanism recipe duplication is implemented in this project.
+The three ME machines are registered as recipe catalysts for Mekanism's existing enriching, crushing, and metallurgic infusing categories. JEI remains an optional client dependency; without JEI, the integration class is not loaded.
 
 Release sources:
 
