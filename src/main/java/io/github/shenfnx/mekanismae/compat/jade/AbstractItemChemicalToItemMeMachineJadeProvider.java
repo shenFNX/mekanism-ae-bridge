@@ -2,6 +2,7 @@ package io.github.shenfnx.mekanismae.compat.jade;
 
 import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.block.entity.AbstractItemChemicalToItemMeMachineBlockEntity;
+import io.github.shenfnx.mekanismae.util.EnergyFormatter;
 import me.ramidzkh.mekae2.ae2.MekanismKey;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
@@ -148,8 +149,8 @@ public abstract class AbstractItemChemicalToItemMeMachineJadeProvider
                 machine.getInt(PARALLEL)));
         tooltip.add(Component.translatable(
                 "jade.mekanismae.energy",
-                machine.getLong(ENERGY),
-                machine.getLong(ENERGY_CAPACITY)));
+                EnergyFormatter.format(machine.getLong(ENERGY)),
+                EnergyFormatter.format(machine.getLong(ENERGY_CAPACITY))));
     }
 
     @Override

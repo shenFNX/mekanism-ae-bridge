@@ -12,8 +12,8 @@ import io.github.shenfnx.mekanismae.config.MekanismAeConfig;
 import io.github.shenfnx.mekanismae.registry.ModItems;
 import java.util.ArrayList;
 import java.util.List;
-import mekanism.api.Action;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.common.integration.energy.forgeenergy.ForgeStrictEnergyHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -44,7 +44,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
 
     protected final MachineSettings settings;
     protected final MachineEnergyStorage energyStorage;
-    private final IStrictEnergyHandler strictEnergyHandler = new StrictEnergyHandler();
+    private final IStrictEnergyHandler strictEnergyHandler;
     protected final NonNullList<ItemStack> patternSlots =
             NonNullList.withSize(PATTERN_SLOT_COUNT, ItemStack.EMPTY);
     protected final NonNullList<ItemStack> upgradeSlots =
@@ -58,6 +58,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         super(type, pos, state);
         settings = MekanismAeConfig.settings(machineType);
         energyStorage = new MachineEnergyStorage(settings.baseEnergyCapacity(), settings.baseEnergyReceive());
+        strictEnergyHandler = new ForgeStrictEnergyHandler(energyStorage);
         var mainNode = getMainNode()
                 .setIdlePowerUsage(settings.idleAePower())
                 .setVisualRepresentation(visualRepresentation)
@@ -73,6 +74,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     @Override
     public final void onMainNodeStateChanged(IGridNodeListener.State state) {
         ICraftingProvider.requestUpdate(getMainNode());
+        updateVisualState();
         setChanged();
     }
 
@@ -176,6 +178,10 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     protected abstract boolean isPatternForThisMachine(IPatternDetails details);
 
     protected abstract boolean hasProcessingWork();
+
+    /** Lets individual machine families expose network/work state through their block models. */
+    protected void updateVisualState() {
+    }
 
     protected final int getParallelBatchSize() {
         return getParallelMultiplier();
@@ -410,52 +416,4 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         }
     }
 
-    private final class StrictEnergyHandler implements IStrictEnergyHandler {
-        @Override
-        public int getEnergyContainerCount() {
-            return 1;
-        }
-
-        @Override
-        public long getEnergy(int container) {
-            return container == 0 ? energyStorage.getEnergyStored() : 0;
-        }
-
-        @Override
-        public void setEnergy(int container, long energy) {
-            if (container == 0) {
-                energyStorage.loadEnergy((int) Math.min(Integer.MAX_VALUE, Math.max(0, energy)));
-                setChanged();
-            }
-        }
-
-        @Override
-        public long getMaxEnergy(int container) {
-            return container == 0 ? energyStorage.getMaxEnergyStored() : 0;
-        }
-
-        @Override
-        public long getNeededEnergy(int container) {
-            return container == 0 ? energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored() : 0;
-        }
-
-        @Override
-        public long insertEnergy(int container, long amount, Action action) {
-            if (container != 0 || amount <= 0) {
-                return amount;
-            }
-            int value = (int) Math.min(Integer.MAX_VALUE, amount);
-            int accepted = energyStorage.receiveEnergy(value, action.simulate());
-            return amount - accepted;
-        }
-
-        @Override
-        public long extractEnergy(int container, long amount, Action action) {
-            if (container != 0 || amount <= 0) {
-                return 0;
-            }
-            int value = (int) Math.min(Integer.MAX_VALUE, amount);
-            return energyStorage.extractEnergy(value, action.simulate());
-        }
-    }
 }

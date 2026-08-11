@@ -51,7 +51,7 @@
   "jade.mekanismae.current.queued": "当前：任务切换中",
   "jade.mekanismae.current.idle": "当前：空闲",
   "jade.mekanismae.upgrades": "速度：×%s｜并行：×%s",
-  "jade.mekanismae.energy": "能量：%s / %s FE",
+  "jade.mekanismae.energy": "能量：%s FE / %s FE",
   "jade.mekanismae.chemical": "化学品：%s（%s）",
   "config.jade.plugin_mekanismae.me_enrichment_chamber_status": "ME 富集仓状态",
   "config.jade.plugin_mekanismae.me_crusher_status": "ME 粉碎机状态",

@@ -3,6 +3,7 @@ package io.github.shenfnx.mekanismae.client;
 import io.github.shenfnx.mekanismae.menu.MeEnrichmentChamberMenu;
 import io.github.shenfnx.mekanismae.block.entity.AbstractItemToItemMeMachineBlockEntity;
 import io.github.shenfnx.mekanismae.registry.ModItems;
+import io.github.shenfnx.mekanismae.util.EnergyFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -245,16 +246,7 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends MeEnrichmentCh
     }
 
     private String formatEnergy(int energy) {
-        if (energy >= 1_000_000) {
-            if (energy % 1_000_000 == 0) {
-                return (energy / 1_000_000) + "M";
-            }
-            return String.format(Locale.ROOT, "%.1fM", energy / 1_000_000.0);
-        }
-        if (energy >= 1_000) {
-            return String.format(Locale.ROOT, "%.0fk", energy / 1_000.0);
-        }
-        return Integer.toString(energy);
+        return EnergyFormatter.format(energy);
     }
 
     private String formatAmount(int amount) {

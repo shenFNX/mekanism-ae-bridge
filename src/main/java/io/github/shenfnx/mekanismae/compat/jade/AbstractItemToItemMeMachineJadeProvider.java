@@ -2,6 +2,7 @@ package io.github.shenfnx.mekanismae.compat.jade;
 
 import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.block.entity.AbstractItemToItemMeMachineBlockEntity;
+import io.github.shenfnx.mekanismae.util.EnergyFormatter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -119,8 +120,8 @@ public abstract class AbstractItemToItemMeMachineJadeProvider
                 machine.getInt(PARALLEL)));
         tooltip.add(Component.translatable(
                 "jade.mekanismae.energy",
-                machine.getLong(ENERGY),
-                machine.getLong(ENERGY_CAPACITY)));
+                EnergyFormatter.format(machine.getLong(ENERGY)),
+                EnergyFormatter.format(machine.getLong(ENERGY_CAPACITY))));
     }
 
     @Override

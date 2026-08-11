@@ -52,7 +52,7 @@
   "jade.mekanismae.current.queued": "Current: Switching Jobs",
   "jade.mekanismae.current.idle": "Current: Idle",
   "jade.mekanismae.upgrades": "Speed: ×%s | Parallel: ×%s",
-  "jade.mekanismae.energy": "Energy: %s / %s FE",
+  "jade.mekanismae.energy": "Energy: %s FE / %s FE",
   "jade.mekanismae.chemical": "Chemical: %s (%s)",
   "config.jade.plugin_mekanismae.me_enrichment_chamber_status": "ME Enrichment Chamber Status",
   "config.jade.plugin_mekanismae.me_crusher_status": "ME Crusher Status",

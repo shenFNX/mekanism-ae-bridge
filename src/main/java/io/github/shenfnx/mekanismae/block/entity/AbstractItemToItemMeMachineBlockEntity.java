@@ -268,6 +268,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         flushOutput();
         finishActiveJobIfDrained();
         activateNextJobIfIdle();
+        updateVisualState();
         if (processingFaulted) {
             return;
         }
@@ -280,6 +281,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
 
         if (activeInputKey == null || activeInputCount < inputPerOperation) {
             markProcessingFault();
+            updateVisualState();
             setChanged();
             return;
         }
@@ -287,6 +289,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         ItemStack result = getRecipeOutput(oneInput);
         if (result.isEmpty()) {
             markProcessingFault();
+            updateVisualState();
             setChanged();
             return;
         }
@@ -296,6 +299,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         int speed = getSpeedMultiplier();
         int processingTicks = getProcessingTicks();
         progress = (int) Math.min(processingTicks, (long) Math.max(0, progress) + speed);
+        updateVisualState();
         int energyPerOperation = getEnergyPerOperation();
         if (progress < processingTicks || energyStorage.getEnergyStored() < energyPerOperation) {
             return;
@@ -316,6 +320,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         if (pendingOutputKey != null
                 && (!pendingOutputKey.equals(resultKey) || !canAdd(pendingOutputCount, produced))) {
             markProcessingFault();
+            updateVisualState();
             setChanged();
             return;
         }
@@ -334,6 +339,23 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         setChanged();
         flushOutput();
         finishActiveJobIfDrained();
+        activateNextJobIfIdle();
+        updateVisualState();
+    }
+
+    /**
+     * True only while the machine can genuinely advance its current recipe. Queued
+     * work by itself is not enough: a redstone pause, blocked output, fault, missing
+     * input, or insufficient energy all switch the working lamp off.
+     */
+    protected final boolean isVisuallyWorking() {
+        return !processingFaulted
+                && !shouldPauseForRedstone()
+                && pendingOperations > 0
+                && activeInputKey != null
+                && activeInputCount >= inputPerOperation
+                && (pendingOutputKey == null || pendingOutputCount <= 0)
+                && energyStorage.getEnergyStored() >= getEnergyPerOperation();
     }
 
     private void markProcessingFault() {
