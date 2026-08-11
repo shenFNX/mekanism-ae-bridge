@@ -714,7 +714,11 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
         // Structural compatibility is not enough: otherwise every item+chemical
         // machine advertises every other machine's pattern to AE2. At least one
         // declared alternative pair must match this machine's own recipe type
-        // and the pattern's declared output/count.
+        // and output item. Do not enforce the exact operation ratio here: AE2
+        // calls this method while discovering installed patterns, and JEI-backed
+        // processing patterns may normalize the displayed stack amount into the
+        // input multiplier. pushPattern performs the authoritative amount and
+        // operation-ratio validation once AE2 delivers the real KeyCounters.
         for (GenericStack itemInput : itemInputs) {
             AEItemKey itemKey = (AEItemKey) itemInput.what();
             long declaredItems = getDeclaredInputAmount(details, itemKey);
@@ -730,12 +734,18 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
                 }
                 ChemicalStack chemicalProbe = chemicalKey.withAmount(declaredChemical);
                 ItemStackChemicalToItemStackRecipe recipe = findRecipe(itemProbe, chemicalProbe);
-                if (recipe != null && matchesPatternOutput(recipe, details, itemProbe, chemicalProbe)) {
+                if (recipe != null && outputItemMatches(recipe, details)) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    private boolean outputItemMatches(ItemStackChemicalToItemStackRecipe recipe, IPatternDetails details) {
+        GenericStack output = details.getOutputs().getFirst();
+        return output.what() instanceof AEItemKey outputKey
+                && outputKey.matches(recipe.getResultItem(level.registryAccess()));
     }
 
     private boolean matchesPatternOutput(ItemStackChemicalToItemStackRecipe recipe, IPatternDetails details,

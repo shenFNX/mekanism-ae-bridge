@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "mekanism:enrichment_chamber"
+    },
+    {
+      "item": "ae2:pattern_provider"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "mekanismae:me_enrichment_chamber"
+  }
+}
