@@ -372,6 +372,7 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
         flushOutput();
         finishActiveJobIfDrained();
         activateNextJobIfIdle();
+        updateVisualState();
         if (processingFaulted) {
             return;
         }
@@ -385,6 +386,7 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
         if (activeItemKey == null || activeItemCount < itemPerOperation
                 || activeChemicalKey == null || activeChemicalCount < chemicalPerOperation) {
             markProcessingFault();
+            updateVisualState();
             setChanged();
             return;
         }
@@ -393,6 +395,7 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
         ItemStack result = getRecipeOutput(oneInput, oneChemical);
         if (result.isEmpty()) {
             markProcessingFault();
+            updateVisualState();
             setChanged();
             return;
         }
@@ -402,6 +405,7 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
         int speed = getSpeedMultiplier();
         int processingTicks = getProcessingTicks();
         progress = (int) Math.min(processingTicks, (long) Math.max(0, progress) + speed);
+        updateVisualState();
         int energyPerOperation = getEnergyPerOperation();
         if (progress < processingTicks || energyStorage.getEnergyStored() < energyPerOperation) {
             return;
@@ -421,6 +425,7 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
         if (pendingOutputKey != null
                 && (!pendingOutputKey.equals(resultKey) || !canAdd(pendingOutputCount, produced))) {
             markProcessingFault();
+            updateVisualState();
             setChanged();
             return;
         }
@@ -440,6 +445,21 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
         setChanged();
         flushOutput();
         finishActiveJobIfDrained();
+        activateNextJobIfIdle();
+        updateVisualState();
+    }
+
+    @Override
+    protected final boolean isVisuallyWorking() {
+        return !processingFaulted
+                && !shouldPauseForRedstone()
+                && pendingOperations > 0
+                && activeItemKey != null
+                && activeItemCount >= itemPerOperation
+                && activeChemicalKey != null
+                && activeChemicalCount >= chemicalPerOperation
+                && (pendingOutputKey == null || pendingOutputCount <= 0)
+                && energyStorage.getEnergyStored() >= getEnergyPerOperation();
     }
 
     private void markProcessingFault() {

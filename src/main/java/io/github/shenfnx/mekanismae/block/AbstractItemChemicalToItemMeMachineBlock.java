@@ -9,8 +9,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -21,7 +19,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.server.level.ServerPlayer;
 import appeng.api.crafting.PatternDetailsHelper;
 
-public abstract class AbstractItemChemicalToItemMeMachineBlock extends Block implements EntityBlock {
+public abstract class AbstractItemChemicalToItemMeMachineBlock extends AbstractMeMachineBlock {
     private final BiFunction<BlockPos, BlockState, ? extends AbstractItemChemicalToItemMeMachineBlockEntity> blockEntityFactory;
     private final Supplier<? extends BlockEntityType<?>> blockEntityType;
 

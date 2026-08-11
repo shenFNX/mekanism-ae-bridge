@@ -6,6 +6,7 @@ import appeng.api.networking.GridFlags;
 import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.blockentity.grid.AENetworkedBlockEntity;
+import io.github.shenfnx.mekanismae.block.AbstractMeMachineBlock;
 import io.github.shenfnx.mekanismae.config.MachineSettings;
 import io.github.shenfnx.mekanismae.config.MachineType;
 import io.github.shenfnx.mekanismae.config.MekanismAeConfig;
@@ -179,9 +180,28 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
 
     protected abstract boolean hasProcessingWork();
 
-    /** Lets individual machine families expose network/work state through their block models. */
-    protected void updateVisualState() {
+    /** Synchronizes the shared online/working model state for every ME machine family. */
+    protected final void updateVisualState() {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+        BlockState state = getBlockState();
+        if (!state.hasProperty(AbstractMeMachineBlock.ONLINE)
+                || !state.hasProperty(AbstractMeMachineBlock.WORKING)) {
+            return;
+        }
+        boolean online = isNetworkOnline();
+        boolean working = isVisuallyWorking();
+        if (state.getValue(AbstractMeMachineBlock.ONLINE) != online
+                || state.getValue(AbstractMeMachineBlock.WORKING) != working) {
+            level.setBlock(worldPosition, state
+                    .setValue(AbstractMeMachineBlock.ONLINE, online)
+                    .setValue(AbstractMeMachineBlock.WORKING, working), 3);
+        }
     }
+
+    /** True only when this machine family can genuinely advance its active recipe. */
+    protected abstract boolean isVisuallyWorking();
 
     protected final int getParallelBatchSize() {
         return getParallelMultiplier();

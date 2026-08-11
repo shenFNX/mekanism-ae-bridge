@@ -348,6 +348,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
      * work by itself is not enough: a redstone pause, blocked output, fault, missing
      * input, or insufficient energy all switch the working lamp off.
      */
+    @Override
     protected final boolean isVisuallyWorking() {
         return !processingFaulted
                 && !shouldPauseForRedstone()

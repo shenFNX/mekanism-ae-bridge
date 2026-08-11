@@ -12,8 +12,6 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -23,7 +21,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 
 /** Shared interaction, ticker, menu, and safe-break behavior for item-only ME machines. */
-public abstract class AbstractItemToItemMeMachineBlock extends Block implements EntityBlock {
+public abstract class AbstractItemToItemMeMachineBlock extends AbstractMeMachineBlock {
     private final BiFunction<BlockPos, BlockState, ? extends AbstractItemToItemMeMachineBlockEntity> blockEntityFactory;
     private final Supplier<? extends BlockEntityType<?>> blockEntityType;
 

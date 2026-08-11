@@ -1,7 +1,6 @@
 package io.github.shenfnx.mekanismae.block.entity;
 
 import io.github.shenfnx.mekanismae.menu.MeEnrichmentChamberMenu;
-import io.github.shenfnx.mekanismae.block.MeEnrichmentChamberBlock;
 import io.github.shenfnx.mekanismae.config.MachineType;
 import io.github.shenfnx.mekanismae.registry.ModBlockEntities;
 import io.github.shenfnx.mekanismae.registry.ModBlocks;
@@ -30,23 +29,4 @@ public final class MeEnrichmentChamberBlockEntity extends AbstractItemToItemMeMa
         return new MeEnrichmentChamberMenu(containerId, inventory, worldPosition);
     }
 
-    @Override
-    protected void updateVisualState() {
-        if (level == null || level.isClientSide()) {
-            return;
-        }
-        BlockState state = getBlockState();
-        if (!state.hasProperty(MeEnrichmentChamberBlock.ONLINE)
-                || !state.hasProperty(MeEnrichmentChamberBlock.WORKING)) {
-            return;
-        }
-        boolean online = isNetworkOnline();
-        boolean working = isVisuallyWorking();
-        if (state.getValue(MeEnrichmentChamberBlock.ONLINE) != online
-                || state.getValue(MeEnrichmentChamberBlock.WORKING) != working) {
-            level.setBlock(worldPosition, state
-                    .setValue(MeEnrichmentChamberBlock.ONLINE, online)
-                    .setValue(MeEnrichmentChamberBlock.WORKING, working), 3);
-        }
-    }
 }

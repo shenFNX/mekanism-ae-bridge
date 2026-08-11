@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "mekanismae:block/me_machine_chassis_right_online",
+    "down": "mekanismae:block/me_machine_chassis_bottom",
+    "up": "mekanismae:block/me_machine_chassis_top_online",
+    "north": "mekanismae:block/me_purification_chamber_front_online_working",
+    "south": "mekanismae:block/me_machine_chassis_back_online",
+    "west": "mekanismae:block/me_machine_chassis_left_online",
+    "east": "mekanismae:block/me_machine_chassis_right_online"
+  }
+}
