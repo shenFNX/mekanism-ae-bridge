@@ -668,6 +668,32 @@ JEI 不复制 Mekanism 配方或分类，而是复用官方分类：
 
 - 中英文语言文件及全部资源 JSON 以 UTF-8 解析通过，`git diff --check` 通过。
 - `build --offline --no-daemon --rerun-tasks --console=plain`：`BUILD SUCCESSFUL`。
+
 - 最终客户端直接进入既有测试存档，旧方块实体正常加载；服务端载入 3460 个配方，玩家成功加入，未出现本模组配置、方块实体或任务账本异常。
 - JEI 完成 recipe catalyst、配方、传输处理器和运行时构建，三种 Mekanism 分类注册阶段无异常。
 - 新架构只生成 `config/mekanismae-server.toml`；NeoForge/FML 本地实现已核对为“存档同名文件存在时使用 `serverconfig` 覆盖，否则读取全局文件”。
+
+### 15.17 通用物品+化学品机器族（2026-08-12）
+
+本轮把 ME 冶金灌注机已经验收的双输入任务账本抽成通用机器族，并新增 ME 锇压缩机、ME 净化仓和 ME 化学压射仓：
+
+- `AbstractItemChemicalToItemMeMachineBlockEntity` 统一处理 AE2 大批量预投递、按编码样板身份隔离的物品/化学品账本、当前配方亲和、并行加工、产物返还、资源排空和 NBT 持久化。
+- ME 冶金灌注机迁移为薄子类；旧存档所用 `TaskDataVersion = 3`、`ActiveItem`、`ActiveChemical`、`ProcessingQueue`、`ItemPerOperation`、`ChemicalPerOperation` 等键保持原样。
+- 三台新机器分别使用 Mekanism 官方 `TYPE_COMPRESSING`、`TYPE_PURIFYING`、`TYPE_INJECTING`，没有复制配方数据。
+- 通用样板检查不仅验证“一个物品输入 + 一个化学品输入 + 一个物品产物”的结构，还必须在本机自己的配方类型中匹配输入、单次用量和声明产物；避免锇压缩机、净化仓、压射仓互相向 AE2 错误声明对方样板。
+- 每个任务保留独立的编码样板、物品键、化学品键、单次用量与剩余次数；只有样板身份和两类资源完全一致时才允许聚合。
+- `perTickUsage` 的单次化学品总量固定与 Mekanism JEI 一致：配方每 tick 用量乘官方 `TileEntityAdvancedElectricMachine.BASE_TICKS_REQUIRED`（当前为 200 tick）。配置中的加工时间和加速卡只影响完成速度，不改变每次操作的锇、氧气或氯气消耗。
+- 方块交互、菜单、Mekanism 风格屏幕和 Jade provider 同步抽成共享层；六台机器均注册方块实体、菜单、AE2 节点、NeoForge FE、Mekanism Strict Energy、JEI catalyst、Jade、创造栏、语言、模型和掉落表。
+
+实现与验证：
+
+- OpenCode `deepseek/deepseek-v4-flash` 完成三台新机器的 Java 薄子类与 blockstate 脚手架；主代理逐文件审查并补齐注册、能力、配置、JEI、Jade、资源和防串投逻辑。
+- OpenCode `deepseek/deepseek-v4-pro` 被要求做只读架构审查，但最终会话返回空报告，因此不作为有效审查依据；核心逻辑由主代理对照锁定版 Mekanism、AE2 与 Applied Mekanistics 源码审查。
+- 全部资源 JSON 以 UTF-8 解析通过，`git diff --check` 通过。
+- `build --offline --no-daemon --rerun-tasks --console=plain`：`BUILD SUCCESSFUL`。
+
+运行时验证：
+
+- 客户端已通过快速进入方式加载现有测试存档，旧机器方块实体和存档数据未触发迁移或反序列化异常。
+- NeoForge 自动补齐了三台新机器的服务端配置项；JEI 完成配方催化剂、配方与运行时注册，Jade 完成服务端配置同步，日志中未出现新机器相关异常。
+- 本轮没有把“客户端能启动”当作配方功能验收；锇压缩、净化和化学压射仍需在游戏内分别验证普通样板、大倍率样板、返回至 ME、重进存档与 0/1/8 张并行卡。

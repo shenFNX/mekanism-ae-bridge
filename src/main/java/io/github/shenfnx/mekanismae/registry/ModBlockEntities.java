@@ -4,6 +4,9 @@ import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.block.entity.MeEnrichmentChamberBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeCrusherBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeMetallurgicInfuserBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeOsmiumCompressorBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MePurificationChamberBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeChemicalInjectionChamberBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -33,6 +36,21 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             MeMetallurgicInfuserBlockEntity::new,
                             ModBlocks.ME_METALLURGIC_INFUSER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeOsmiumCompressorBlockEntity>>
+            ME_OSMIUM_COMPRESSOR = BLOCK_ENTITY_TYPES.register("me_osmium_compressor",
+                    () -> BlockEntityType.Builder.of(MeOsmiumCompressorBlockEntity::new,
+                            ModBlocks.ME_OSMIUM_COMPRESSOR.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MePurificationChamberBlockEntity>>
+            ME_PURIFICATION_CHAMBER = BLOCK_ENTITY_TYPES.register("me_purification_chamber",
+                    () -> BlockEntityType.Builder.of(MePurificationChamberBlockEntity::new,
+                            ModBlocks.ME_PURIFICATION_CHAMBER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeChemicalInjectionChamberBlockEntity>>
+            ME_CHEMICAL_INJECTION_CHAMBER = BLOCK_ENTITY_TYPES.register("me_chemical_injection_chamber",
+                    () -> BlockEntityType.Builder.of(MeChemicalInjectionChamberBlockEntity::new,
+                            ModBlocks.ME_CHEMICAL_INJECTION_CHAMBER.get()).build(null));
 
     private ModBlockEntities() {
     }

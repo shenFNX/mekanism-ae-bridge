@@ -28,5 +28,11 @@ public final class MekanismAeJeiPlugin implements IModPlugin {
                 MekanismJEI.genericRecipeType(RecipeViewerRecipeType.CRUSHING));
         registration.addRecipeCatalyst(ModBlocks.ME_METALLURGIC_INFUSER_ITEM.get(),
                 MekanismJEI.genericRecipeType(RecipeViewerRecipeType.METALLURGIC_INFUSING));
+        registration.addRecipeCatalyst(ModBlocks.ME_OSMIUM_COMPRESSOR_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.COMPRESSING));
+        registration.addRecipeCatalyst(ModBlocks.ME_PURIFICATION_CHAMBER_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.PURIFYING));
+        registration.addRecipeCatalyst(ModBlocks.ME_CHEMICAL_INJECTION_CHAMBER_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.INJECTING));
     }
 }

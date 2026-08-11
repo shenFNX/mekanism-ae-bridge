@@ -4,6 +4,9 @@ import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.menu.MeEnrichmentChamberMenu;
 import io.github.shenfnx.mekanismae.menu.MeCrusherMenu;
 import io.github.shenfnx.mekanismae.menu.MeMetallurgicInfuserMenu;
+import io.github.shenfnx.mekanismae.menu.MeOsmiumCompressorMenu;
+import io.github.shenfnx.mekanismae.menu.MePurificationChamberMenu;
+import io.github.shenfnx.mekanismae.menu.MeChemicalInjectionChamberMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
@@ -22,6 +25,14 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<MeMetallurgicInfuserMenu>> ME_METALLURGIC_INFUSER =
             MENUS.register("me_metallurgic_infuser", () -> IMenuTypeExtension.create(MeMetallurgicInfuserMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<MeOsmiumCompressorMenu>> ME_OSMIUM_COMPRESSOR =
+            MENUS.register("me_osmium_compressor", () -> IMenuTypeExtension.create(MeOsmiumCompressorMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MePurificationChamberMenu>> ME_PURIFICATION_CHAMBER =
+            MENUS.register("me_purification_chamber", () -> IMenuTypeExtension.create(MePurificationChamberMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MeChemicalInjectionChamberMenu>>
+            ME_CHEMICAL_INJECTION_CHAMBER = MENUS.register("me_chemical_injection_chamber",
+                    () -> IMenuTypeExtension.create(MeChemicalInjectionChamberMenu::new));
 
     private ModMenus() {
     }

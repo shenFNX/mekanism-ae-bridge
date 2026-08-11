@@ -3,9 +3,15 @@ package io.github.shenfnx.mekanismae.compat.jade;
 import io.github.shenfnx.mekanismae.block.MeEnrichmentChamberBlock;
 import io.github.shenfnx.mekanismae.block.MeCrusherBlock;
 import io.github.shenfnx.mekanismae.block.MeMetallurgicInfuserBlock;
+import io.github.shenfnx.mekanismae.block.MeOsmiumCompressorBlock;
+import io.github.shenfnx.mekanismae.block.MePurificationChamberBlock;
+import io.github.shenfnx.mekanismae.block.MeChemicalInjectionChamberBlock;
 import io.github.shenfnx.mekanismae.block.entity.MeEnrichmentChamberBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeCrusherBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeMetallurgicInfuserBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeOsmiumCompressorBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MePurificationChamberBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeChemicalInjectionChamberBlockEntity;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
@@ -22,6 +28,12 @@ public final class MeEnrichmentChamberJadePlugin implements IWailaPlugin {
         registration.registerBlockDataProvider(
                 MeMetallurgicInfuserJadeProvider.INSTANCE,
                 MeMetallurgicInfuserBlockEntity.class);
+        registration.registerBlockDataProvider(
+                MeOsmiumCompressorJadeProvider.INSTANCE, MeOsmiumCompressorBlockEntity.class);
+        registration.registerBlockDataProvider(
+                MePurificationChamberJadeProvider.INSTANCE, MePurificationChamberBlockEntity.class);
+        registration.registerBlockDataProvider(
+                MeChemicalInjectionChamberJadeProvider.INSTANCE, MeChemicalInjectionChamberBlockEntity.class);
     }
 
     @Override
@@ -33,5 +45,11 @@ public final class MeEnrichmentChamberJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(
                 MeMetallurgicInfuserJadeProvider.INSTANCE,
                 MeMetallurgicInfuserBlock.class);
+        registration.registerBlockComponent(
+                MeOsmiumCompressorJadeProvider.INSTANCE, MeOsmiumCompressorBlock.class);
+        registration.registerBlockComponent(
+                MePurificationChamberJadeProvider.INSTANCE, MePurificationChamberBlock.class);
+        registration.registerBlockComponent(
+                MeChemicalInjectionChamberJadeProvider.INSTANCE, MeChemicalInjectionChamberBlock.class);
     }
 }

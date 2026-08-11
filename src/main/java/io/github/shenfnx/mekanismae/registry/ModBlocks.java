@@ -4,6 +4,9 @@ import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.block.MeEnrichmentChamberBlock;
 import io.github.shenfnx.mekanismae.block.MeCrusherBlock;
 import io.github.shenfnx.mekanismae.block.MeMetallurgicInfuserBlock;
+import io.github.shenfnx.mekanismae.block.MeOsmiumCompressorBlock;
+import io.github.shenfnx.mekanismae.block.MePurificationChamberBlock;
+import io.github.shenfnx.mekanismae.block.MeChemicalInjectionChamberBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -48,6 +51,29 @@ public final class ModBlocks {
 
     public static final DeferredItem<BlockItem> ME_METALLURGIC_INFUSER_ITEM =
             ITEMS.registerSimpleBlockItem("me_metallurgic_infuser", ME_METALLURGIC_INFUSER);
+
+    public static final DeferredBlock<MeOsmiumCompressorBlock> ME_OSMIUM_COMPRESSOR = BLOCKS.registerBlock(
+            "me_osmium_compressor", MeOsmiumCompressorBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_OSMIUM_COMPRESSOR_ITEM =
+            ITEMS.registerSimpleBlockItem("me_osmium_compressor", ME_OSMIUM_COMPRESSOR);
+
+    public static final DeferredBlock<MePurificationChamberBlock> ME_PURIFICATION_CHAMBER = BLOCKS.registerBlock(
+            "me_purification_chamber", MePurificationChamberBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_PURIFICATION_CHAMBER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_purification_chamber", ME_PURIFICATION_CHAMBER);
+
+    public static final DeferredBlock<MeChemicalInjectionChamberBlock> ME_CHEMICAL_INJECTION_CHAMBER =
+            BLOCKS.registerBlock("me_chemical_injection_chamber", MeChemicalInjectionChamberBlock::new,
+                    machineProperties());
+    public static final DeferredItem<BlockItem> ME_CHEMICAL_INJECTION_CHAMBER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_chemical_injection_chamber", ME_CHEMICAL_INJECTION_CHAMBER);
+
+    private static BlockBehaviour.Properties machineProperties() {
+        return BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                .strength(5.0F, 6.0F)
+                .sound(SoundType.METAL)
+                .requiresCorrectToolForDrops();
+    }
 
     private ModBlocks() {
     }

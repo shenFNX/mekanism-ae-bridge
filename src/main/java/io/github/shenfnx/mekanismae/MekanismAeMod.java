@@ -73,6 +73,21 @@ public final class MekanismAeMod {
                 mekanism.common.capabilities.Capabilities.STRICT_ENERGY.block(),
                 ModBlockEntities.ME_METALLURGIC_INFUSER.get(),
                 (blockEntity, side) -> blockEntity.getStrictEnergyHandler());
+
+        registerMachineCapabilities(event, ModBlockEntities.ME_OSMIUM_COMPRESSOR.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_PURIFICATION_CHAMBER.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_CHEMICAL_INJECTION_CHAMBER.get());
+    }
+
+    private static <T extends io.github.shenfnx.mekanismae.block.entity.AbstractMeProcessingBlockEntity>
+            void registerMachineCapabilities(RegisterCapabilitiesEvent event,
+                    net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
+        event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, type,
+                (blockEntity, ignored) -> blockEntity);
+        event.registerBlockEntity(net.neoforged.neoforge.capabilities.Capabilities.EnergyStorage.BLOCK, type,
+                (blockEntity, side) -> blockEntity.getEnergyStorage());
+        event.registerBlockEntity(mekanism.common.capabilities.Capabilities.STRICT_ENERGY.block(), type,
+                (blockEntity, side) -> blockEntity.getStrictEnergyHandler());
     }
 
     private static void addCreativeTabItems(BuildCreativeModeTabContentsEvent event) {
