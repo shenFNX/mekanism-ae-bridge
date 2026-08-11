@@ -77,6 +77,7 @@ public final class MekanismAeMod {
         registerMachineCapabilities(event, ModBlockEntities.ME_OSMIUM_COMPRESSOR.get());
         registerMachineCapabilities(event, ModBlockEntities.ME_PURIFICATION_CHAMBER.get());
         registerMachineCapabilities(event, ModBlockEntities.ME_CHEMICAL_INJECTION_CHAMBER.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_ENERGIZED_SMELTER.get());
     }
 
     private static <T extends io.github.shenfnx.mekanismae.block.entity.AbstractMeProcessingBlockEntity>

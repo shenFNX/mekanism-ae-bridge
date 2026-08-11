@@ -13,6 +13,7 @@ COLORS = {name: ImageColor.getcolor(value, "RGBA") for name, value in {
     "edge": "#738088", "bolt": "#a5afb2", "shadow": "#929da1", "panel": "#ced5d4",
     "panel_hi": "#eef1ef", "panel_mid": "#b4bebf", "cyan0": "#064e59", "cyan1": "#087f8b",
     "cyan2": "#11c5ce", "cyan3": "#8bffff", "purple0": "#34223f", "purple1": "#654178",
+    "heat0": "#3b1b16", "heat1": "#8f2b18", "heat2": "#ed651c", "heat3": "#ffe18a",
 }.items()}
 
 
@@ -123,6 +124,34 @@ def crusher_front(online, working, phase=0):
     if working:
         px(im, 13 - phase % 2, 11 + phase, highlight)
         px(im, 19 + phase % 2, 21 - phase, highlight)
+    return im
+
+
+def energized_smelter_front(online, working, phase=0):
+    im = machine_front_base(online)
+    cold = COLORS["frame2"] if not online else COLORS["heat1"]
+    warm = COLORS["edge"] if not online else COLORS["heat2"]
+    hot = COLORS["bolt"] if not online else COLORS["heat3"]
+
+    # Refractory hearth and three heating elements around the central billet.
+    rect(im, (10, 12, 21, 21), COLORS["frame1"])
+    rect(im, (12, 14, 19, 20), COLORS["heat0"] if online else COLORS["black"])
+    for x in (10, 15, 20):
+        rect(im, (x, 11, x + 1, 13), cold)
+        rect(im, (x, 20, x + 1, 22), cold)
+
+    # Four animation phases make heat circulate without changing the silhouette.
+    flame_rise = (2, 1, 0, 1)[phase] if working else 2
+    rect(im, (14, 16 - flame_rise, 17, 19), warm)
+    rect(im, (15, 15 - flame_rise, 16, 17), hot)
+    px(im, 13, 18 - flame_rise, cold)
+    px(im, 18, 17 - flame_rise, cold)
+    rect(im, (13, 19, 18, 20), COLORS["panel_mid"])
+    rect(im, (14, 18, 17, 19), COLORS["panel_hi"])
+
+    if working:
+        for index, (x, y) in enumerate(((11, 15), (20, 15), (20, 18), (11, 18))):
+            px(im, x, y, hot if index == phase else warm)
     return im
 
 
@@ -305,6 +334,7 @@ def main():
                        [enrichment_front(online, True, phase) for phase in range(4)])
         for machine, renderer in (
                 ("me_crusher", crusher_front),
+                ("me_energized_smelter", energized_smelter_front),
                 ("me_metallurgic_infuser", metallurgic_front),
                 ("me_osmium_compressor", osmium_compressor_front),
                 ("me_purification_chamber", purification_front),

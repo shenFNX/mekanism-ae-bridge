@@ -16,6 +16,7 @@ public final class ClientModEvents {
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenus.ME_ENRICHMENT_CHAMBER.get(), MeEnrichmentChamberScreen::new);
         event.register(ModMenus.ME_CRUSHER.get(), MeCrusherScreen::new);
+        event.register(ModMenus.ME_ENERGIZED_SMELTER.get(), MeEnergizedSmelterScreen::new);
         event.register(ModMenus.ME_METALLURGIC_INFUSER.get(), MeMetallurgicInfuserScreen::new);
         event.register(ModMenus.ME_OSMIUM_COMPRESSOR.get(), MeOsmiumCompressorScreen::new);
         event.register(ModMenus.ME_PURIFICATION_CHAMBER.get(), MePurificationChamberScreen::new);

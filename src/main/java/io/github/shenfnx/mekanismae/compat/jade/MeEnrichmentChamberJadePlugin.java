@@ -1,12 +1,14 @@
 package io.github.shenfnx.mekanismae.compat.jade;
 
 import io.github.shenfnx.mekanismae.block.MeEnrichmentChamberBlock;
+import io.github.shenfnx.mekanismae.block.MeEnergizedSmelterBlock;
 import io.github.shenfnx.mekanismae.block.MeCrusherBlock;
 import io.github.shenfnx.mekanismae.block.MeMetallurgicInfuserBlock;
 import io.github.shenfnx.mekanismae.block.MeOsmiumCompressorBlock;
 import io.github.shenfnx.mekanismae.block.MePurificationChamberBlock;
 import io.github.shenfnx.mekanismae.block.MeChemicalInjectionChamberBlock;
 import io.github.shenfnx.mekanismae.block.entity.MeEnrichmentChamberBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeEnergizedSmelterBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeCrusherBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeMetallurgicInfuserBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeOsmiumCompressorBlockEntity;
@@ -26,6 +28,8 @@ public final class MeEnrichmentChamberJadePlugin implements IWailaPlugin {
                 MeEnrichmentChamberBlockEntity.class);
         registration.registerBlockDataProvider(MeCrusherJadeProvider.INSTANCE, MeCrusherBlockEntity.class);
         registration.registerBlockDataProvider(
+                MeEnergizedSmelterJadeProvider.INSTANCE, MeEnergizedSmelterBlockEntity.class);
+        registration.registerBlockDataProvider(
                 MeMetallurgicInfuserJadeProvider.INSTANCE,
                 MeMetallurgicInfuserBlockEntity.class);
         registration.registerBlockDataProvider(
@@ -42,6 +46,7 @@ public final class MeEnrichmentChamberJadePlugin implements IWailaPlugin {
                 MeEnrichmentChamberJadeProvider.INSTANCE,
                 MeEnrichmentChamberBlock.class);
         registration.registerBlockComponent(MeCrusherJadeProvider.INSTANCE, MeCrusherBlock.class);
+        registration.registerBlockComponent(MeEnergizedSmelterJadeProvider.INSTANCE, MeEnergizedSmelterBlock.class);
         registration.registerBlockComponent(
                 MeMetallurgicInfuserJadeProvider.INSTANCE,
                 MeMetallurgicInfuserBlock.class);

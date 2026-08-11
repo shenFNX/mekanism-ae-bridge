@@ -9,6 +9,7 @@ BLOCKSTATES = ASSETS / "blockstates"
 
 MACHINES = (
     "me_crusher",
+    "me_energized_smelter",
     "me_metallurgic_infuser",
     "me_osmium_compressor",
     "me_purification_chamber",

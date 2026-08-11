@@ -2,6 +2,7 @@ package io.github.shenfnx.mekanismae.registry;
 
 import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.menu.MeEnrichmentChamberMenu;
+import io.github.shenfnx.mekanismae.menu.MeEnergizedSmelterMenu;
 import io.github.shenfnx.mekanismae.menu.MeCrusherMenu;
 import io.github.shenfnx.mekanismae.menu.MeMetallurgicInfuserMenu;
 import io.github.shenfnx.mekanismae.menu.MeOsmiumCompressorMenu;
@@ -22,6 +23,9 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<MeCrusherMenu>> ME_CRUSHER =
             MENUS.register("me_crusher", () -> IMenuTypeExtension.create(MeCrusherMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<MeEnergizedSmelterMenu>> ME_ENERGIZED_SMELTER =
+            MENUS.register("me_energized_smelter", () -> IMenuTypeExtension.create(MeEnergizedSmelterMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<MeMetallurgicInfuserMenu>> ME_METALLURGIC_INFUSER =
             MENUS.register("me_metallurgic_infuser", () -> IMenuTypeExtension.create(MeMetallurgicInfuserMenu::new));

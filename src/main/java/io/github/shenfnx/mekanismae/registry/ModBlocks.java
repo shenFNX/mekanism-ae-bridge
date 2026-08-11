@@ -2,6 +2,7 @@ package io.github.shenfnx.mekanismae.registry;
 
 import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.block.MeEnrichmentChamberBlock;
+import io.github.shenfnx.mekanismae.block.MeEnergizedSmelterBlock;
 import io.github.shenfnx.mekanismae.block.MeCrusherBlock;
 import io.github.shenfnx.mekanismae.block.MeMetallurgicInfuserBlock;
 import io.github.shenfnx.mekanismae.block.MeOsmiumCompressorBlock;
@@ -40,6 +41,11 @@ public final class ModBlocks {
 
     public static final DeferredItem<BlockItem> ME_CRUSHER_ITEM =
             ITEMS.registerSimpleBlockItem("me_crusher", ME_CRUSHER);
+
+    public static final DeferredBlock<MeEnergizedSmelterBlock> ME_ENERGIZED_SMELTER = BLOCKS.registerBlock(
+            "me_energized_smelter", MeEnergizedSmelterBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_ENERGIZED_SMELTER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_energized_smelter", ME_ENERGIZED_SMELTER);
 
     public static final DeferredBlock<MeMetallurgicInfuserBlock> ME_METALLURGIC_INFUSER = BLOCKS.registerBlock(
             "me_metallurgic_infuser",

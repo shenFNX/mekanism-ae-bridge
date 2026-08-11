@@ -503,7 +503,12 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         return recipe == null ? ItemStack.EMPTY : recipe.getOutput(input);
     }
 
-    private ItemStackToItemStackRecipe findRecipe(ItemStack input) {
+    /**
+     * Resolves the machine recipe for a concrete input stack. Machines with a
+     * synthetic recipe view, such as Mekanism's energized smelter, can override
+     * this to use the same cache as their native Mekanism counterpart.
+     */
+    protected ItemStackToItemStackRecipe findRecipe(ItemStack input) {
         if (level == null) {
             return null;
         }

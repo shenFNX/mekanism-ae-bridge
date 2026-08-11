@@ -18,6 +18,7 @@ public final class ModCreativeModeTabs {
                     .displayItems((parameters, output) -> {
                         output.accept(ModBlocks.ME_ENRICHMENT_CHAMBER_ITEM.get());
                         output.accept(ModBlocks.ME_CRUSHER_ITEM.get());
+                        output.accept(ModBlocks.ME_ENERGIZED_SMELTER_ITEM.get());
                         output.accept(ModBlocks.ME_METALLURGIC_INFUSER_ITEM.get());
                         output.accept(ModBlocks.ME_OSMIUM_COMPRESSOR_ITEM.get());
                         output.accept(ModBlocks.ME_PURIFICATION_CHAMBER_ITEM.get());

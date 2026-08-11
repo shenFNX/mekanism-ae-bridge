@@ -2,6 +2,7 @@ package io.github.shenfnx.mekanismae.registry;
 
 import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.block.entity.MeEnrichmentChamberBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeEnergizedSmelterBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeCrusherBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeMetallurgicInfuserBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeOsmiumCompressorBlockEntity;
@@ -29,6 +30,11 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             MeCrusherBlockEntity::new,
                             ModBlocks.ME_CRUSHER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeEnergizedSmelterBlockEntity>>
+            ME_ENERGIZED_SMELTER = BLOCK_ENTITY_TYPES.register("me_energized_smelter",
+                    () -> BlockEntityType.Builder.of(MeEnergizedSmelterBlockEntity::new,
+                            ModBlocks.ME_ENERGIZED_SMELTER.get()).build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeMetallurgicInfuserBlockEntity>>
             ME_METALLURGIC_INFUSER = BLOCK_ENTITY_TYPES.register(
