@@ -2,8 +2,6 @@ package io.github.shenfnx.mekanismae.block.entity;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.crafting.PatternDetailsHelper;
-import appeng.api.networking.GridFlags;
-import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.config.Actionable;
@@ -11,7 +9,6 @@ import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
 import appeng.api.stacks.KeyCounter;
-import appeng.blockentity.grid.AENetworkedBlockEntity;
 import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.registry.ModBlockEntities;
 import io.github.shenfnx.mekanismae.registry.ModBlocks;
@@ -29,38 +26,18 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.energy.EnergyStorage;
 import net.neoforged.neoforge.energy.IEnergyStorage;
-import mekanism.api.energy.IStrictEnergyHandler;
-import mekanism.api.Action;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
-import net.minecraft.core.NonNullList;
 
-public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntity implements ICraftingProvider, Container, net.minecraft.world.MenuProvider {
-    private static final int BASE_ENERGY_CAPACITY = 1_000_000;
-    private static final int BASE_ENERGY_RECEIVE = 200_000;
-    private static final int ENERGY_CAPACITY_PER_UPGRADE = 500_000;
-    private static final int ENERGY_RECEIVE_PER_UPGRADE = 200_000;
-    private static final int ENERGY_PER_OPERATION = 10_000;
-    private static final int BASE_PROCESSING_TICKS = 20;
-    public static final int PATTERN_SLOT_COUNT = 9;
-    public static final int UPGRADE_SLOT_COUNT = 8;
-    public static final int MAX_UPGRADES_PER_TYPE = 8;
-    private static final long MAX_ACCEPTED_OPERATIONS = 1_048_576;
+public final class MeMetallurgicInfuserBlockEntity extends AbstractMeProcessingBlockEntity {
     private static final int TASK_DATA_VERSION = 3;
     private static final int METALLURGIC_BASE_TICKS = 200;
-    private static final int[] PARALLEL_MULTIPLIER = {1, 2, 3, 4, 6, 8, 10, 12, 16};
-
-    private final MachineEnergyStorage energyStorage = new MachineEnergyStorage(BASE_ENERGY_CAPACITY, BASE_ENERGY_RECEIVE);
-    private final IStrictEnergyHandler strictEnergyHandler = new StrictEnergyHandler();
-    private final NonNullList<ItemStack> patternSlots = NonNullList.withSize(PATTERN_SLOT_COUNT, ItemStack.EMPTY);
     private AEItemKey activeItemKey;
     private long activeItemCount;
     private MekanismKey activeChemicalKey;
@@ -76,33 +53,9 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
     private boolean processingFaulted;
     private long nextPatternRejectLogTime;
 
-    // These are intentionally data-driven entry points for the later upgrade system.
-    private int speedUpgrades;
-    private int parallelUpgrades;
-    private boolean networkEnabled = true;
-    private final NonNullList<ItemStack> upgradeSlots = NonNullList.withSize(UPGRADE_SLOT_COUNT, ItemStack.EMPTY);
-
     public MeMetallurgicInfuserBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.ME_METALLURGIC_INFUSER.get(), pos, state);
-        getMainNode()
-                .setFlags(GridFlags.REQUIRE_CHANNEL)
-                .setIdlePowerUsage(2.0)
-                .setVisualRepresentation(ModBlocks.ME_METALLURGIC_INFUSER_ITEM.get())
-                .addService(ICraftingProvider.class, this);
-    }
-
-    @Override
-    public void onMainNodeStateChanged(IGridNodeListener.State state) {
-        ICraftingProvider.requestUpdate(getMainNode());
-        setChanged();
-    }
-
-    public IEnergyStorage getEnergyStorage() {
-        return energyStorage;
-    }
-
-    public IStrictEnergyHandler getStrictEnergyHandler() {
-        return strictEnergyHandler;
+        super(ModBlockEntities.ME_METALLURGIC_INFUSER.get(), pos, state,
+                ModBlocks.ME_METALLURGIC_INFUSER_ITEM.get());
     }
 
     public ItemStack getProcessingInputDisplay() {
@@ -123,46 +76,6 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
         }
         return getRecipeOutput(activeItemKey.toStack(Math.max(1, itemPerOperation)),
                 activeChemicalKey.withAmount(Math.max(1, chemicalPerOperation)));
-    }
-
-    public boolean setPattern(ItemStack stack) {
-        if (!PatternDetailsHelper.isEncodedPattern(stack)) {
-            return false;
-        }
-        for (int slot = 0; slot < PATTERN_SLOT_COUNT; slot++) {
-            if (patternSlots.get(slot).isEmpty()) {
-                setItem(slot, stack.copyWithCount(1));
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public ItemStack takePattern() {
-        if (hasProcessingWork()) {
-            return ItemStack.EMPTY;
-        }
-        for (int slot = 0; slot < PATTERN_SLOT_COUNT; slot++) {
-            if (!patternSlots.get(slot).isEmpty()) {
-                ItemStack result = patternSlots.get(slot);
-                patternSlots.set(slot, ItemStack.EMPTY);
-                ICraftingProvider.requestUpdate(getMainNode());
-                setChanged();
-                return result;
-            }
-        }
-        return ItemStack.EMPTY;
-    }
-
-    public boolean canTakePattern() {
-        return !hasProcessingWork();
-    }
-
-    @Override
-    public boolean stillValid(Player player) {
-        return level != null && level.getBlockEntity(worldPosition) == this
-                && player.distanceToSqr(worldPosition.getX() + 0.5, worldPosition.getY() + 0.5,
-                        worldPosition.getZ() + 0.5) <= 64.0;
     }
 
     @Override
@@ -216,19 +129,7 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
         };
     }
 
-    public boolean isNetworkEnabled() {
-        return networkEnabled;
-    }
-
-    /**
-     * Read-only status used by overlays such as Jade. These accessors must not
-     * advance the work queue because tooltip requests can arrive independently
-     * from the server tick.
-     */
-    public boolean isNetworkOnline() {
-        return getMainNode().isOnline();
-    }
-
+    @Override
     public boolean isProcessingFaulted() {
         return processingFaulted;
     }
@@ -237,16 +138,8 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
         return getTotalQueuedOperations();
     }
 
-    public long getBufferOperationLimit() {
-        return MAX_ACCEPTED_OPERATIONS;
-    }
-
     public long getCurrentOperationCount() {
         return Math.max(0, pendingOperations);
-    }
-
-    public int getParallelMultiplier() {
-        return getParallelBatchSize();
     }
 
     public ItemStack getBufferedInputDisplay() {
@@ -267,32 +160,6 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
 
     public long getBufferedChemicalCount() {
         return Math.max(0, activeChemicalCount);
-    }
-
-    public void toggleNetworkEnabled() {
-        if (!networkEnabled && processingFaulted && hasProcessingWork()) {
-            return;
-        }
-        networkEnabled = !networkEnabled;
-        ICraftingProvider.requestUpdate(getMainNode());
-        setChanged();
-    }
-
-    @Override
-    public List<IPatternDetails> getAvailablePatterns() {
-        if (level == null || !networkEnabled) {
-            return List.of();
-        }
-        List<IPatternDetails> result = new ArrayList<>(PATTERN_SLOT_COUNT);
-        for (ItemStack pattern : patternSlots) {
-            if (!pattern.isEmpty()) {
-                IPatternDetails details = PatternDetailsHelper.decodePattern(pattern, level);
-                if (details != null && isMetallurgicInfusingPattern(details)) {
-                    result.add(details);
-                }
-            }
-        }
-        return result;
     }
 
     @Override
@@ -465,10 +332,6 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
                 && ItemStack.isSameItemSameComponents(firstPattern, secondPattern);
     }
 
-    private int getParallelBatchSize() {
-        return PARALLEL_MULTIPLIER[Math.min(Math.max(0, parallelUpgrades), PARALLEL_MULTIPLIER.length - 1)];
-    }
-
     private static boolean canAdd(long first, long second) {
         return first >= 0 && second >= 0 && first <= Long.MAX_VALUE - second;
     }
@@ -484,7 +347,8 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
         return total;
     }
 
-    private boolean hasProcessingWork() {
+    @Override
+    protected boolean hasProcessingWork() {
         return getTotalQueuedOperations() > 0 || (activeItemKey != null && activeItemCount > 0)
                 || (activeChemicalKey != null && activeChemicalCount > 0)
                 || (pendingOutputKey != null && pendingOutputCount > 0) || !queuedJobs.isEmpty();
@@ -783,7 +647,7 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
         if (details.getInputs().length != 2 || details.getOutputs().size() != 1) {
             return false;
         }
-        if (!isMetallurgicInfusingPattern(details)) {
+        if (!isPatternForThisMachine(details)) {
             return false;
         }
         for (ItemStack pattern : patternSlots) {
@@ -797,7 +661,8 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
         return false;
     }
 
-    private boolean isMetallurgicInfusingPattern(IPatternDetails details) {
+    @Override
+    protected boolean isPatternForThisMachine(IPatternDetails details) {
         if (level == null || details.getInputs().length != 2 || details.getOutputs().size() != 1) {
             return false;
         }
@@ -879,16 +744,6 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
     public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putInt("TaskDataVersion", TASK_DATA_VERSION);
-        net.minecraft.nbt.ListTag patterns = new net.minecraft.nbt.ListTag();
-        for (int index = 0; index < patternSlots.size(); index++) {
-            ItemStack stack = patternSlots.get(index);
-            if (!stack.isEmpty()) {
-                CompoundTag pattern = (CompoundTag) stack.save(registries);
-                pattern.putByte("Slot", (byte) index);
-                patterns.add(pattern);
-            }
-        }
-        tag.put("Patterns", patterns);
         if (activeItemKey != null && activeItemCount > 0) {
             CompoundTag itemTag = new CompoundTag();
             saveItemKey(activeItemKey, itemTag, registries);
@@ -924,25 +779,11 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
             jobs.add(savedJob);
         }
         tag.put("ProcessingQueue", jobs);
-        tag.putInt("Energy", energyStorage.getEnergyStored());
         tag.putLong("PendingOperations", pendingOperations);
         tag.putInt("ItemPerOperation", itemPerOperation);
         tag.putLong("ChemicalPerOperation", chemicalPerOperation);
         tag.putInt("Progress", progress);
         tag.putBoolean("ProcessingFaulted", processingFaulted);
-        tag.putInt("SpeedUpgrades", speedUpgrades);
-        tag.putInt("ParallelUpgrades", parallelUpgrades);
-        tag.putBoolean("NetworkEnabled", networkEnabled);
-        net.minecraft.nbt.ListTag upgrades = new net.minecraft.nbt.ListTag();
-        for (int index = 0; index < upgradeSlots.size(); index++) {
-            ItemStack stack = upgradeSlots.get(index);
-            if (!stack.isEmpty()) {
-                CompoundTag upgrade = (CompoundTag) stack.save(registries);
-                upgrade.putByte("Slot", (byte) index);
-                upgrades.add(upgrade);
-            }
-        }
-        tag.put("Upgrades", upgrades);
     }
 
     private static void saveItemKey(AEItemKey key, CompoundTag tag, HolderLookup.Provider registries) {
@@ -952,20 +793,6 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
     @Override
     public void loadTag(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadTag(tag, registries);
-        patternSlots.replaceAll(stack -> ItemStack.EMPTY);
-        if (tag.contains("Patterns", net.minecraft.nbt.Tag.TAG_LIST)) {
-            var patterns = tag.getList("Patterns", net.minecraft.nbt.Tag.TAG_COMPOUND);
-            for (int index = 0; index < patterns.size(); index++) {
-                CompoundTag pattern = patterns.getCompound(index);
-                int slot = pattern.contains("Slot") ? pattern.getByte("Slot") : index;
-                if (slot >= 0 && slot < patternSlots.size()) {
-                    patternSlots.set(slot, ItemStack.parseOptional(registries, pattern));
-                }
-            }
-        } else if (tag.contains("Pattern")) {
-            patternSlots.set(0, ItemStack.parseOptional(registries, tag.getCompound("Pattern")));
-        }
-
         int dataVersion = tag.getInt("TaskDataVersion");
         activeItemKey = null;
         activeItemCount = 0;
@@ -1015,7 +842,6 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
                 }
             }
         }
-        int savedEnergy = tag.getInt("Energy");
         pendingOperations = Math.max(0, tag.getLong("PendingOperations"));
         itemPerOperation = Math.max(1, tag.getInt("ItemPerOperation"));
         chemicalPerOperation = Math.max(1, tag.getLong("ChemicalPerOperation"));
@@ -1043,133 +869,6 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
                 processingFaulted = true;
             }
         }
-        speedUpgrades = Math.max(0, tag.getInt("SpeedUpgrades"));
-        parallelUpgrades = Math.max(0, tag.getInt("ParallelUpgrades"));
-        networkEnabled = !tag.contains("NetworkEnabled") || tag.getBoolean("NetworkEnabled");
-        upgradeSlots.replaceAll(stack -> ItemStack.EMPTY);
-        if (tag.contains("Upgrades", net.minecraft.nbt.Tag.TAG_LIST)) {
-            var upgrades = tag.getList("Upgrades", net.minecraft.nbt.Tag.TAG_COMPOUND);
-            for (int index = 0; index < upgrades.size(); index++) {
-                CompoundTag upgrade = upgrades.getCompound(index);
-                int slot = upgrade.contains("Slot") ? upgrade.getByte("Slot") : index;
-                if (slot >= 0 && slot < upgradeSlots.size()) {
-                    upgradeSlots.set(slot, ItemStack.parseOptional(registries, upgrade));
-                }
-            }
-        }
-        recalculateUpgrades();
-        energyStorage.loadEnergy(savedEnergy);
-    }
-
-    @Override
-    public int getContainerSize() {
-        return PATTERN_SLOT_COUNT + UPGRADE_SLOT_COUNT;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        if (patternSlots.stream().anyMatch(stack -> !stack.isEmpty())) {
-            return false;
-        }
-        return upgradeSlots.stream().allMatch(ItemStack::isEmpty);
-    }
-
-    @Override
-    public ItemStack getItem(int slot) {
-        return slot < PATTERN_SLOT_COUNT ? patternSlots.get(slot) : upgradeSlots.get(slot - PATTERN_SLOT_COUNT);
-    }
-
-    @Override
-    public ItemStack removeItem(int slot, int amount) {
-        if (slot < PATTERN_SLOT_COUNT && !canTakePattern()) {
-            return ItemStack.EMPTY;
-        }
-        ItemStack current = getItem(slot);
-        if (current.isEmpty()) {
-            return ItemStack.EMPTY;
-        }
-        ItemStack result = current.split(amount);
-        if (current.isEmpty()) {
-            setItem(slot, ItemStack.EMPTY);
-        } else {
-            setChanged();
-        }
-        return result;
-    }
-
-    @Override
-    public ItemStack removeItemNoUpdate(int slot) {
-        if (slot < PATTERN_SLOT_COUNT && !canTakePattern()) {
-            return ItemStack.EMPTY;
-        }
-        ItemStack result = getItem(slot);
-        if (slot < PATTERN_SLOT_COUNT) {
-            patternSlots.set(slot, ItemStack.EMPTY);
-        } else {
-            upgradeSlots.set(slot - PATTERN_SLOT_COUNT, ItemStack.EMPTY);
-            recalculateUpgrades();
-        }
-        setChanged();
-        return result;
-    }
-
-    @Override
-    public void setItem(int slot, ItemStack stack) {
-        if (slot < PATTERN_SLOT_COUNT) {
-            if (!stack.isEmpty() && !PatternDetailsHelper.isEncodedPattern(stack)) {
-                return;
-            }
-            patternSlots.set(slot, stack.copyWithCount(Math.min(1, stack.getCount())));
-            ICraftingProvider.requestUpdate(getMainNode());
-        } else if (slot < getContainerSize()) {
-            ItemStack accepted = stack.copy();
-            accepted.setCount(Math.min(accepted.getCount(), getUpgradeLimitForSlot(slot, accepted)));
-            upgradeSlots.set(slot - PATTERN_SLOT_COUNT, accepted);
-            recalculateUpgrades();
-        }
-        setChanged();
-    }
-
-    private void recalculateUpgrades() {
-        speedUpgrades = upgradeSlots.stream().filter(stack -> stack.is(io.github.shenfnx.mekanismae.registry.ModItems.SPEED_CARD.get()))
-                .mapToInt(ItemStack::getCount).sum();
-        parallelUpgrades = upgradeSlots.stream().filter(stack -> stack.is(io.github.shenfnx.mekanismae.registry.ModItems.PARALLEL_CARD.get()))
-                .mapToInt(ItemStack::getCount).sum();
-        int energyUpgrades = upgradeSlots.stream().filter(stack -> stack.is(io.github.shenfnx.mekanismae.registry.ModItems.ENERGY_CARD.get()))
-                .mapToInt(ItemStack::getCount).sum();
-        energyStorage.updateUpgrades(energyUpgrades);
-    }
-
-    public int getUpgradeCount(net.minecraft.world.item.Item item) {
-        return upgradeSlots.stream().filter(stack -> stack.is(item)).mapToInt(ItemStack::getCount).sum();
-    }
-
-    public int getUpgradeLimitForSlot(int slot, ItemStack stack) {
-        if (slot < PATTERN_SLOT_COUNT || slot >= getContainerSize() || !isSupportedUpgrade(stack)) {
-            return 0;
-        }
-        ItemStack current = upgradeSlots.get(slot - PATTERN_SLOT_COUNT);
-        int currentInSlot = ItemStack.isSameItemSameComponents(current, stack) ? current.getCount() : 0;
-        return Math.max(0, MAX_UPGRADES_PER_TYPE - getUpgradeCount(stack.getItem()) + currentInSlot);
-    }
-
-    private boolean isSupportedUpgrade(ItemStack stack) {
-        return stack.is(ModItems.SPEED_CARD.get()) || stack.is(ModItems.PARALLEL_CARD.get())
-                || stack.is(ModItems.ENERGY_CARD.get());
-    }
-
-    @Override
-    public void clearContent() {
-        patternSlots.replaceAll(stack -> ItemStack.EMPTY);
-        upgradeSlots.replaceAll(stack -> ItemStack.EMPTY);
-        recalculateUpgrades();
-        setChanged();
-    }
-
-    @Override
-    public boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot < PATTERN_SLOT_COUNT ? PatternDetailsHelper.isEncodedPattern(stack)
-                : isSupportedUpgrade(stack) && getUpgradeLimitForSlot(slot, stack) > 0;
     }
 
     /**
@@ -1219,101 +918,4 @@ public final class MeMetallurgicInfuserBlockEntity extends AENetworkedBlockEntit
         private static final ReturnedInputs NONE = new ReturnedInputs(0, 0);
     }
 
-    private final class MachineEnergyStorage extends EnergyStorage {
-        private MachineEnergyStorage(int capacity, int maxReceive) {
-            super(capacity, maxReceive, 0);
-        }
-
-        private void loadEnergy(int energy) {
-            this.energy = Math.max(0, Math.min(energy, capacity));
-        }
-
-        private void updateUpgrades(int upgrades) {
-            int safeUpgrades = Math.max(0, upgrades);
-            capacity = BASE_ENERGY_CAPACITY + safeUpgrades * ENERGY_CAPACITY_PER_UPGRADE;
-            maxReceive = BASE_ENERGY_RECEIVE + safeUpgrades * ENERGY_RECEIVE_PER_UPGRADE;
-            energy = Math.min(energy, capacity);
-        }
-
-        private int consumeEnergy(int amount) {
-            int consumed = Math.min(energy, Math.max(0, amount));
-            if (consumed > 0) {
-                energy -= consumed;
-                setChanged();
-            }
-            return consumed;
-        }
-
-        private int getReceiveLimit() {
-            return maxReceive;
-        }
-
-        @Override
-        public int receiveEnergy(int maxReceive, boolean simulate) {
-            int received = super.receiveEnergy(maxReceive, simulate);
-            if (!simulate && received > 0) {
-                setChanged();
-            }
-            return received;
-        }
-
-        @Override
-        public int extractEnergy(int maxExtract, boolean simulate) {
-            int extracted = super.extractEnergy(maxExtract, simulate);
-            if (!simulate && extracted > 0) {
-                setChanged();
-            }
-            return extracted;
-        }
-    }
-
-    private final class StrictEnergyHandler implements IStrictEnergyHandler {
-        @Override
-        public int getEnergyContainerCount() {
-            return 1;
-        }
-
-        @Override
-        public long getEnergy(int container) {
-            return container == 0 ? energyStorage.getEnergyStored() : 0;
-        }
-
-        @Override
-        public void setEnergy(int container, long energy) {
-            if (container == 0) {
-                energyStorage.loadEnergy((int) Math.min(Integer.MAX_VALUE, Math.max(0, energy)));
-                setChanged();
-            }
-        }
-
-        @Override
-        public long getMaxEnergy(int container) {
-            return container == 0 ? energyStorage.getMaxEnergyStored() : 0;
-        }
-
-        @Override
-        public long getNeededEnergy(int container) {
-            return container == 0 ? energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored() : 0;
-        }
-
-        @Override
-        public long insertEnergy(int container, long amount, Action action) {
-            if (container != 0 || amount <= 0) {
-                return amount;
-            }
-            int value = (int) Math.min(Integer.MAX_VALUE, amount);
-            int accepted = energyStorage.receiveEnergy(value, action.simulate());
-            // Mekanism's insert contract returns the unaccepted remainder, not the amount inserted.
-            return amount - accepted;
-        }
-
-        @Override
-        public long extractEnergy(int container, long amount, Action action) {
-            if (container != 0 || amount <= 0) {
-                return 0;
-            }
-            int value = (int) Math.min(Integer.MAX_VALUE, amount);
-            return energyStorage.extractEnergy(value, action.simulate());
-        }
-    }
 }

@@ -604,3 +604,37 @@ GUI 与兼容：
 4. 最终测试日志没有出现冶金灌注样板拒绝、任务故障或本模组异常；客户端退出时所有维度均正常保存。
 
 在正式发布前仍应把双配方串料、返回至 ME、任务中途重进存档和 0/1/8 张并行卡列入完整回归测试，避免后续通用化改造引入倒退。
+
+### 15.15 通用加工基础与 ME 粉碎机（2026-08-11）
+
+本轮先完成机器通用化，再以 ME 粉碎机验证扩展新物品加工机不需要复制整套富集仓代码：
+
+- 新增 `AbstractMeProcessingBlockEntity`，统一管理 AE2 托管节点、9 个处理样板槽、8 个升级槽、FE/Mekanism Strict Energy 双接口、网络接入开关、并行倍率曲线和通用 NBT。
+- 新增 `AbstractItemToItemMeMachineBlockEntity`，承载物品到物品机器共用的 GTNH 式大容量预投递、按编码样板身份隔离的任务账本、当前配方亲和、产物返还、故障恢复和 `TaskDataVersion = 2` 迁移逻辑。
+- ME 富集仓迁移到物品加工基类，ME 冶金灌注机迁移到通用节点/能量/样板/升级基类；旧存档使用的 `Patterns`、`Pattern`、`Energy`、`Upgrades`、`NetworkEnabled`、任务队列及升级数量键保持不变。
+- GUI、菜单、方块交互与 Jade 的物品加工部分也抽成共用实现；新机器只需要声明自己的配方类型、注册项、显示名称和资源模型。
+- 对照 Jade 15.10.5 的 `HierarchyLookup` 后，将共用方块交互放入中性基类，使富集仓与粉碎机成为并列子类；避免粉碎机因继承富集仓方块类而同时命中两个 Jade component provider。
+- 新增 ME 粉碎机，配方严格使用 Mekanism 10.7.19.85 官方 `MekanismRecipeTypes.TYPE_CRUSHING`，没有自行复制或猜测配方判断。方块模型继承 Mekanism 官方粉碎机模型。
+- 注册了方块、物品、方块实体、菜单、客户端界面、AE2 节点、NeoForge FE、Mekanism Strict Energy、Jade、创造模式物品、语言、模型、方块状态和战利品表。
+
+实现依据：
+
+- [Mekanism 官方源码](https://github.com/mekanism/Mekanism)：核对 `MekanismRecipeTypes.TYPE_CRUSHING`、`ItemStackToItemStackRecipe` 以及官方粉碎机模型。
+- [Jade 官方源码](https://github.com/Snownee/Jade)：核对 component/data provider 的父类层级收集规则。
+- 已锁定的 AE2、NeoForge、Jade 接口继续沿用前几轮经实机验证的实现，通用化没有修改 AE2 发配协议或任务账本格式。
+- 曾再次尝试把边界明确的粉碎机表现层脚手架交给本机 OpenCode 的 `deepseek/deepseek-v4-flash`；模型完成只读分析后仍被 `unknown certificate verification error` 中断，没有写入工作区。最终实现由主代理完成并逐项审查。
+
+自动验证：
+
+- `git diff --check`：通过。
+- `build --offline --no-daemon --rerun-tasks --console=plain`：`BUILD SUCCESSFUL`，全部任务重新执行。
+- 新客户端成功进入主菜单；日志确认本模组资源与 Jade 插件正常加载，没有 `me_crusher` 注册、模型、翻译或配置断言错误。
+- 运行中的 Render 线程停在 GLFW 等待事件/帧率限制处，确认客户端是在主菜单正常空闲，不是启动卡死。
+
+回归与实机验收清单：
+
+1. 给 ME 粉碎机放入有效粉碎处理样板，确认 AE2 能读取样板并将大批量任务预投递到机器。
+2. 同时下发两种粉碎配方，确认当前样板材料耗尽后才切换，两个样板的内部账本不会串料。
+3. 分别测试 0、1、8 张并行卡，以及加速卡、能量卡、暂停接入和“返还至 ME”。
+4. 任务处理中退出并重进存档，确认缓存数量、活动样板、等待队列、能量和升级卡完整恢复。
+5. 回归 ME 富集仓与 ME 冶金灌注机，尤其检查旧存档、化学品隔离、返还和方块拆除保护没有变化。

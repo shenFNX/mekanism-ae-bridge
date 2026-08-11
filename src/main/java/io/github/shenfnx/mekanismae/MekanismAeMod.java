@@ -47,6 +47,19 @@ public final class MekanismAeMod {
 
         event.registerBlockEntity(
                 AECapabilities.IN_WORLD_GRID_NODE_HOST,
+                ModBlockEntities.ME_CRUSHER.get(),
+                (blockEntity, ignored) -> blockEntity);
+        event.registerBlockEntity(
+                net.neoforged.neoforge.capabilities.Capabilities.EnergyStorage.BLOCK,
+                ModBlockEntities.ME_CRUSHER.get(),
+                (blockEntity, side) -> blockEntity.getEnergyStorage());
+        event.registerBlockEntity(
+                mekanism.common.capabilities.Capabilities.STRICT_ENERGY.block(),
+                ModBlockEntities.ME_CRUSHER.get(),
+                (blockEntity, side) -> blockEntity.getStrictEnergyHandler());
+
+        event.registerBlockEntity(
+                AECapabilities.IN_WORLD_GRID_NODE_HOST,
                 ModBlockEntities.ME_METALLURGIC_INFUSER.get(),
                 (blockEntity, ignored) -> blockEntity);
         event.registerBlockEntity(

@@ -15,6 +15,7 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenus.ME_ENRICHMENT_CHAMBER.get(), MeEnrichmentChamberScreen::new);
+        event.register(ModMenus.ME_CRUSHER.get(), MeCrusherScreen::new);
         event.register(ModMenus.ME_METALLURGIC_INFUSER.get(), MeMetallurgicInfuserScreen::new);
     }
 }

@@ -1,6 +1,7 @@
 package io.github.shenfnx.mekanismae.menu;
 
 import appeng.api.crafting.PatternDetailsHelper;
+import io.github.shenfnx.mekanismae.block.entity.AbstractItemToItemMeMachineBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeEnrichmentChamberBlockEntity;
 import io.github.shenfnx.mekanismae.registry.ModItems;
 import io.github.shenfnx.mekanismae.registry.ModMenus;
@@ -13,16 +14,17 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 
-public final class MeEnrichmentChamberMenu extends AbstractContainerMenu {
+public class MeEnrichmentChamberMenu extends AbstractContainerMenu {
     private static final int DATA_COUNT = 16;
-    private static final int REAL_MACHINE_SLOT_COUNT = MeEnrichmentChamberBlockEntity.PATTERN_SLOT_COUNT
-            + MeEnrichmentChamberBlockEntity.UPGRADE_SLOT_COUNT;
+    private static final int REAL_MACHINE_SLOT_COUNT = AbstractItemToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT
+            + AbstractItemToItemMeMachineBlockEntity.UPGRADE_SLOT_COUNT;
     private static final int DISPLAY_SLOT_COUNT = 2;
     private static final int MACHINE_MENU_SLOT_COUNT = REAL_MACHINE_SLOT_COUNT + DISPLAY_SLOT_COUNT;
-    private final MeEnrichmentChamberBlockEntity chamber;
+    private final AbstractItemToItemMeMachineBlockEntity chamber;
     private final ContainerData data;
     private final SimpleContainer processingDisplay = new SimpleContainer(DISPLAY_SLOT_COUNT);
 
@@ -31,12 +33,18 @@ public final class MeEnrichmentChamberMenu extends AbstractContainerMenu {
     }
 
     public MeEnrichmentChamberMenu(int containerId, Inventory inventory, BlockPos pos) {
-        super(ModMenus.ME_ENRICHMENT_CHAMBER.get(), containerId);
-        if (!(inventory.player.level().getBlockEntity(pos) instanceof MeEnrichmentChamberBlockEntity found)) {
-            throw new IllegalStateException("Missing ME enrichment chamber at " + pos);
+        this(ModMenus.ME_ENRICHMENT_CHAMBER.get(), containerId, inventory, pos,
+                MeEnrichmentChamberBlockEntity.class, "ME enrichment chamber");
+    }
+
+    protected MeEnrichmentChamberMenu(MenuType<?> menuType, int containerId, Inventory inventory, BlockPos pos,
+            Class<? extends AbstractItemToItemMeMachineBlockEntity> expectedType, String machineName) {
+        super(menuType, containerId);
+        if (!expectedType.isInstance(inventory.player.level().getBlockEntity(pos))) {
+            throw new IllegalStateException("Missing " + machineName + " at " + pos);
         }
-        chamber = found;
-        for (int index = 0; index < MeEnrichmentChamberBlockEntity.PATTERN_SLOT_COUNT; index++) {
+        chamber = expectedType.cast(inventory.player.level().getBlockEntity(pos));
+        for (int index = 0; index < AbstractItemToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT; index++) {
             int slotIndex = index;
             addSlot(new Slot(chamber, slotIndex, 31 + index * 18, 29) {
                 @Override
@@ -55,8 +63,8 @@ public final class MeEnrichmentChamberMenu extends AbstractContainerMenu {
                 }
             });
         }
-        for (int index = 0; index < MeEnrichmentChamberBlockEntity.UPGRADE_SLOT_COUNT; index++) {
-            int slotIndex = MeEnrichmentChamberBlockEntity.PATTERN_SLOT_COUNT + index;
+        for (int index = 0; index < AbstractItemToItemMeMachineBlockEntity.UPGRADE_SLOT_COUNT; index++) {
+            int slotIndex = AbstractItemToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT + index;
             int upgradeIndex = index;
             addSlot(new Slot(chamber, slotIndex, 263 + (upgradeIndex % 2) * 18, 33 + (upgradeIndex / 2) * 18) {
                 @Override
@@ -114,7 +122,7 @@ public final class MeEnrichmentChamberMenu extends AbstractContainerMenu {
         super.broadcastChanges();
     }
 
-    public MeEnrichmentChamberBlockEntity chamber() {
+    public AbstractItemToItemMeMachineBlockEntity chamber() {
         return chamber;
     }
 
@@ -224,10 +232,10 @@ public final class MeEnrichmentChamberMenu extends AbstractContainerMenu {
         ItemStack moving = source.getItem();
         boolean moved = false;
         if (PatternDetailsHelper.isEncodedPattern(moving)) {
-            moved = moveItemStackTo(moving, 0, MeEnrichmentChamberBlockEntity.PATTERN_SLOT_COUNT, false);
+            moved = moveItemStackTo(moving, 0, AbstractItemToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT, false);
         } else if (moving.is(ModItems.SPEED_CARD.get()) || moving.is(ModItems.PARALLEL_CARD.get())
                 || moving.is(ModItems.ENERGY_CARD.get())) {
-            moved = moveItemStackTo(moving, MeEnrichmentChamberBlockEntity.PATTERN_SLOT_COUNT,
+            moved = moveItemStackTo(moving, AbstractItemToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT,
                     REAL_MACHINE_SLOT_COUNT, false);
         }
         if (!moved) {

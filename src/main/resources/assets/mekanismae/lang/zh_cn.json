@@ -1,6 +1,7 @@
 {
   "mod.mekanismae.name": "Mekanism ME 附属",
   "block.mekanismae.me_enrichment_chamber": "ME 富集仓",
+  "block.mekanismae.me_crusher": "ME 粉碎机",
   "block.mekanismae.me_metallurgic_infuser": "ME 冶金灌注机",
   "item.mekanismae.speed_card": "ME 加速卡",
   "item.mekanismae.parallel_card": "ME 并行卡",
@@ -50,5 +51,6 @@
   "jade.mekanismae.energy": "能量：%s / %s FE",
   "jade.mekanismae.chemical": "化学品：%s（%s）",
   "config.jade.plugin_mekanismae.me_enrichment_chamber_status": "ME 富集仓状态",
+  "config.jade.plugin_mekanismae.me_crusher_status": "ME 粉碎机状态",
   "config.jade.plugin_mekanismae.me_metallurgic_infuser_status": "ME 冶金灌注机状态"
 }

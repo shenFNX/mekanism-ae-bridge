@@ -1,6 +1,7 @@
 {
   "mod.mekanismae.name": "Mekanism AE Bridge",
   "block.mekanismae.me_enrichment_chamber": "ME Enrichment Chamber",
+  "block.mekanismae.me_crusher": "ME Crusher",
   "block.mekanismae.me_metallurgic_infuser": "ME Metallurgic Infuser",
   "item.mekanismae.speed_card": "ME Speed Card",
   "item.mekanismae.parallel_card": "ME Parallel Card",
@@ -51,5 +52,6 @@
   "jade.mekanismae.energy": "Energy: %s / %s FE",
   "jade.mekanismae.chemical": "Chemical: %s (%s)",
   "config.jade.plugin_mekanismae.me_enrichment_chamber_status": "ME Enrichment Chamber Status",
+  "config.jade.plugin_mekanismae.me_crusher_status": "ME Crusher Status",
   "config.jade.plugin_mekanismae.me_metallurgic_infuser_status": "ME Metallurgic Infuser Status"
 }

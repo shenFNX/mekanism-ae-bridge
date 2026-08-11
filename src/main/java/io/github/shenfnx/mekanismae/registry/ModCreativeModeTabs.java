@@ -17,6 +17,7 @@ public final class ModCreativeModeTabs {
                     .icon(() -> ModBlocks.ME_ENRICHMENT_CHAMBER_ITEM.get().getDefaultInstance())
                     .displayItems((parameters, output) -> {
                         output.accept(ModBlocks.ME_ENRICHMENT_CHAMBER_ITEM.get());
+                        output.accept(ModBlocks.ME_CRUSHER_ITEM.get());
                         output.accept(ModBlocks.ME_METALLURGIC_INFUSER_ITEM.get());
                         output.accept(ModItems.SPEED_CARD.get());
                         output.accept(ModItems.PARALLEL_CARD.get());
