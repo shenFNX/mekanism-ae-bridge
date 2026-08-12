@@ -260,7 +260,8 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         blockEntity.tickServer();
     }
 
-    private void tickServer() {
+    @Override
+    public final void tickServer() {
         if (level == null || level.isClientSide()) {
             return;
         }
@@ -324,9 +325,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
             setChanged();
             return;
         }
-        for (int i = 0; i < availableOperations; i++) {
-            energyStorage.consumeEnergy(energyPerOperation);
-        }
+        energyStorage.consumeEnergy((int) (availableOperations * energyPerOperation));
         activeInputCount -= consumedInput;
         pendingOperations -= availableOperations;
         if (pendingOutputKey == null) {

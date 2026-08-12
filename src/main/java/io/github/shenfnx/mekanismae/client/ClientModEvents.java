@@ -21,5 +21,7 @@ public final class ClientModEvents {
         event.register(ModMenus.ME_OSMIUM_COMPRESSOR.get(), MeOsmiumCompressorScreen::new);
         event.register(ModMenus.ME_PURIFICATION_CHAMBER.get(), MePurificationChamberScreen::new);
         event.register(ModMenus.ME_CHEMICAL_INJECTION_CHAMBER.get(), MeChemicalInjectionChamberScreen::new);
+        event.register(ModMenus.ME_COMBINER.get(), MeCombinerScreen::new);
+        event.register(ModMenus.ME_PRECISION_SAWMILL.get(), MePrecisionSawmillScreen::new);
     }
 }

@@ -230,6 +230,48 @@ def chemical_injection_front(online, working, phase=0):
     return im
 
 
+def combiner_front(online, working, phase=0):
+    im = machine_front_base(online)
+    signal = COLORS["cyan2"] if online else COLORS["cyan0"]
+    material = COLORS["purple1"] if online else COLORS["purple0"]
+    travel = (0, 1, 2, 1)[phase] if working else 0
+    # Two independent solid feeds converge in a reinforced central press.
+    rect(im, (9 + travel, 12, 12 + travel, 20), signal)
+    rect(im, (19 - travel, 12, 22 - travel, 20), material)
+    rect(im, (13, 14, 18, 18), COLORS["frame2"])
+    rect(im, (14, 15, 17, 17), COLORS["panel_hi"])
+    px(im, 15, 15, COLORS["cyan3"] if online else COLORS["bolt"])
+    rect(im, (9, 10, 12, 11), COLORS["frame1"])
+    rect(im, (19, 10, 22, 11), COLORS["frame1"])
+    rect(im, (13, 20, 18, 22), COLORS["frame1"])
+    if working:
+        px(im, 13 + phase, 13 + phase % 2, COLORS["cyan3"] if online else COLORS["cyan2"])
+    return im
+
+
+def precision_sawmill_front(online, working, phase=0):
+    im = machine_front_base(online)
+    signal = COLORS["cyan2"] if online else COLORS["cyan0"]
+    blade = COLORS["panel_hi"] if online else COLORS["edge"]
+    # A toothed circular blade over the feed table; highlights rotate by phase.
+    rect(im, (9, 19, 22, 21), COLORS["frame2"])
+    rect(im, (10, 17, 21, 19), COLORS["heat1"] if online else COLORS["frame1"])
+    for x, y in ((14, 11), (17, 11), (20, 14), (20, 17),
+                 (17, 20), (14, 20), (11, 17), (11, 14)):
+        px(im, x, y, blade)
+    rect(im, (13, 12, 18, 19), COLORS["frame2"])
+    rect(im, (12, 14, 19, 17), COLORS["frame2"])
+    rect(im, (14, 13, 17, 18), blade)
+    rect(im, (13, 15, 18, 16), blade)
+    rect(im, (15, 15, 16, 16), COLORS["black"])
+    if working:
+        teeth = ((14, 11), (20, 14), (17, 20), (11, 17))
+        x, y = teeth[phase]
+        px(im, x, y, COLORS["cyan3"] if online else signal)
+        px(im, 10 + phase * 3, 22, signal)
+    return im
+
+
 def left(online):
     im = new(); chassis(im); lamp(im, online)
     rect(im, (7, 8, 24, 24), COLORS["panel_hi"])
@@ -338,7 +380,9 @@ def main():
                 ("me_metallurgic_infuser", metallurgic_front),
                 ("me_osmium_compressor", osmium_compressor_front),
                 ("me_purification_chamber", purification_front),
-                ("me_chemical_injection_chamber", chemical_injection_front)):
+                ("me_chemical_injection_chamber", chemical_injection_front),
+                ("me_combiner", combiner_front),
+                ("me_precision_sawmill", precision_sawmill_front)):
             save(f"{machine}_front_{suffix}", renderer(online, False))
             save_animation(f"{machine}_front_{suffix}_working",
                            [renderer(online, True, phase) for phase in range(4)])

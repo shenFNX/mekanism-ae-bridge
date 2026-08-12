@@ -1,6 +1,7 @@
 package io.github.shenfnx.mekanismae.client;
 
 import io.github.shenfnx.mekanismae.menu.MeEnrichmentChamberMenu;
+import io.github.shenfnx.mekanismae.menu.MeProcessingMachineMenu;
 import io.github.shenfnx.mekanismae.block.entity.AbstractItemToItemMeMachineBlockEntity;
 import io.github.shenfnx.mekanismae.registry.ModItems;
 import io.github.shenfnx.mekanismae.util.EnergyFormatter;
@@ -18,7 +19,8 @@ import net.minecraft.world.entity.player.Inventory;
  * Mekanism-style status screen. Processing resources stay internal, so the
  * only real machine slots are the encoded pattern and the upgrade drawer.
  */
-public abstract class AbstractItemToItemMeMachineScreen<M extends MeEnrichmentChamberMenu>
+public abstract class AbstractItemToItemMeMachineScreen<M extends net.minecraft.world.inventory.AbstractContainerMenu
+        & MeProcessingMachineMenu>
         extends AbstractContainerScreen<M> {
     private static final int MAIN_WIDTH = 256;
     private static final int UPGRADE_PANEL_X = 256;
@@ -57,17 +59,7 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends MeEnrichmentCh
             drawSlot(graphics, left + 30 + index * 18, top + 28);
         }
 
-        // Read-only input and expected/finished output for the active operation.
-        drawSlot(graphics, left + 42, top + 69);
-        drawSlot(graphics, left + 91, top + 69);
-        int progressWidth = Math.min(22, Math.max(0,
-                menu.progress() * 22 / menu.processingTicks()));
-        // The arrow is constrained to the 31 px gap between the two slots.
-        graphics.fill(left + 62, top + 75, left + 86, top + 84, 0xFF555555);
-        graphics.fill(left + 63, top + 76, left + 63 + progressWidth, top + 83, 0xFF23C987);
-        graphics.fill(left + 86, top + 73, left + 88, top + 86, 0xFF555555);
-        graphics.fill(left + 88, top + 75, left + 90, top + 84, 0xFF555555);
-        graphics.fill(left + 90, top + 77, left + 91, top + 82, 0xFF555555);
+        drawProcessingArea(graphics, left, top);
 
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
@@ -82,6 +74,21 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends MeEnrichmentCh
         drawReturnTab(graphics, left, top);
         drawEnergyTab(graphics, left, top);
         drawUpgradeDrawer(graphics, left, top);
+    }
+
+    /** Draws the read-only internal processing ledger. Multi-input/output screens override this. */
+    protected void drawProcessingArea(GuiGraphics graphics, int left, int top) {
+        drawSlot(graphics, left + 42, top + 69);
+        drawSlot(graphics, left + 91, top + 69);
+        int progressWidth = Math.min(22, Math.max(0,
+                menu.progress() * 22 / menu.processingTicks()));
+        // The arrow is constrained to the 31 px gap between the two slots.
+        graphics.fill(left + 62, top + 75, left + 86, top + 84, 0xFF555555);
+        graphics.fill(left + 63, top + 76, left + 63 + progressWidth, top + 83, 0xFF23C987);
+        graphics.fill(left + 86, top + 73, left + 88, top + 86, 0xFF555555);
+        graphics.fill(left + 88, top + 75, left + 90, top + 84, 0xFF555555);
+        graphics.fill(left + 90, top + 77, left + 91, top + 82, 0xFF555555);
+
     }
 
     private void drawNetworkTab(GuiGraphics graphics, int left, int top) {
@@ -144,7 +151,7 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends MeEnrichmentCh
         graphics.fill(x + 3, y + 3, x + 5, y + height - 3, accent);
     }
 
-    private void drawSlot(GuiGraphics graphics, int x, int y) {
+    protected final void drawSlot(GuiGraphics graphics, int x, int y) {
         graphics.blit(NORMAL_SLOT, x, y, 0, 0, 18, 18, 18, 18);
     }
 
@@ -164,7 +171,16 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends MeEnrichmentCh
                 121, 72, 0xFFE0E0E0, false);
         graphics.drawString(font, compactEnergyLine(), 121, 85, 0xFFE0E0E0, false);
         graphics.drawString(font, Component.translatable("gui.mekanismae.progress",
-                Math.min(100, menu.progress() * 100 / menu.processingTicks())), 43, 89, 0xFF404040, false);
+                Math.min(100, menu.progress() * 100 / menu.processingTicks())),
+                progressLabelX(), progressLabelY(), 0xFF404040, false);
+    }
+
+    protected int progressLabelX() {
+        return 43;
+    }
+
+    protected int progressLabelY() {
+        return 89;
     }
 
     @Override

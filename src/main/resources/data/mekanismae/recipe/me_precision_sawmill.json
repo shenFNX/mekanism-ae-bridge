@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "mekanism:precision_sawmill" },
+    { "item": "ae2:pattern_provider" }
+  ],
+  "result": { "count": 1, "id": "mekanismae:me_precision_sawmill" }
+}

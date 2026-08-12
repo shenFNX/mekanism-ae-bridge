@@ -18,7 +18,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 
-public class MeEnrichmentChamberMenu extends AbstractContainerMenu {
+public class MeEnrichmentChamberMenu extends AbstractContainerMenu implements MeProcessingMachineMenu {
     private static final int DATA_COUNT = 17;
     private static final int REAL_MACHINE_SLOT_COUNT = AbstractItemToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT
             + AbstractItemToItemMeMachineBlockEntity.UPGRADE_SLOT_COUNT;

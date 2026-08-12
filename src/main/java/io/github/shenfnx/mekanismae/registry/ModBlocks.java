@@ -8,6 +8,8 @@ import io.github.shenfnx.mekanismae.block.MeMetallurgicInfuserBlock;
 import io.github.shenfnx.mekanismae.block.MeOsmiumCompressorBlock;
 import io.github.shenfnx.mekanismae.block.MePurificationChamberBlock;
 import io.github.shenfnx.mekanismae.block.MeChemicalInjectionChamberBlock;
+import io.github.shenfnx.mekanismae.block.MeCombinerBlock;
+import io.github.shenfnx.mekanismae.block.MePrecisionSawmillBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -73,6 +75,16 @@ public final class ModBlocks {
                     machineProperties());
     public static final DeferredItem<BlockItem> ME_CHEMICAL_INJECTION_CHAMBER_ITEM =
             ITEMS.registerSimpleBlockItem("me_chemical_injection_chamber", ME_CHEMICAL_INJECTION_CHAMBER);
+
+    public static final DeferredBlock<MeCombinerBlock> ME_COMBINER = BLOCKS.registerBlock(
+            "me_combiner", MeCombinerBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_COMBINER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_combiner", ME_COMBINER);
+
+    public static final DeferredBlock<MePrecisionSawmillBlock> ME_PRECISION_SAWMILL = BLOCKS.registerBlock(
+            "me_precision_sawmill", MePrecisionSawmillBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_PRECISION_SAWMILL_ITEM =
+            ITEMS.registerSimpleBlockItem("me_precision_sawmill", ME_PRECISION_SAWMILL);
 
     private static BlockBehaviour.Properties machineProperties() {
         return BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)

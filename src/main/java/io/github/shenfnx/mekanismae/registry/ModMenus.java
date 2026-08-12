@@ -8,6 +8,8 @@ import io.github.shenfnx.mekanismae.menu.MeMetallurgicInfuserMenu;
 import io.github.shenfnx.mekanismae.menu.MeOsmiumCompressorMenu;
 import io.github.shenfnx.mekanismae.menu.MePurificationChamberMenu;
 import io.github.shenfnx.mekanismae.menu.MeChemicalInjectionChamberMenu;
+import io.github.shenfnx.mekanismae.menu.MeCombinerMenu;
+import io.github.shenfnx.mekanismae.menu.MePrecisionSawmillMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
@@ -37,6 +39,11 @@ public final class ModMenus {
     public static final DeferredHolder<MenuType<?>, MenuType<MeChemicalInjectionChamberMenu>>
             ME_CHEMICAL_INJECTION_CHAMBER = MENUS.register("me_chemical_injection_chamber",
                     () -> IMenuTypeExtension.create(MeChemicalInjectionChamberMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MeCombinerMenu>> ME_COMBINER =
+            MENUS.register("me_combiner", () -> IMenuTypeExtension.create(MeCombinerMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MePrecisionSawmillMenu>> ME_PRECISION_SAWMILL =
+            MENUS.register("me_precision_sawmill",
+                    () -> IMenuTypeExtension.create(MePrecisionSawmillMenu::new));
 
     private ModMenus() {
     }

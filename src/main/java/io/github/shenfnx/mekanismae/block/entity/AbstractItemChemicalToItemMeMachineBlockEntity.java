@@ -364,7 +364,8 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
         blockEntity.tickServer();
     }
 
-    private void tickServer() {
+    @Override
+    public final void tickServer() {
         if (level == null || level.isClientSide()) {
             return;
         }
@@ -429,9 +430,7 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
             setChanged();
             return;
         }
-        for (int i = 0; i < availableOperations; i++) {
-            energyStorage.consumeEnergy(energyPerOperation);
-        }
+        energyStorage.consumeEnergy((int) (availableOperations * energyPerOperation));
         activeItemCount -= consumedItems;
         activeChemicalCount -= consumedChemical;
         pendingOperations -= availableOperations;

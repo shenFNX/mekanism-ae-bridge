@@ -1,7 +1,7 @@
 package io.github.shenfnx.mekanismae.compat.jade;
 
 import io.github.shenfnx.mekanismae.MekanismAeMod;
-import io.github.shenfnx.mekanismae.block.entity.AbstractItemToItemMeMachineBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.AbstractMeProcessingBlockEntity;
 import io.github.shenfnx.mekanismae.util.EnergyFormatter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -39,7 +39,7 @@ public abstract class AbstractItemToItemMeMachineJadeProvider
 
     @Override
     public void appendServerData(CompoundTag data, BlockAccessor accessor) {
-        if (!(accessor.getBlockEntity() instanceof AbstractItemToItemMeMachineBlockEntity chamber)) {
+        if (!(accessor.getBlockEntity() instanceof AbstractMeProcessingBlockEntity chamber)) {
             return;
         }
 

@@ -36,5 +36,9 @@ public final class MekanismAeJeiPlugin implements IModPlugin {
                 MekanismJEI.genericRecipeType(RecipeViewerRecipeType.PURIFYING));
         registration.addRecipeCatalyst(ModBlocks.ME_CHEMICAL_INJECTION_CHAMBER_ITEM.get(),
                 MekanismJEI.genericRecipeType(RecipeViewerRecipeType.INJECTING));
+        registration.addRecipeCatalyst(ModBlocks.ME_COMBINER_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.COMBINING));
+        registration.addRecipeCatalyst(ModBlocks.ME_PRECISION_SAWMILL_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.SAWING));
     }
 }

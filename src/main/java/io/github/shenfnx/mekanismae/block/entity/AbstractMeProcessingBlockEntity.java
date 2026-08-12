@@ -23,6 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
@@ -108,6 +109,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
             if (!patternSlots.get(slot).isEmpty()) {
                 ItemStack result = patternSlots.get(slot);
                 patternSlots.set(slot, ItemStack.EMPTY);
+                onPatternRemoved(result);
                 ICraftingProvider.requestUpdate(getMainNode());
                 setChanged();
                 return result;
@@ -137,6 +139,39 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     }
 
     public abstract boolean isProcessingFaulted();
+
+    /** Server-owned task tick used by the common machine block ticker. */
+    public abstract void tickServer();
+
+    /** True when breaking the block would discard patterns, upgrades, inputs, or outputs. */
+    public abstract boolean hasStoredContents();
+
+    public abstract ContainerData getContainerData();
+
+    public abstract ItemStack getProcessingInputDisplay();
+
+    public ItemStack getProcessingSecondaryInputDisplay() {
+        return ItemStack.EMPTY;
+    }
+
+    public abstract ItemStack getProcessingOutputDisplay();
+
+    public ItemStack getProcessingSecondaryOutputDisplay() {
+        return ItemStack.EMPTY;
+    }
+
+    public abstract boolean returnAllResourcesToNetwork();
+
+    /** Common Jade/debug view of the task ledger without exposing mutable storage. */
+    public abstract long getBufferedOperationCount();
+
+    public abstract long getCurrentOperationCount();
+
+    public abstract ItemStack getBufferedInputDisplay();
+
+    public abstract ItemStack getBufferedOutputDisplay();
+
+    public abstract long getBufferedOutputCount();
 
     public final long getBufferOperationLimit() {
         return settings.maxBufferedOperations();
@@ -308,6 +343,9 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
             return ItemStack.EMPTY;
         }
         ItemStack result = current.split(amount);
+        if (slot < PATTERN_SLOT_COUNT && !result.isEmpty()) {
+            onPatternRemoved(result);
+        }
         if (current.isEmpty()) {
             setItem(slot, ItemStack.EMPTY);
         } else {
@@ -324,6 +362,9 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         ItemStack result = getItem(slot);
         if (slot < PATTERN_SLOT_COUNT) {
             patternSlots.set(slot, ItemStack.EMPTY);
+            if (!result.isEmpty()) {
+                onPatternRemoved(result);
+            }
             ICraftingProvider.requestUpdate(getMainNode());
         } else {
             upgradeSlots.set(slot - PATTERN_SLOT_COUNT, ItemStack.EMPTY);
@@ -376,6 +417,11 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
 
     @Override
     public final void clearContent() {
+        for (ItemStack pattern : patternSlots) {
+            if (!pattern.isEmpty()) {
+                onPatternRemoved(pattern);
+            }
+        }
         patternSlots.replaceAll(stack -> ItemStack.EMPTY);
         upgradeSlots.replaceAll(stack -> ItemStack.EMPTY);
         recalculateUpgrades();
@@ -434,6 +480,10 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
             }
             return extracted;
         }
+    }
+
+    /** Allows specialized ledgers to discard non-physical metadata for a deliberately removed pattern. */
+    protected void onPatternRemoved(ItemStack pattern) {
     }
 
 }
