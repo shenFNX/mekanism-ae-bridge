@@ -27,6 +27,9 @@ public final class ModCreativeModeTabs {
                         output.accept(ModBlocks.ME_PRECISION_SAWMILL_ITEM.get());
                         output.accept(ModBlocks.ME_CHEMICAL_OXIDIZER_ITEM.get());
                         output.accept(ModBlocks.ME_CHEMICAL_CRYSTALLIZER_ITEM.get());
+                        output.accept(ModBlocks.ME_ANTIPROTONIC_NUCLEOSYNTHESIZER_ITEM.get());
+                        output.accept(ModBlocks.ME_CHEMICAL_DISSOLUTION_CHAMBER_ITEM.get());
+                        output.accept(ModBlocks.ME_CHEMICAL_INFUSER_ITEM.get());
                         output.accept(ModItems.SPEED_CARD.get());
                         output.accept(ModItems.PARALLEL_CARD.get());
                         output.accept(ModItems.ENERGY_CARD.get());

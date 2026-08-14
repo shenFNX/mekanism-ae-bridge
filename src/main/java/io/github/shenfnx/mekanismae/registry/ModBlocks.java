@@ -12,6 +12,9 @@ import io.github.shenfnx.mekanismae.block.MeCombinerBlock;
 import io.github.shenfnx.mekanismae.block.MePrecisionSawmillBlock;
 import io.github.shenfnx.mekanismae.block.MeChemicalOxidizerBlock;
 import io.github.shenfnx.mekanismae.block.MeChemicalCrystallizerBlock;
+import io.github.shenfnx.mekanismae.block.MeAntiprotonicNucleosynthesizerBlock;
+import io.github.shenfnx.mekanismae.block.MeChemicalDissolutionChamberBlock;
+import io.github.shenfnx.mekanismae.block.MeChemicalInfuserBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -97,6 +100,23 @@ public final class ModBlocks {
             "me_chemical_crystallizer", MeChemicalCrystallizerBlock::new, machineProperties());
     public static final DeferredItem<BlockItem> ME_CHEMICAL_CRYSTALLIZER_ITEM =
             ITEMS.registerSimpleBlockItem("me_chemical_crystallizer", ME_CHEMICAL_CRYSTALLIZER);
+
+    public static final DeferredBlock<MeAntiprotonicNucleosynthesizerBlock> ME_ANTIPROTONIC_NUCLEOSYNTHESIZER =
+            BLOCKS.registerBlock("me_antiprotonic_nucleosynthesizer",
+                    MeAntiprotonicNucleosynthesizerBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_ANTIPROTONIC_NUCLEOSYNTHESIZER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_antiprotonic_nucleosynthesizer", ME_ANTIPROTONIC_NUCLEOSYNTHESIZER);
+
+    public static final DeferredBlock<MeChemicalDissolutionChamberBlock> ME_CHEMICAL_DISSOLUTION_CHAMBER =
+            BLOCKS.registerBlock("me_chemical_dissolution_chamber",
+                    MeChemicalDissolutionChamberBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_CHEMICAL_DISSOLUTION_CHAMBER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_chemical_dissolution_chamber", ME_CHEMICAL_DISSOLUTION_CHAMBER);
+
+    public static final DeferredBlock<MeChemicalInfuserBlock> ME_CHEMICAL_INFUSER = BLOCKS.registerBlock(
+            "me_chemical_infuser", MeChemicalInfuserBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_CHEMICAL_INFUSER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_chemical_infuser", ME_CHEMICAL_INFUSER);
 
     private static BlockBehaviour.Properties machineProperties() {
         return BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)

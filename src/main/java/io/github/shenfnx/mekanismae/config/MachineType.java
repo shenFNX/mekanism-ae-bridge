@@ -11,7 +11,10 @@ public enum MachineType {
     ME_COMBINER("me_combiner"),
     ME_PRECISION_SAWMILL("me_precision_sawmill"),
     ME_CHEMICAL_OXIDIZER("me_chemical_oxidizer"),
-    ME_CHEMICAL_CRYSTALLIZER("me_chemical_crystallizer");
+    ME_CHEMICAL_CRYSTALLIZER("me_chemical_crystallizer"),
+    ME_ANTIPROTONIC_NUCLEOSYNTHESIZER("me_antiprotonic_nucleosynthesizer"),
+    ME_CHEMICAL_DISSOLUTION_CHAMBER("me_chemical_dissolution_chamber"),
+    ME_CHEMICAL_INFUSER("me_chemical_infuser");
 
     private final String configKey;
 

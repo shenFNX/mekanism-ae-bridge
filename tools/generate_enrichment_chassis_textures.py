@@ -270,6 +270,70 @@ def chemical_crystallizer_front(online, working, phase=0):
     return im
 
 
+def antiprotonic_nucleosynthesizer_front(online, working, phase=0):
+    im = machine_front_base(online)
+    beam = COLORS["cyan2"] if online else COLORS["cyan0"]
+    antimatter = COLORS["purple1"] if online else COLORS["purple0"]
+    highlight = COLORS["cyan3"] if online else COLORS["edge"]
+    # Opposed emitters focus antimatter around the item held in the reaction core.
+    rect(im, (9, 13, 11, 19), COLORS["frame2"])
+    rect(im, (20, 13, 22, 19), COLORS["frame2"])
+    rect(im, (12, 15, 13, 17), beam)
+    rect(im, (18, 15, 19, 17), beam)
+    rect(im, (14, 13, 17, 19), COLORS["purple0"])
+    rect(im, (15, 15, 16, 17), antimatter)
+    px(im, 15, 15, highlight)
+    for index, (x, y) in enumerate(((13, 12), (18, 12), (18, 20), (13, 20))):
+        px(im, x, y, highlight if working and index == phase else beam)
+    if working:
+        travel = (0, 1, 2, 1)[phase]
+        px(im, 12 + travel, 16, highlight)
+        px(im, 19 - travel, 16, highlight)
+    return im
+
+
+def chemical_dissolution_front(online, working, phase=0):
+    im = machine_front_base(online)
+    chemical = COLORS["purple1"] if online else COLORS["purple0"]
+    solution = COLORS["cyan2"] if online else COLORS["cyan0"]
+    highlight = COLORS["cyan3"] if online else COLORS["edge"]
+    # A solid sample descends into a sealed chemical bath and leaves as solution.
+    rect(im, (13, 10, 18, 12), COLORS["frame2"])
+    rect(im, (14, 12, 17, 15), COLORS["panel_hi"])
+    rect(im, (10, 16, 21, 21), COLORS["frame1"])
+    rect(im, (11, 17, 20, 20), chemical)
+    rect(im, (9, 19, 10, 22), solution)
+    rect(im, (21, 19, 22, 22), solution)
+    offset = phase if working else 0
+    for index, (x, y) in enumerate(((12, 19), (15, 18), (18, 19), (16, 20))):
+        px(im, x, 17 + ((y - 17 - offset - index) % 4),
+           highlight if online and working and index == phase else solution)
+    if working:
+        px(im, 14 + phase, 15, chemical)
+    return im
+
+
+def chemical_infuser_front(online, working, phase=0):
+    im = machine_front_base(online)
+    first = COLORS["purple1"] if online else COLORS["purple0"]
+    second = COLORS["cyan2"] if online else COLORS["cyan0"]
+    highlight = COLORS["cyan3"] if online else COLORS["edge"]
+    # Two isolated chemical manifolds mix only in the central infusing vessel.
+    rect(im, (9, 11, 11, 20), first)
+    rect(im, (20, 11, 22, 20), second)
+    rect(im, (12, 14, 19, 19), COLORS["frame2"])
+    rect(im, (14, 15, 17, 18), COLORS["purple0"])
+    rect(im, (15, 16, 16, 17), second if online else COLORS["frame1"])
+    for index, y in enumerate((12, 15, 18, 21)):
+        travel = phase if working else 1
+        px(im, 12 + (travel + index) % 2, y, first)
+        px(im, 19 - (travel + index) % 2, y, second)
+    if working:
+        px(im, 14 + phase, 13 + phase % 2, highlight)
+        px(im, 17 - phase, 20 - phase % 2, highlight)
+    return im
+
+
 def combiner_front(online, working, phase=0):
     im = machine_front_base(online)
     signal = COLORS["cyan2"] if online else COLORS["cyan0"]
@@ -423,6 +487,9 @@ def main():
                 ("me_chemical_injection_chamber", chemical_injection_front),
                 ("me_chemical_oxidizer", chemical_oxidizer_front),
                 ("me_chemical_crystallizer", chemical_crystallizer_front),
+                ("me_antiprotonic_nucleosynthesizer", antiprotonic_nucleosynthesizer_front),
+                ("me_chemical_dissolution_chamber", chemical_dissolution_front),
+                ("me_chemical_infuser", chemical_infuser_front),
                 ("me_combiner", combiner_front),
                 ("me_precision_sawmill", precision_sawmill_front)):
             save(f"{machine}_front_{suffix}", renderer(online, False))

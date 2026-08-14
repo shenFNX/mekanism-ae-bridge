@@ -43,7 +43,7 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap;
  */
 public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends AbstractMeProcessingBlockEntity {
     private static final int TASK_DATA_VERSION = 3;
-    private final RecipeType<ItemStackChemicalToItemStackRecipe> recipeType;
+    private final RecipeType<? extends ItemStackChemicalToItemStackRecipe> recipeType;
     private final String rejectionLogName;
     private AEItemKey activeItemKey;
     private long activeItemCount;
@@ -62,7 +62,7 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
 
     protected AbstractItemChemicalToItemMeMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state,
             ItemLike visualRepresentation, MachineType machineType,
-            RecipeType<ItemStackChemicalToItemStackRecipe> recipeType, String rejectionLogName) {
+            RecipeType<? extends ItemStackChemicalToItemStackRecipe> recipeType, String rejectionLogName) {
         super(type, pos, state, visualRepresentation, machineType);
         this.recipeType = recipeType;
         this.rejectionLogName = rejectionLogName;

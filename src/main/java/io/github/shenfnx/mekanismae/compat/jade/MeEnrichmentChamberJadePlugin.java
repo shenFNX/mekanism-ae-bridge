@@ -11,6 +11,9 @@ import io.github.shenfnx.mekanismae.block.MeCombinerBlock;
 import io.github.shenfnx.mekanismae.block.MePrecisionSawmillBlock;
 import io.github.shenfnx.mekanismae.block.MeChemicalOxidizerBlock;
 import io.github.shenfnx.mekanismae.block.MeChemicalCrystallizerBlock;
+import io.github.shenfnx.mekanismae.block.MeAntiprotonicNucleosynthesizerBlock;
+import io.github.shenfnx.mekanismae.block.MeChemicalDissolutionChamberBlock;
+import io.github.shenfnx.mekanismae.block.MeChemicalInfuserBlock;
 import io.github.shenfnx.mekanismae.block.entity.MeEnrichmentChamberBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeEnergizedSmelterBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeCrusherBlockEntity;
@@ -22,6 +25,9 @@ import io.github.shenfnx.mekanismae.block.entity.MeCombinerBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MePrecisionSawmillBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeChemicalOxidizerBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeChemicalCrystallizerBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeAntiprotonicNucleosynthesizerBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeChemicalDissolutionChamberBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeChemicalInfuserBlockEntity;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
@@ -53,6 +59,12 @@ public final class MeEnrichmentChamberJadePlugin implements IWailaPlugin {
                 MeChemicalOxidizerJadeProvider.INSTANCE, MeChemicalOxidizerBlockEntity.class);
         registration.registerBlockDataProvider(
                 MeChemicalCrystallizerJadeProvider.INSTANCE, MeChemicalCrystallizerBlockEntity.class);
+        registration.registerBlockDataProvider(MeAntiprotonicNucleosynthesizerJadeProvider.INSTANCE,
+                MeAntiprotonicNucleosynthesizerBlockEntity.class);
+        registration.registerBlockDataProvider(MeChemicalDissolutionChamberJadeProvider.INSTANCE,
+                MeChemicalDissolutionChamberBlockEntity.class);
+        registration.registerBlockDataProvider(
+                MeChemicalInfuserJadeProvider.INSTANCE, MeChemicalInfuserBlockEntity.class);
     }
 
     @Override
@@ -78,5 +90,11 @@ public final class MeEnrichmentChamberJadePlugin implements IWailaPlugin {
                 MeChemicalOxidizerJadeProvider.INSTANCE, MeChemicalOxidizerBlock.class);
         registration.registerBlockComponent(
                 MeChemicalCrystallizerJadeProvider.INSTANCE, MeChemicalCrystallizerBlock.class);
+        registration.registerBlockComponent(MeAntiprotonicNucleosynthesizerJadeProvider.INSTANCE,
+                MeAntiprotonicNucleosynthesizerBlock.class);
+        registration.registerBlockComponent(MeChemicalDissolutionChamberJadeProvider.INSTANCE,
+                MeChemicalDissolutionChamberBlock.class);
+        registration.registerBlockComponent(
+                MeChemicalInfuserJadeProvider.INSTANCE, MeChemicalInfuserBlock.class);
     }
 }

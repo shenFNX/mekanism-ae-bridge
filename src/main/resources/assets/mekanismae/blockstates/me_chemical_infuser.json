@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,online=false,working=false": {
+      "model": "mekanismae:block/me_chemical_infuser"
+    },
+    "facing=east,online=false,working=false": {
+      "model": "mekanismae:block/me_chemical_infuser",
+      "y": 90
+    },
+    "facing=south,online=false,working=false": {
+      "model": "mekanismae:block/me_chemical_infuser",
+      "y": 180
+    },
+    "facing=west,online=false,working=false": {
+      "model": "mekanismae:block/me_chemical_infuser",
+      "y": 270
+    },
+    "facing=north,online=false,working=true": {
+      "model": "mekanismae:block/me_chemical_infuser_offline_working"
+    },
+    "facing=east,online=false,working=true": {
+      "model": "mekanismae:block/me_chemical_infuser_offline_working",
+      "y": 90
+    },
+    "facing=south,online=false,working=true": {
+      "model": "mekanismae:block/me_chemical_infuser_offline_working",
+      "y": 180
+    },
+    "facing=west,online=false,working=true": {
+      "model": "mekanismae:block/me_chemical_infuser_offline_working",
+      "y": 270
+    },
+    "facing=north,online=true,working=false": {
+      "model": "mekanismae:block/me_chemical_infuser_online"
+    },
+    "facing=east,online=true,working=false": {
+      "model": "mekanismae:block/me_chemical_infuser_online",
+      "y": 90
+    },
+    "facing=south,online=true,working=false": {
+      "model": "mekanismae:block/me_chemical_infuser_online",
+      "y": 180
+    },
+    "facing=west,online=true,working=false": {
+      "model": "mekanismae:block/me_chemical_infuser_online",
+      "y": 270
+    },
+    "facing=north,online=true,working=true": {
+      "model": "mekanismae:block/me_chemical_infuser_online_working"
+    },
+    "facing=east,online=true,working=true": {
+      "model": "mekanismae:block/me_chemical_infuser_online_working",
+      "y": 90
+    },
+    "facing=south,online=true,working=true": {
+      "model": "mekanismae:block/me_chemical_infuser_online_working",
+      "y": 180
+    },
+    "facing=west,online=true,working=true": {
+      "model": "mekanismae:block/me_chemical_infuser_online_working",
+      "y": 270
+    }
+  }
+}

@@ -82,6 +82,9 @@ public final class MekanismAeMod {
         registerMachineCapabilities(event, ModBlockEntities.ME_PRECISION_SAWMILL.get());
         registerMachineCapabilities(event, ModBlockEntities.ME_CHEMICAL_OXIDIZER.get());
         registerMachineCapabilities(event, ModBlockEntities.ME_CHEMICAL_CRYSTALLIZER.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_ANTIPROTONIC_NUCLEOSYNTHESIZER.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_CHEMICAL_DISSOLUTION_CHAMBER.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_CHEMICAL_INFUSER.get());
     }
 
     private static <T extends io.github.shenfnx.mekanismae.block.entity.AbstractMeProcessingBlockEntity>

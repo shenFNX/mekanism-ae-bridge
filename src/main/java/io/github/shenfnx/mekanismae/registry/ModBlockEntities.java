@@ -12,6 +12,9 @@ import io.github.shenfnx.mekanismae.block.entity.MeCombinerBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MePrecisionSawmillBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeChemicalOxidizerBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeChemicalCrystallizerBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeAntiprotonicNucleosynthesizerBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeChemicalDissolutionChamberBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeChemicalInfuserBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -81,6 +84,23 @@ public final class ModBlockEntities {
             ME_CHEMICAL_CRYSTALLIZER = BLOCK_ENTITY_TYPES.register("me_chemical_crystallizer",
                     () -> BlockEntityType.Builder.of(MeChemicalCrystallizerBlockEntity::new,
                             ModBlocks.ME_CHEMICAL_CRYSTALLIZER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeAntiprotonicNucleosynthesizerBlockEntity>>
+            ME_ANTIPROTONIC_NUCLEOSYNTHESIZER = BLOCK_ENTITY_TYPES.register(
+                    "me_antiprotonic_nucleosynthesizer",
+                    () -> BlockEntityType.Builder.of(MeAntiprotonicNucleosynthesizerBlockEntity::new,
+                            ModBlocks.ME_ANTIPROTONIC_NUCLEOSYNTHESIZER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeChemicalDissolutionChamberBlockEntity>>
+            ME_CHEMICAL_DISSOLUTION_CHAMBER = BLOCK_ENTITY_TYPES.register(
+                    "me_chemical_dissolution_chamber",
+                    () -> BlockEntityType.Builder.of(MeChemicalDissolutionChamberBlockEntity::new,
+                            ModBlocks.ME_CHEMICAL_DISSOLUTION_CHAMBER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeChemicalInfuserBlockEntity>>
+            ME_CHEMICAL_INFUSER = BLOCK_ENTITY_TYPES.register("me_chemical_infuser",
+                    () -> BlockEntityType.Builder.of(MeChemicalInfuserBlockEntity::new,
+                            ModBlocks.ME_CHEMICAL_INFUSER.get()).build(null));
 
     private ModBlockEntities() {
     }

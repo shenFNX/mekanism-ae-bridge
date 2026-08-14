@@ -12,6 +12,9 @@ import io.github.shenfnx.mekanismae.menu.MeCombinerMenu;
 import io.github.shenfnx.mekanismae.menu.MePrecisionSawmillMenu;
 import io.github.shenfnx.mekanismae.menu.MeChemicalOxidizerMenu;
 import io.github.shenfnx.mekanismae.menu.MeChemicalCrystallizerMenu;
+import io.github.shenfnx.mekanismae.menu.MeAntiprotonicNucleosynthesizerMenu;
+import io.github.shenfnx.mekanismae.menu.MeChemicalDissolutionChamberMenu;
+import io.github.shenfnx.mekanismae.menu.MeChemicalInfuserMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
@@ -52,6 +55,15 @@ public final class ModMenus {
     public static final DeferredHolder<MenuType<?>, MenuType<MeChemicalCrystallizerMenu>> ME_CHEMICAL_CRYSTALLIZER =
             MENUS.register("me_chemical_crystallizer",
                     () -> IMenuTypeExtension.create(MeChemicalCrystallizerMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MeAntiprotonicNucleosynthesizerMenu>>
+            ME_ANTIPROTONIC_NUCLEOSYNTHESIZER = MENUS.register("me_antiprotonic_nucleosynthesizer",
+                    () -> IMenuTypeExtension.create(MeAntiprotonicNucleosynthesizerMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MeChemicalDissolutionChamberMenu>>
+            ME_CHEMICAL_DISSOLUTION_CHAMBER = MENUS.register("me_chemical_dissolution_chamber",
+                    () -> IMenuTypeExtension.create(MeChemicalDissolutionChamberMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MeChemicalInfuserMenu>> ME_CHEMICAL_INFUSER =
+            MENUS.register("me_chemical_infuser",
+                    () -> IMenuTypeExtension.create(MeChemicalInfuserMenu::new));
 
     private ModMenus() {
     }

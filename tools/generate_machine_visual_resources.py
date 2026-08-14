@@ -18,6 +18,9 @@ MACHINES = (
     "me_precision_sawmill",
     "me_chemical_oxidizer",
     "me_chemical_crystallizer",
+    "me_antiprotonic_nucleosynthesizer",
+    "me_chemical_dissolution_chamber",
+    "me_chemical_infuser",
 )
 
 

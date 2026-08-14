@@ -44,5 +44,11 @@ public final class MekanismAeJeiPlugin implements IModPlugin {
                 MekanismJEI.genericRecipeType(RecipeViewerRecipeType.OXIDIZING));
         registration.addRecipeCatalyst(ModBlocks.ME_CHEMICAL_CRYSTALLIZER_ITEM.get(),
                 MekanismJEI.genericRecipeType(RecipeViewerRecipeType.CRYSTALLIZING));
+        registration.addRecipeCatalyst(ModBlocks.ME_ANTIPROTONIC_NUCLEOSYNTHESIZER_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.NUCLEOSYNTHESIZING));
+        registration.addRecipeCatalyst(ModBlocks.ME_CHEMICAL_DISSOLUTION_CHAMBER_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.DISSOLUTION));
+        registration.addRecipeCatalyst(ModBlocks.ME_CHEMICAL_INFUSER_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.CHEMICAL_INFUSING));
     }
 }

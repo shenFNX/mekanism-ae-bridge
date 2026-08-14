@@ -25,5 +25,10 @@ public final class ClientModEvents {
         event.register(ModMenus.ME_PRECISION_SAWMILL.get(), MePrecisionSawmillScreen::new);
         event.register(ModMenus.ME_CHEMICAL_OXIDIZER.get(), MeChemicalOxidizerScreen::new);
         event.register(ModMenus.ME_CHEMICAL_CRYSTALLIZER.get(), MeChemicalCrystallizerScreen::new);
+        event.register(ModMenus.ME_ANTIPROTONIC_NUCLEOSYNTHESIZER.get(),
+                MeAntiprotonicNucleosynthesizerScreen::new);
+        event.register(ModMenus.ME_CHEMICAL_DISSOLUTION_CHAMBER.get(),
+                MeChemicalDissolutionChamberScreen::new);
+        event.register(ModMenus.ME_CHEMICAL_INFUSER.get(), MeChemicalInfuserScreen::new);
     }
 }
