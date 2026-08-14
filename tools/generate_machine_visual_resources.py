@@ -21,6 +21,11 @@ MACHINES = (
     "me_antiprotonic_nucleosynthesizer",
     "me_chemical_dissolution_chamber",
     "me_chemical_infuser",
+    "me_electrolytic_separator",
+    "me_rotary_condensentrator",
+    "me_chemical_washer",
+    "me_nutritional_liquifier",
+    "me_pressurized_reaction_chamber",
 )
 
 

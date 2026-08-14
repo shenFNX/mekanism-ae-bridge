@@ -14,6 +14,8 @@ COLORS = {name: ImageColor.getcolor(value, "RGBA") for name, value in {
     "panel_hi": "#eef1ef", "panel_mid": "#b4bebf", "cyan0": "#064e59", "cyan1": "#087f8b",
     "cyan2": "#11c5ce", "cyan3": "#8bffff", "purple0": "#34223f", "purple1": "#654178",
     "heat0": "#3b1b16", "heat1": "#8f2b18", "heat2": "#ed651c", "heat3": "#ffe18a",
+    "green0": "#223923", "green1": "#477b35", "green2": "#86c64a", "green3": "#d8f58a",
+    "water0": "#123d57", "water1": "#1f7294", "water2": "#54c8dc",
 }.items()}
 
 
@@ -334,6 +336,129 @@ def chemical_infuser_front(online, working, phase=0):
     return im
 
 
+def electrolytic_separator_front(online, working, phase=0):
+    im = new(); chassis(im); lamp(im, online)
+    water = COLORS["water1"] if online else COLORS["water0"]
+    gas_a = COLORS["cyan2"] if online else COLORS["cyan0"]
+    gas_b = COLORS["purple1"] if online else COLORS["purple0"]
+    # A wide glass bath, two electrodes, and visibly separated output towers.
+    rect(im, (6, 9, 25, 24), COLORS["frame0"])
+    rect(im, (8, 11, 23, 22), COLORS["panel_hi"])
+    rect(im, (9, 12, 22, 21), COLORS["water0"])
+    rect(im, (9, 17, 22, 21), water)
+    rect(im, (11, 10, 12, 20), COLORS["edge"])
+    rect(im, (19, 10, 20, 20), COLORS["edge"])
+    rect(im, (10, 8, 13, 10), gas_a)
+    rect(im, (18, 8, 21, 10), gas_b)
+    rect(im, (15, 12, 16, 21), COLORS["frame2"])
+    if working:
+        bubble_y = 20 - phase * 2
+        px(im, 10 + phase % 2, bubble_y, COLORS["cyan3"] if online else gas_a)
+        px(im, 21 - phase % 2, 14 + phase * 2, COLORS["cyan3"] if online else gas_b)
+        px(im, 13 + phase, 16 - phase % 2, COLORS["panel_hi"])
+    return im
+
+
+def rotary_condensentrator_front(online, working, phase=0):
+    im = new(); chassis(im); lamp(im, online)
+    signal = COLORS["cyan2"] if online else COLORS["cyan0"]
+    vapor = COLORS["purple1"] if online else COLORS["purple0"]
+    # The full center is a rotary impeller instead of another rectangular reaction cell.
+    rect(im, (10, 8, 21, 8), COLORS["frame2"])
+    rect(im, (7, 11, 24, 20), COLORS["frame0"])
+    rect(im, (10, 9, 21, 22), COLORS["frame0"])
+    rect(im, (10, 11, 21, 20), COLORS["black"])
+    rect(im, (12, 13, 19, 18), COLORS["frame1"])
+    rect(im, (15, 14, 16, 17), COLORS["bolt"])
+    blades = (
+        ((15, 11), (20, 15), (16, 20), (11, 16)),
+        ((18, 12), (19, 18), (13, 19), (12, 13)),
+        ((20, 15), (16, 20), (11, 16), (15, 11)),
+        ((19, 18), (13, 19), (12, 13), (18, 12)),
+    )[phase if working else 0]
+    for index, (x, y) in enumerate(blades):
+        rect(im, (x - 1, y - 1, x + 1, y + 1), signal if index % 2 == 0 else vapor)
+    rect(im, (6, 14, 9, 17), vapor)
+    rect(im, (22, 14, 25, 17), signal)
+    if working:
+        px(im, 15 + phase % 2, 15 + (phase // 2), COLORS["cyan3"] if online else COLORS["edge"])
+    return im
+
+
+def chemical_washer_front(online, working, phase=0):
+    im = new(); chassis(im); lamp(im, online)
+    liquid = COLORS["water2"] if online else COLORS["water0"]
+    slurry = COLORS["purple1"] if online else COLORS["purple0"]
+    # An offset washing drum, overhead water manifold, and bottom slurry outlet.
+    rect(im, (7, 9, 22, 11), COLORS["frame2"])
+    rect(im, (8, 10, 10, 15), liquid)
+    rect(im, (10, 12, 24, 22), COLORS["frame0"])
+    rect(im, (8, 15, 22, 21), COLORS["frame0"])
+    rect(im, (11, 14, 21, 20), COLORS["water0"])
+    rect(im, (11, 18, 21, 20), slurry)
+    rect(im, (13, 22, 18, 24), slurry)
+    rect(im, (23, 14, 25, 18), liquid)
+    if working:
+        bubbles = ((13, 18), (16, 16), (19, 18), (17, 14))
+        for index, (x, y) in enumerate(bubbles):
+            yy = 14 + ((y - 14 - phase - index) % 5)
+            px(im, x, yy, COLORS["cyan3"] if online and index == phase else liquid)
+        px(im, 12 + phase * 2, 21, slurry)
+    return im
+
+
+def nutritional_liquifier_front(online, working, phase=0):
+    im = new(); chassis(im); lamp(im, online)
+    paste = COLORS["green2"] if online else COLORS["green0"]
+    food = COLORS["heat2"] if online else COLORS["heat0"]
+    # A broad food hopper feeds an exposed four-blade liquifier and green paste sump.
+    rect(im, (7, 9, 24, 11), COLORS["frame2"])
+    rect(im, (9, 11, 22, 14), COLORS["panel_hi"])
+    rect(im, (12, 14, 19, 17), food)
+    rect(im, (9, 17, 22, 23), COLORS["frame0"])
+    rect(im, (11, 19, 20, 22), COLORS["green0"])
+    cx, cy = 15, 18
+    blade_sets = (
+        ((cx, cy - 3), (cx + 3, cy), (cx, cy + 3), (cx - 3, cy)),
+        ((cx + 2, cy - 2), (cx + 2, cy + 2), (cx - 2, cy + 2), (cx - 2, cy - 2)),
+        ((cx + 3, cy), (cx, cy + 3), (cx - 3, cy), (cx, cy - 3)),
+        ((cx + 2, cy + 2), (cx - 2, cy + 2), (cx - 2, cy - 2), (cx + 2, cy - 2)),
+    )[phase if working else 0]
+    for x, y in blade_sets:
+        rect(im, (x, y, x + 1, y + 1), COLORS["panel_hi"])
+    rect(im, (14, 17, 16, 19), COLORS["bolt"])
+    rect(im, (21, 20, 24, 22), paste)
+    if working:
+        px(im, 12 + phase * 2, 21, COLORS["green3"] if online else paste)
+    return im
+
+
+def pressurized_reaction_front(online, working, phase=0):
+    im = new(); chassis(im); lamp(im, online)
+    pressure = COLORS["heat2"] if online else COLORS["heat0"]
+    chemical = COLORS["purple1"] if online else COLORS["purple0"]
+    arc = COLORS["cyan3"] if online else COLORS["cyan1"]
+    # A tall pressure vessel with three feed ports, clamps, and a pulsing core window.
+    rect(im, (10, 8, 21, 10), COLORS["frame2"])
+    rect(im, (8, 11, 23, 22), COLORS["frame0"])
+    rect(im, (10, 12, 21, 21), COLORS["panel_hi"])
+    rect(im, (12, 13, 19, 20), COLORS["black"])
+    rect(im, (13, 15, 18, 18), pressure)
+    rect(im, (6, 13, 9, 15), COLORS["edge"])
+    rect(im, (6, 19, 9, 21), COLORS["water1"] if online else COLORS["water0"])
+    rect(im, (22, 16, 25, 18), chemical)
+    rect(im, (10, 23, 21, 24), COLORS["frame2"])
+    for x in (10, 14, 18):
+        px(im, x, 10, COLORS["heat3"] if online else COLORS["edge"])
+        px(im, x + 1, 11, COLORS["black"])
+    if working:
+        pulse = (0, 1, 2, 1)[phase]
+        rect(im, (14 - pulse, 14, 17 + pulse, 14), arc)
+        rect(im, (14 - pulse, 19, 17 + pulse, 19), arc)
+        px(im, 12 + phase * 2, 16 + phase % 2, arc)
+    return im
+
+
 def combiner_front(online, working, phase=0):
     im = machine_front_base(online)
     signal = COLORS["cyan2"] if online else COLORS["cyan0"]
@@ -490,6 +615,11 @@ def main():
                 ("me_antiprotonic_nucleosynthesizer", antiprotonic_nucleosynthesizer_front),
                 ("me_chemical_dissolution_chamber", chemical_dissolution_front),
                 ("me_chemical_infuser", chemical_infuser_front),
+                ("me_electrolytic_separator", electrolytic_separator_front),
+                ("me_rotary_condensentrator", rotary_condensentrator_front),
+                ("me_chemical_washer", chemical_washer_front),
+                ("me_nutritional_liquifier", nutritional_liquifier_front),
+                ("me_pressurized_reaction_chamber", pressurized_reaction_front),
                 ("me_combiner", combiner_front),
                 ("me_precision_sawmill", precision_sawmill_front)):
             save(f"{machine}_front_{suffix}", renderer(online, False))

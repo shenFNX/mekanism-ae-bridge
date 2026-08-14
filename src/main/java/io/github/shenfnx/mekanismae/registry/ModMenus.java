@@ -15,6 +15,11 @@ import io.github.shenfnx.mekanismae.menu.MeChemicalCrystallizerMenu;
 import io.github.shenfnx.mekanismae.menu.MeAntiprotonicNucleosynthesizerMenu;
 import io.github.shenfnx.mekanismae.menu.MeChemicalDissolutionChamberMenu;
 import io.github.shenfnx.mekanismae.menu.MeChemicalInfuserMenu;
+import io.github.shenfnx.mekanismae.menu.MeElectrolyticSeparatorMenu;
+import io.github.shenfnx.mekanismae.menu.MeRotaryCondensentratorMenu;
+import io.github.shenfnx.mekanismae.menu.MeChemicalWasherMenu;
+import io.github.shenfnx.mekanismae.menu.MeNutritionalLiquifierMenu;
+import io.github.shenfnx.mekanismae.menu.MePressurizedReactionChamberMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
@@ -64,6 +69,21 @@ public final class ModMenus {
     public static final DeferredHolder<MenuType<?>, MenuType<MeChemicalInfuserMenu>> ME_CHEMICAL_INFUSER =
             MENUS.register("me_chemical_infuser",
                     () -> IMenuTypeExtension.create(MeChemicalInfuserMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MeElectrolyticSeparatorMenu>>
+            ME_ELECTROLYTIC_SEPARATOR = MENUS.register("me_electrolytic_separator",
+                    () -> IMenuTypeExtension.create(MeElectrolyticSeparatorMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MeRotaryCondensentratorMenu>>
+            ME_ROTARY_CONDENSENTRATOR = MENUS.register("me_rotary_condensentrator",
+                    () -> IMenuTypeExtension.create(MeRotaryCondensentratorMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MeChemicalWasherMenu>> ME_CHEMICAL_WASHER =
+            MENUS.register("me_chemical_washer",
+                    () -> IMenuTypeExtension.create(MeChemicalWasherMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MeNutritionalLiquifierMenu>>
+            ME_NUTRITIONAL_LIQUIFIER = MENUS.register("me_nutritional_liquifier",
+                    () -> IMenuTypeExtension.create(MeNutritionalLiquifierMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<MePressurizedReactionChamberMenu>>
+            ME_PRESSURIZED_REACTION_CHAMBER = MENUS.register("me_pressurized_reaction_chamber",
+                    () -> IMenuTypeExtension.create(MePressurizedReactionChamberMenu::new));
 
     private ModMenus() {
     }

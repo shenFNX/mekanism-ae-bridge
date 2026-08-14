@@ -113,9 +113,10 @@ public final class MekanismAeConfig {
             builder.pop();
 
             builder.comment("Default machine values and optional per-machine replacements.").push("machines");
-            defaults = new MachineValues(builder, "defaults", false);
+            defaults = new MachineValues(builder, "defaults", false, 1);
             for (MachineType machineType : MachineType.values()) {
-                machines.put(machineType, new MachineValues(builder, machineType.configKey(), true));
+                machines.put(machineType, new MachineValues(builder, machineType.configKey(), true,
+                        machineType.defaultBaseOperationsPerCycle()));
             }
             builder.pop();
         }
@@ -133,6 +134,7 @@ public final class MekanismAeConfig {
                     energyReceivePerUpgrade.get(),
                     selected.energyPerOperation.get(),
                     selected.processingTicks.get(),
+                    machine.baseOperationsPerCycle.get(),
                     selected.maxBufferedOperations.get(),
                     normalizeCurve(speedMultipliers.get(), DEFAULT_SPEED_CURVE, CURVE_SIZE),
                     normalizeCurve(parallelMultipliers.get(), DEFAULT_PARALLEL_CURVE, CURVE_SIZE),
@@ -158,9 +160,11 @@ public final class MekanismAeConfig {
         private final ModConfigSpec.IntValue baseEnergyReceive;
         private final ModConfigSpec.IntValue energyPerOperation;
         private final ModConfigSpec.IntValue processingTicks;
+        private final ModConfigSpec.IntValue baseOperationsPerCycle;
         private final ModConfigSpec.LongValue maxBufferedOperations;
 
-        private MachineValues(ModConfigSpec.Builder builder, String name, boolean allowDefaults) {
+        private MachineValues(ModConfigSpec.Builder builder, String name, boolean allowDefaults,
+                int defaultBaseOperationsPerCycle) {
             builder.push(name);
             useDefaults = allowDefaults
                     ? builder.comment("Use the machines.defaults values for this machine.")
@@ -188,6 +192,14 @@ public final class MekanismAeConfig {
                     .translation("config.mekanismae.processing_ticks")
                     .worldRestart()
                     .defineInRange("processing_ticks", 20, 1, 1_000_000);
+            baseOperationsPerCycle = allowDefaults
+                    ? builder.comment("Recipe operations completed per processing cycle before cards and tier "
+                                    + "installers. Continuous low-volume fluid and chemical machines default higher "
+                                    + "than item machines. This value is always machine-specific.")
+                            .translation("config.mekanismae.base_operations_per_cycle")
+                            .worldRestart()
+                            .defineInRange("base_operations_per_cycle", defaultBaseOperationsPerCycle, 1, 1_000_000)
+                    : null;
             maxBufferedOperations = builder
                     .comment("Maximum complete recipe operations accepted from AE2. Existing work is never deleted if this is lowered.")
                     .translation("config.mekanismae.max_buffered_operations")

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "mekanism:pressurized_reaction_chamber" },
+    { "item": "ae2:pattern_provider" }
+  ],
+  "result": { "count": 1, "id": "mekanismae:me_pressurized_reaction_chamber" }
+}

@@ -15,6 +15,11 @@ import io.github.shenfnx.mekanismae.block.entity.MeChemicalCrystallizerBlockEnti
 import io.github.shenfnx.mekanismae.block.entity.MeAntiprotonicNucleosynthesizerBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeChemicalDissolutionChamberBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeChemicalInfuserBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeElectrolyticSeparatorBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeRotaryCondensentratorBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeChemicalWasherBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeNutritionalLiquifierBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MePressurizedReactionChamberBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -101,6 +106,32 @@ public final class ModBlockEntities {
             ME_CHEMICAL_INFUSER = BLOCK_ENTITY_TYPES.register("me_chemical_infuser",
                     () -> BlockEntityType.Builder.of(MeChemicalInfuserBlockEntity::new,
                             ModBlocks.ME_CHEMICAL_INFUSER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeElectrolyticSeparatorBlockEntity>>
+            ME_ELECTROLYTIC_SEPARATOR = BLOCK_ENTITY_TYPES.register("me_electrolytic_separator",
+                    () -> BlockEntityType.Builder.of(MeElectrolyticSeparatorBlockEntity::new,
+                            ModBlocks.ME_ELECTROLYTIC_SEPARATOR.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeRotaryCondensentratorBlockEntity>>
+            ME_ROTARY_CONDENSENTRATOR = BLOCK_ENTITY_TYPES.register("me_rotary_condensentrator",
+                    () -> BlockEntityType.Builder.of(MeRotaryCondensentratorBlockEntity::new,
+                            ModBlocks.ME_ROTARY_CONDENSENTRATOR.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeChemicalWasherBlockEntity>>
+            ME_CHEMICAL_WASHER = BLOCK_ENTITY_TYPES.register("me_chemical_washer",
+                    () -> BlockEntityType.Builder.of(MeChemicalWasherBlockEntity::new,
+                            ModBlocks.ME_CHEMICAL_WASHER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeNutritionalLiquifierBlockEntity>>
+            ME_NUTRITIONAL_LIQUIFIER = BLOCK_ENTITY_TYPES.register("me_nutritional_liquifier",
+                    () -> BlockEntityType.Builder.of(MeNutritionalLiquifierBlockEntity::new,
+                            ModBlocks.ME_NUTRITIONAL_LIQUIFIER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MePressurizedReactionChamberBlockEntity>>
+            ME_PRESSURIZED_REACTION_CHAMBER = BLOCK_ENTITY_TYPES.register(
+                    "me_pressurized_reaction_chamber",
+                    () -> BlockEntityType.Builder.of(MePressurizedReactionChamberBlockEntity::new,
+                            ModBlocks.ME_PRESSURIZED_REACTION_CHAMBER.get()).build(null));
 
     private ModBlockEntities() {
     }

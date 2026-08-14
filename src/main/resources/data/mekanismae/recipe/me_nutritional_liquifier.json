@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "mekanism:nutritional_liquifier" },
+    { "item": "ae2:pattern_provider" }
+  ],
+  "result": { "count": 1, "id": "mekanismae:me_nutritional_liquifier" }
+}

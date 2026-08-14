@@ -15,6 +15,11 @@ import io.github.shenfnx.mekanismae.block.MeChemicalCrystallizerBlock;
 import io.github.shenfnx.mekanismae.block.MeAntiprotonicNucleosynthesizerBlock;
 import io.github.shenfnx.mekanismae.block.MeChemicalDissolutionChamberBlock;
 import io.github.shenfnx.mekanismae.block.MeChemicalInfuserBlock;
+import io.github.shenfnx.mekanismae.block.MeElectrolyticSeparatorBlock;
+import io.github.shenfnx.mekanismae.block.MeRotaryCondensentratorBlock;
+import io.github.shenfnx.mekanismae.block.MeChemicalWasherBlock;
+import io.github.shenfnx.mekanismae.block.MeNutritionalLiquifierBlock;
+import io.github.shenfnx.mekanismae.block.MePressurizedReactionChamberBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -117,6 +122,36 @@ public final class ModBlocks {
             "me_chemical_infuser", MeChemicalInfuserBlock::new, machineProperties());
     public static final DeferredItem<BlockItem> ME_CHEMICAL_INFUSER_ITEM =
             ITEMS.registerSimpleBlockItem("me_chemical_infuser", ME_CHEMICAL_INFUSER);
+
+    public static final DeferredBlock<MeElectrolyticSeparatorBlock> ME_ELECTROLYTIC_SEPARATOR =
+            BLOCKS.registerBlock("me_electrolytic_separator",
+                    MeElectrolyticSeparatorBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_ELECTROLYTIC_SEPARATOR_ITEM =
+            ITEMS.registerSimpleBlockItem("me_electrolytic_separator", ME_ELECTROLYTIC_SEPARATOR);
+
+    public static final DeferredBlock<MeRotaryCondensentratorBlock> ME_ROTARY_CONDENSENTRATOR =
+            BLOCKS.registerBlock("me_rotary_condensentrator",
+                    MeRotaryCondensentratorBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_ROTARY_CONDENSENTRATOR_ITEM =
+            ITEMS.registerSimpleBlockItem("me_rotary_condensentrator", ME_ROTARY_CONDENSENTRATOR);
+
+    public static final DeferredBlock<MeChemicalWasherBlock> ME_CHEMICAL_WASHER = BLOCKS.registerBlock(
+            "me_chemical_washer", MeChemicalWasherBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_CHEMICAL_WASHER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_chemical_washer", ME_CHEMICAL_WASHER);
+
+    public static final DeferredBlock<MeNutritionalLiquifierBlock> ME_NUTRITIONAL_LIQUIFIER =
+            BLOCKS.registerBlock("me_nutritional_liquifier",
+                    MeNutritionalLiquifierBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_NUTRITIONAL_LIQUIFIER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_nutritional_liquifier", ME_NUTRITIONAL_LIQUIFIER);
+
+    public static final DeferredBlock<MePressurizedReactionChamberBlock> ME_PRESSURIZED_REACTION_CHAMBER =
+            BLOCKS.registerBlock("me_pressurized_reaction_chamber",
+                    MePressurizedReactionChamberBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_PRESSURIZED_REACTION_CHAMBER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_pressurized_reaction_chamber",
+                    ME_PRESSURIZED_REACTION_CHAMBER);
 
     private static BlockBehaviour.Properties machineProperties() {
         return BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)

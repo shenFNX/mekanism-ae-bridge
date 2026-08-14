@@ -30,5 +30,11 @@ public final class ClientModEvents {
         event.register(ModMenus.ME_CHEMICAL_DISSOLUTION_CHAMBER.get(),
                 MeChemicalDissolutionChamberScreen::new);
         event.register(ModMenus.ME_CHEMICAL_INFUSER.get(), MeChemicalInfuserScreen::new);
+        event.register(ModMenus.ME_ELECTROLYTIC_SEPARATOR.get(), MeElectrolyticSeparatorScreen::new);
+        event.register(ModMenus.ME_ROTARY_CONDENSENTRATOR.get(), MeRotaryCondensentratorScreen::new);
+        event.register(ModMenus.ME_CHEMICAL_WASHER.get(), MeChemicalWasherScreen::new);
+        event.register(ModMenus.ME_NUTRITIONAL_LIQUIFIER.get(), MeNutritionalLiquifierScreen::new);
+        event.register(ModMenus.ME_PRESSURIZED_REACTION_CHAMBER.get(),
+                MePressurizedReactionChamberScreen::new);
     }
 }

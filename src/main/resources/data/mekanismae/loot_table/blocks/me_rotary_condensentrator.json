@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:block",
+  "pools": [{
+    "rolls": 1.0,
+    "entries": [{ "type": "minecraft:item", "name": "mekanismae:me_rotary_condensentrator" }],
+    "conditions": [{ "condition": "minecraft:survives_explosion" }]
+  }]
+}

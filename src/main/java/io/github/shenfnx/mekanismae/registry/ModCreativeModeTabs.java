@@ -30,6 +30,11 @@ public final class ModCreativeModeTabs {
                         output.accept(ModBlocks.ME_ANTIPROTONIC_NUCLEOSYNTHESIZER_ITEM.get());
                         output.accept(ModBlocks.ME_CHEMICAL_DISSOLUTION_CHAMBER_ITEM.get());
                         output.accept(ModBlocks.ME_CHEMICAL_INFUSER_ITEM.get());
+                        output.accept(ModBlocks.ME_ELECTROLYTIC_SEPARATOR_ITEM.get());
+                        output.accept(ModBlocks.ME_ROTARY_CONDENSENTRATOR_ITEM.get());
+                        output.accept(ModBlocks.ME_CHEMICAL_WASHER_ITEM.get());
+                        output.accept(ModBlocks.ME_NUTRITIONAL_LIQUIFIER_ITEM.get());
+                        output.accept(ModBlocks.ME_PRESSURIZED_REACTION_CHAMBER_ITEM.get());
                         output.accept(ModItems.SPEED_CARD.get());
                         output.accept(ModItems.PARALLEL_CARD.get());
                         output.accept(ModItems.ENERGY_CARD.get());

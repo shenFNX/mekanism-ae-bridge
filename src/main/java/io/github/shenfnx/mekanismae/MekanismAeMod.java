@@ -85,6 +85,11 @@ public final class MekanismAeMod {
         registerMachineCapabilities(event, ModBlockEntities.ME_ANTIPROTONIC_NUCLEOSYNTHESIZER.get());
         registerMachineCapabilities(event, ModBlockEntities.ME_CHEMICAL_DISSOLUTION_CHAMBER.get());
         registerMachineCapabilities(event, ModBlockEntities.ME_CHEMICAL_INFUSER.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_ELECTROLYTIC_SEPARATOR.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_ROTARY_CONDENSENTRATOR.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_CHEMICAL_WASHER.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_NUTRITIONAL_LIQUIFIER.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_PRESSURIZED_REACTION_CHAMBER.get());
     }
 
     private static <T extends io.github.shenfnx.mekanismae.block.entity.AbstractMeProcessingBlockEntity>

@@ -50,5 +50,17 @@ public final class MekanismAeJeiPlugin implements IModPlugin {
                 MekanismJEI.genericRecipeType(RecipeViewerRecipeType.DISSOLUTION));
         registration.addRecipeCatalyst(ModBlocks.ME_CHEMICAL_INFUSER_ITEM.get(),
                 MekanismJEI.genericRecipeType(RecipeViewerRecipeType.CHEMICAL_INFUSING));
+        registration.addRecipeCatalyst(ModBlocks.ME_ELECTROLYTIC_SEPARATOR_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.SEPARATING));
+        registration.addRecipeCatalyst(ModBlocks.ME_ROTARY_CONDENSENTRATOR_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.CONDENSENTRATING));
+        registration.addRecipeCatalyst(ModBlocks.ME_ROTARY_CONDENSENTRATOR_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.DECONDENSENTRATING));
+        registration.addRecipeCatalyst(ModBlocks.ME_CHEMICAL_WASHER_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.WASHING));
+        registration.addRecipeCatalyst(ModBlocks.ME_NUTRITIONAL_LIQUIFIER_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.NUTRITIONAL_LIQUIFICATION));
+        registration.addRecipeCatalyst(ModBlocks.ME_PRESSURIZED_REACTION_CHAMBER_ITEM.get(),
+                MekanismJEI.genericRecipeType(RecipeViewerRecipeType.REACTION));
     }
 }

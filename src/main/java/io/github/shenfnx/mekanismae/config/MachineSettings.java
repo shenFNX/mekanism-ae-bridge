@@ -13,6 +13,7 @@ public record MachineSettings(
         int energyReceivePerUpgrade,
         int energyPerOperation,
         int processingTicks,
+        int baseOperationsPerCycle,
         long maxBufferedOperations,
         List<Integer> speedMultipliers,
         List<Integer> parallelMultipliers,
@@ -44,7 +45,9 @@ public record MachineSettings(
     }
 
     public int parallelMultiplier(int installedCards, int tierIndex) {
-        return safeIntProduct(parallelMultiplier(installedCards), tierMultiplier(tierParallelMultipliers, tierIndex));
+        int upgradeMultiplier = safeIntProduct(parallelMultiplier(installedCards),
+                tierMultiplier(tierParallelMultipliers, tierIndex));
+        return safeIntProduct(baseOperationsPerCycle, upgradeMultiplier);
     }
 
     public int energyCapacity(int installedCards, int tierIndex) {
