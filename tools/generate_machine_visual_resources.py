@@ -16,6 +16,8 @@ MACHINES = (
     "me_chemical_injection_chamber",
     "me_combiner",
     "me_precision_sawmill",
+    "me_chemical_oxidizer",
+    "me_chemical_crystallizer",
 )
 
 

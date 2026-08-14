@@ -10,6 +10,8 @@ import io.github.shenfnx.mekanismae.block.entity.MePurificationChamberBlockEntit
 import io.github.shenfnx.mekanismae.block.entity.MeChemicalInjectionChamberBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeCombinerBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MePrecisionSawmillBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeChemicalOxidizerBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeChemicalCrystallizerBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -69,6 +71,16 @@ public final class ModBlockEntities {
             ME_PRECISION_SAWMILL = BLOCK_ENTITY_TYPES.register("me_precision_sawmill",
                     () -> BlockEntityType.Builder.of(MePrecisionSawmillBlockEntity::new,
                             ModBlocks.ME_PRECISION_SAWMILL.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeChemicalOxidizerBlockEntity>>
+            ME_CHEMICAL_OXIDIZER = BLOCK_ENTITY_TYPES.register("me_chemical_oxidizer",
+                    () -> BlockEntityType.Builder.of(MeChemicalOxidizerBlockEntity::new,
+                            ModBlocks.ME_CHEMICAL_OXIDIZER.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MeChemicalCrystallizerBlockEntity>>
+            ME_CHEMICAL_CRYSTALLIZER = BLOCK_ENTITY_TYPES.register("me_chemical_crystallizer",
+                    () -> BlockEntityType.Builder.of(MeChemicalCrystallizerBlockEntity::new,
+                            ModBlocks.ME_CHEMICAL_CRYSTALLIZER.get()).build(null));
 
     private ModBlockEntities() {
     }

@@ -10,6 +10,8 @@ import io.github.shenfnx.mekanismae.block.MePurificationChamberBlock;
 import io.github.shenfnx.mekanismae.block.MeChemicalInjectionChamberBlock;
 import io.github.shenfnx.mekanismae.block.MeCombinerBlock;
 import io.github.shenfnx.mekanismae.block.MePrecisionSawmillBlock;
+import io.github.shenfnx.mekanismae.block.MeChemicalOxidizerBlock;
+import io.github.shenfnx.mekanismae.block.MeChemicalCrystallizerBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
@@ -85,6 +87,16 @@ public final class ModBlocks {
             "me_precision_sawmill", MePrecisionSawmillBlock::new, machineProperties());
     public static final DeferredItem<BlockItem> ME_PRECISION_SAWMILL_ITEM =
             ITEMS.registerSimpleBlockItem("me_precision_sawmill", ME_PRECISION_SAWMILL);
+
+    public static final DeferredBlock<MeChemicalOxidizerBlock> ME_CHEMICAL_OXIDIZER = BLOCKS.registerBlock(
+            "me_chemical_oxidizer", MeChemicalOxidizerBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_CHEMICAL_OXIDIZER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_chemical_oxidizer", ME_CHEMICAL_OXIDIZER);
+
+    public static final DeferredBlock<MeChemicalCrystallizerBlock> ME_CHEMICAL_CRYSTALLIZER = BLOCKS.registerBlock(
+            "me_chemical_crystallizer", MeChemicalCrystallizerBlock::new, machineProperties());
+    public static final DeferredItem<BlockItem> ME_CHEMICAL_CRYSTALLIZER_ITEM =
+            ITEMS.registerSimpleBlockItem("me_chemical_crystallizer", ME_CHEMICAL_CRYSTALLIZER);
 
     private static BlockBehaviour.Properties machineProperties() {
         return BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)

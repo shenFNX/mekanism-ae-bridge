@@ -9,6 +9,8 @@ import io.github.shenfnx.mekanismae.block.MePurificationChamberBlock;
 import io.github.shenfnx.mekanismae.block.MeChemicalInjectionChamberBlock;
 import io.github.shenfnx.mekanismae.block.MeCombinerBlock;
 import io.github.shenfnx.mekanismae.block.MePrecisionSawmillBlock;
+import io.github.shenfnx.mekanismae.block.MeChemicalOxidizerBlock;
+import io.github.shenfnx.mekanismae.block.MeChemicalCrystallizerBlock;
 import io.github.shenfnx.mekanismae.block.entity.MeEnrichmentChamberBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeEnergizedSmelterBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeCrusherBlockEntity;
@@ -18,6 +20,8 @@ import io.github.shenfnx.mekanismae.block.entity.MePurificationChamberBlockEntit
 import io.github.shenfnx.mekanismae.block.entity.MeChemicalInjectionChamberBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MeCombinerBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.MePrecisionSawmillBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeChemicalOxidizerBlockEntity;
+import io.github.shenfnx.mekanismae.block.entity.MeChemicalCrystallizerBlockEntity;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
@@ -45,6 +49,10 @@ public final class MeEnrichmentChamberJadePlugin implements IWailaPlugin {
         registration.registerBlockDataProvider(MeCombinerJadeProvider.INSTANCE, MeCombinerBlockEntity.class);
         registration.registerBlockDataProvider(
                 MePrecisionSawmillJadeProvider.INSTANCE, MePrecisionSawmillBlockEntity.class);
+        registration.registerBlockDataProvider(
+                MeChemicalOxidizerJadeProvider.INSTANCE, MeChemicalOxidizerBlockEntity.class);
+        registration.registerBlockDataProvider(
+                MeChemicalCrystallizerJadeProvider.INSTANCE, MeChemicalCrystallizerBlockEntity.class);
     }
 
     @Override
@@ -66,5 +74,9 @@ public final class MeEnrichmentChamberJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(MeCombinerJadeProvider.INSTANCE, MeCombinerBlock.class);
         registration.registerBlockComponent(
                 MePrecisionSawmillJadeProvider.INSTANCE, MePrecisionSawmillBlock.class);
+        registration.registerBlockComponent(
+                MeChemicalOxidizerJadeProvider.INSTANCE, MeChemicalOxidizerBlock.class);
+        registration.registerBlockComponent(
+                MeChemicalCrystallizerJadeProvider.INSTANCE, MeChemicalCrystallizerBlock.class);
     }
 }

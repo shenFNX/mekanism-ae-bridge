@@ -80,6 +80,8 @@ public final class MekanismAeMod {
         registerMachineCapabilities(event, ModBlockEntities.ME_ENERGIZED_SMELTER.get());
         registerMachineCapabilities(event, ModBlockEntities.ME_COMBINER.get());
         registerMachineCapabilities(event, ModBlockEntities.ME_PRECISION_SAWMILL.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_CHEMICAL_OXIDIZER.get());
+        registerMachineCapabilities(event, ModBlockEntities.ME_CHEMICAL_CRYSTALLIZER.get());
     }
 
     private static <T extends io.github.shenfnx.mekanismae.block.entity.AbstractMeProcessingBlockEntity>

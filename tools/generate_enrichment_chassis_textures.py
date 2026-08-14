@@ -230,6 +230,46 @@ def chemical_injection_front(online, working, phase=0):
     return im
 
 
+def chemical_oxidizer_front(online, working, phase=0):
+    im = machine_front_base(online)
+    chemical = COLORS["purple1"] if online else COLORS["purple0"]
+    vapor = COLORS["cyan2"] if online else COLORS["cyan0"]
+    # A sealed lower crucible converts a solid feed into a rising chemical stream.
+    rect(im, (11, 18, 20, 21), COLORS["frame2"])
+    rect(im, (13, 16, 18, 19), COLORS["panel_hi"])
+    rect(im, (14, 17, 17, 18), chemical)
+    rect(im, (9, 19, 10, 22), vapor)
+    rect(im, (21, 19, 22, 22), vapor)
+    bubbles = ((13, 15), (17, 14), (15, 12), (19, 11))
+    offset = phase if working else 0
+    for index, (x, y) in enumerate(bubbles):
+        yy = 11 + ((y - 11 - offset - index) % 6)
+        px(im, x, yy, COLORS["cyan3"] if online and working and index == phase else vapor)
+    rect(im, (14, 10, 17, 11), chemical)
+    if working:
+        px(im, 11 + phase * 3, 22, COLORS["cyan3"] if online else vapor)
+    return im
+
+
+def chemical_crystallizer_front(online, working, phase=0):
+    im = machine_front_base(online)
+    solution = COLORS["purple1"] if online else COLORS["purple0"]
+    crystal = COLORS["cyan2"] if online else COLORS["edge"]
+    highlight = COLORS["cyan3"] if online else COLORS["bolt"]
+    # Chemical feed rails surround a faceted crystal that grows through four phases.
+    rect(im, (9, 11, 10, 21), solution)
+    rect(im, (21, 11, 22, 21), solution)
+    rect(im, (11, 20, 20, 22), COLORS["frame2"])
+    growth = phase if working else 1
+    rect(im, (14, 17 - growth, 17, 20), crystal)
+    rect(im, (13, 18 - growth, 18, 19), crystal)
+    px(im, 15, 15 - growth, highlight)
+    px(im, 18, 17 - growth, COLORS["cyan1"] if online else COLORS["frame2"])
+    for index, (x, y) in enumerate(((12, 13), (19, 13), (12, 17), (19, 17))):
+        px(im, x, y, highlight if working and index == phase else solution)
+    return im
+
+
 def combiner_front(online, working, phase=0):
     im = machine_front_base(online)
     signal = COLORS["cyan2"] if online else COLORS["cyan0"]
@@ -381,6 +421,8 @@ def main():
                 ("me_osmium_compressor", osmium_compressor_front),
                 ("me_purification_chamber", purification_front),
                 ("me_chemical_injection_chamber", chemical_injection_front),
+                ("me_chemical_oxidizer", chemical_oxidizer_front),
+                ("me_chemical_crystallizer", chemical_crystallizer_front),
                 ("me_combiner", combiner_front),
                 ("me_precision_sawmill", precision_sawmill_front)):
             save(f"{machine}_front_{suffix}", renderer(online, False))
