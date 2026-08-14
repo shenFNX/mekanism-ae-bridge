@@ -430,7 +430,7 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
             setChanged();
             return;
         }
-        energyStorage.consumeEnergy((int) (availableOperations * energyPerOperation));
+        energyStorage.consumeEnergy(getEnergyCostForOperations(availableOperations));
         activeItemCount -= consumedItems;
         activeChemicalCount -= consumedChemical;
         pendingOperations -= availableOperations;

@@ -325,7 +325,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
             setChanged();
             return;
         }
-        energyStorage.consumeEnergy((int) (availableOperations * energyPerOperation));
+        energyStorage.consumeEnergy(getEnergyCostForOperations(availableOperations));
         activeInputCount -= consumedInput;
         pendingOperations -= availableOperations;
         if (pendingOutputKey == null) {

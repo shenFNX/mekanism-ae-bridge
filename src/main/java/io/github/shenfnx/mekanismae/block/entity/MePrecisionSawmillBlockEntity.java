@@ -345,7 +345,7 @@ public final class MePrecisionSawmillBlockEntity extends AbstractMeProcessingBlo
             fault();
             return;
         }
-        energyStorage.consumeEnergy((int) (operations * energyPerOperation));
+        energyStorage.consumeEnergy(getEnergyCostForOperations(operations));
         activeInputCount -= operations * inputPerOperation;
         pendingOperations -= operations;
         addPending(activeMainOutputKey, mainProduced, false);

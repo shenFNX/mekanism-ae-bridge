@@ -11,10 +11,14 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 /** Server-authoritative tuning loaded from the global file or a native per-world override. */
 public final class MekanismAeConfig {
     private static final int CURVE_SIZE = 9;
+    private static final int TIER_CURVE_SIZE = 4;
     private static final int MAX_MULTIPLIER = 256;
     private static final long MAX_BUFFERED_OPERATIONS = 16_777_216L;
     private static final List<Integer> DEFAULT_SPEED_CURVE = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
     private static final List<Integer> DEFAULT_PARALLEL_CURVE = List.of(1, 2, 3, 4, 6, 8, 10, 12, 16);
+    private static final List<Integer> DEFAULT_TIER_PARALLEL_CURVE = List.of(3, 6, 10, 16);
+    private static final List<Integer> DEFAULT_TIER_ENERGY_CURVE = List.of(2, 4, 8, 16);
+    private static final List<Integer> DEFAULT_TIER_BUFFER_CURVE = List.of(2, 4, 8, 16);
 
     public static final ModConfigSpec SPEC;
 
@@ -45,6 +49,10 @@ public final class MekanismAeConfig {
         private final ModConfigSpec.IntValue energyReceivePerUpgrade;
         private final ModConfigSpec.ConfigValue<List<? extends Integer>> speedMultipliers;
         private final ModConfigSpec.ConfigValue<List<? extends Integer>> parallelMultipliers;
+        private final ModConfigSpec.ConfigValue<List<? extends Integer>> tierParallelMultipliers;
+        private final ModConfigSpec.ConfigValue<List<? extends Integer>> tierEnergyCapacityMultipliers;
+        private final ModConfigSpec.ConfigValue<List<? extends Integer>> tierEnergyReceiveMultipliers;
+        private final ModConfigSpec.ConfigValue<List<? extends Integer>> tierBufferMultipliers;
         private final MachineValues defaults;
         private final Map<MachineType, MachineValues> machines = new EnumMap<>(MachineType.class);
 
@@ -90,6 +98,18 @@ public final class MekanismAeConfig {
                     .worldRestart()
                     .defineList("parallel_multipliers", DEFAULT_PARALLEL_CURVE, () -> 1,
                             value -> value instanceof Integer integer && integer >= 1 && integer <= MAX_MULTIPLIER);
+            tierParallelMultipliers = tierCurve(builder, "tier_parallel_multipliers",
+                    "Parallel multipliers for Basic, Advanced, Elite, and Ultimate tier installers.",
+                    "config.mekanismae.tier_parallel_multipliers", DEFAULT_TIER_PARALLEL_CURVE);
+            tierEnergyCapacityMultipliers = tierCurve(builder, "tier_energy_capacity_multipliers",
+                    "Energy-capacity multipliers for Basic, Advanced, Elite, and Ultimate tier installers.",
+                    "config.mekanismae.tier_energy_capacity_multipliers", DEFAULT_TIER_ENERGY_CURVE);
+            tierEnergyReceiveMultipliers = tierCurve(builder, "tier_energy_receive_multipliers",
+                    "Energy-input multipliers for Basic, Advanced, Elite, and Ultimate tier installers.",
+                    "config.mekanismae.tier_energy_receive_multipliers", DEFAULT_TIER_ENERGY_CURVE);
+            tierBufferMultipliers = tierCurve(builder, "tier_buffer_multipliers",
+                    "Task-buffer multipliers for Basic, Advanced, Elite, and Ultimate tier installers.",
+                    "config.mekanismae.tier_buffer_multipliers", DEFAULT_TIER_BUFFER_CURVE);
             builder.pop();
 
             builder.comment("Default machine values and optional per-machine replacements.").push("machines");
@@ -114,8 +134,21 @@ public final class MekanismAeConfig {
                     selected.energyPerOperation.get(),
                     selected.processingTicks.get(),
                     selected.maxBufferedOperations.get(),
-                    normalizeCurve(speedMultipliers.get(), DEFAULT_SPEED_CURVE),
-                    normalizeCurve(parallelMultipliers.get(), DEFAULT_PARALLEL_CURVE));
+                    normalizeCurve(speedMultipliers.get(), DEFAULT_SPEED_CURVE, CURVE_SIZE),
+                    normalizeCurve(parallelMultipliers.get(), DEFAULT_PARALLEL_CURVE, CURVE_SIZE),
+                    normalizeCurve(tierParallelMultipliers.get(), DEFAULT_TIER_PARALLEL_CURVE, TIER_CURVE_SIZE),
+                    normalizeCurve(tierEnergyCapacityMultipliers.get(), DEFAULT_TIER_ENERGY_CURVE, TIER_CURVE_SIZE),
+                    normalizeCurve(tierEnergyReceiveMultipliers.get(), DEFAULT_TIER_ENERGY_CURVE, TIER_CURVE_SIZE),
+                    normalizeCurve(tierBufferMultipliers.get(), DEFAULT_TIER_BUFFER_CURVE, TIER_CURVE_SIZE));
+        }
+
+        private static ModConfigSpec.ConfigValue<List<? extends Integer>> tierCurve(ModConfigSpec.Builder builder,
+                String name, String comment, String translation, List<Integer> defaults) {
+            return builder.comment(comment + " Missing entries repeat the last value; extra entries are ignored.")
+                    .translation(translation)
+                    .worldRestart()
+                    .defineList(name, defaults, () -> 1,
+                            value -> value instanceof Integer integer && integer >= 1 && integer <= MAX_MULTIPLIER);
         }
     }
 
@@ -164,9 +197,9 @@ public final class MekanismAeConfig {
         }
     }
 
-    private static List<Integer> normalizeCurve(List<? extends Integer> configured, List<Integer> defaults) {
-        List<Integer> result = new ArrayList<>(CURVE_SIZE);
-        for (int index = 0; index < CURVE_SIZE; index++) {
+    private static List<Integer> normalizeCurve(List<? extends Integer> configured, List<Integer> defaults, int size) {
+        List<Integer> result = new ArrayList<>(size);
+        for (int index = 0; index < size; index++) {
             int value;
             if (configured.isEmpty()) {
                 value = defaults.get(index);

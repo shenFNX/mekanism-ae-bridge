@@ -14,13 +14,13 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import mekanism.common.item.ItemTierInstaller;
 
 /** Menu used by machines whose active task needs up to two item inputs and outputs. */
 public abstract class AbstractMultiItemMeMachineMenu extends AbstractContainerMenu
         implements MeProcessingMachineMenu {
     private static final int DATA_COUNT = 17;
-    private static final int REAL_MACHINE_SLOT_COUNT = AbstractMeProcessingBlockEntity.PATTERN_SLOT_COUNT
-            + AbstractMeProcessingBlockEntity.UPGRADE_SLOT_COUNT;
+    private static final int REAL_MACHINE_SLOT_COUNT = AbstractMeProcessingBlockEntity.TIER_SLOT_INDEX + 1;
     private static final int DISPLAY_SLOT_COUNT = 4;
     private static final int MACHINE_MENU_SLOT_COUNT = REAL_MACHINE_SLOT_COUNT + DISPLAY_SLOT_COUNT;
 
@@ -57,8 +57,7 @@ public abstract class AbstractMultiItemMeMachineMenu extends AbstractContainerMe
         for (int index = 0; index < AbstractMeProcessingBlockEntity.UPGRADE_SLOT_COUNT; index++) {
             int slotIndex = AbstractMeProcessingBlockEntity.PATTERN_SLOT_COUNT + index;
             int upgradeIndex = index;
-            addSlot(new Slot(machine, slotIndex, 263 + (upgradeIndex % 2) * 18,
-                    33 + (upgradeIndex / 2) * 18) {
+            addSlot(new Slot(machine, slotIndex, 262, 9 + upgradeIndex * 18) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return machine.canPlaceItem(slotIndex, stack);
@@ -70,20 +69,31 @@ public abstract class AbstractMultiItemMeMachineMenu extends AbstractContainerMe
                 }
             });
         }
+        addSlot(new Slot(machine, AbstractMeProcessingBlockEntity.TIER_SLOT_INDEX, 8, 29) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return machine.canPlaceItem(AbstractMeProcessingBlockEntity.TIER_SLOT_INDEX, stack);
+            }
+
+            @Override
+            public int getMaxStackSize() {
+                return 1;
+            }
+        });
 
         refreshDisplay();
-        addSlot(readOnlyDisplaySlot(0, 35, 63));
-        addSlot(readOnlyDisplaySlot(1, 35, 81));
-        addSlot(readOnlyDisplaySlot(2, 92, 63));
-        addSlot(readOnlyDisplaySlot(3, 92, 81));
+        addSlot(readOnlyDisplaySlot(0, 35, 69));
+        addSlot(readOnlyDisplaySlot(1, 35, 87));
+        addSlot(readOnlyDisplaySlot(2, 92, 69));
+        addSlot(readOnlyDisplaySlot(3, 92, 87));
 
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 32 + column * 18, 117 + row * 18));
+                addSlot(new Slot(inventory, column + row * 9 + 9, 32 + column * 18, 135 + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 32 + column * 18, 175));
+            addSlot(new Slot(inventory, column, 32 + column * 18, 193));
         }
         data = inventory.player.level().isClientSide()
                 ? new SimpleContainerData(DATA_COUNT)
@@ -174,6 +184,9 @@ public abstract class AbstractMultiItemMeMachineMenu extends AbstractContainerMe
         } else if (moving.is(ModItems.SPEED_CARD.get()) || moving.is(ModItems.PARALLEL_CARD.get())
                 || moving.is(ModItems.ENERGY_CARD.get())) {
             moved = moveItemStackTo(moving, AbstractMeProcessingBlockEntity.PATTERN_SLOT_COUNT,
+                    AbstractMeProcessingBlockEntity.TIER_SLOT_INDEX, false);
+        } else if (moving.getItem() instanceof ItemTierInstaller) {
+            moved = moveItemStackTo(moving, AbstractMeProcessingBlockEntity.TIER_SLOT_INDEX,
                     REAL_MACHINE_SLOT_COUNT, false);
         }
         if (!moved) return ItemStack.EMPTY;

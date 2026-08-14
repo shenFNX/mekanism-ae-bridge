@@ -3,6 +3,8 @@ package io.github.shenfnx.mekanismae.block;
 import io.github.shenfnx.mekanismae.block.entity.AbstractMeProcessingBlockEntity;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -72,13 +74,31 @@ public abstract class AbstractProcessingMeMachineBlock extends AbstractMeMachine
     public final boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player,
             boolean willHarvest, FluidState fluid) {
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof AbstractMeProcessingBlockEntity machine && machine.hasStoredContents()) {
+        if (blockEntity instanceof AbstractMeProcessingBlockEntity machine && machine.hasProcessingResources()) {
             if (!level.isClientSide()) {
                 player.displayClientMessage(Component.translatable("message.mekanismae.empty_before_breaking"), true);
             }
             return false;
         }
-        return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
+        List<ItemStack> inventoryDrops = new ArrayList<>();
+        if (!level.isClientSide() && blockEntity instanceof AbstractMeProcessingBlockEntity machine) {
+            for (int slot = 0; slot < machine.getContainerSize(); slot++) {
+                ItemStack stack = machine.getItem(slot);
+                if (!stack.isEmpty()) {
+                    inventoryDrops.add(stack.copy());
+                }
+            }
+        }
+        boolean destroyed = super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
+        if (destroyed && !level.isClientSide()) {
+            if (blockEntity instanceof AbstractMeProcessingBlockEntity machine) {
+                machine.clearInstalledItemsAfterBreak();
+            }
+            for (ItemStack stack : inventoryDrops) {
+                popResource(level, pos, stack);
+            }
+        }
+        return destroyed;
     }
 
     @Override

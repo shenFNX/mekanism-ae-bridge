@@ -383,7 +383,7 @@ public abstract class AbstractTwoItemToItemMeMachineBlockEntity extends Abstract
             markFault();
             return;
         }
-        energyStorage.consumeEnergy((int) (operations * energyPerOperation));
+        energyStorage.consumeEnergy(getEnergyCostForOperations(operations));
         activeMainCount -= operations * mainPerOperation;
         activeExtraCount -= operations * extraPerOperation;
         pendingOperations -= operations;

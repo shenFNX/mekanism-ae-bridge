@@ -14,11 +14,11 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
+import mekanism.common.item.ItemTierInstaller;
 
 public abstract class AbstractItemChemicalToItemMeMachineMenu extends AbstractContainerMenu {
     private static final int DATA_COUNT = 19;
-    private static final int REAL_MACHINE_SLOT_COUNT = AbstractItemChemicalToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT
-            + AbstractItemChemicalToItemMeMachineBlockEntity.UPGRADE_SLOT_COUNT;
+    private static final int REAL_MACHINE_SLOT_COUNT = AbstractItemChemicalToItemMeMachineBlockEntity.TIER_SLOT_INDEX + 1;
     private static final int DISPLAY_SLOT_COUNT = 2;
     private static final int MACHINE_MENU_SLOT_COUNT = REAL_MACHINE_SLOT_COUNT + DISPLAY_SLOT_COUNT;
     private final AbstractItemChemicalToItemMeMachineBlockEntity machine;
@@ -55,7 +55,7 @@ public abstract class AbstractItemChemicalToItemMeMachineMenu extends AbstractCo
         for (int index = 0; index < AbstractItemChemicalToItemMeMachineBlockEntity.UPGRADE_SLOT_COUNT; index++) {
             int slotIndex = AbstractItemChemicalToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT + index;
             int upgradeIndex = index;
-            addSlot(new Slot(machine, slotIndex, 263 + (upgradeIndex % 2) * 18, 33 + (upgradeIndex / 2) * 18) {
+            addSlot(new Slot(machine, slotIndex, 262, 9 + upgradeIndex * 18) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return machine.canPlaceItem(slotIndex, stack);
@@ -67,19 +67,30 @@ public abstract class AbstractItemChemicalToItemMeMachineMenu extends AbstractCo
                 }
             });
         }
+        addSlot(new Slot(machine, AbstractItemChemicalToItemMeMachineBlockEntity.TIER_SLOT_INDEX, 8, 29) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return machine.canPlaceItem(AbstractItemChemicalToItemMeMachineBlockEntity.TIER_SLOT_INDEX, stack);
+            }
+
+            @Override
+            public int getMaxStackSize() {
+                return 1;
+            }
+        });
 
         processingDisplay.setItem(0, machine.getProcessingInputDisplay());
         processingDisplay.setItem(1, machine.getProcessingOutputDisplay());
-        addSlot(readOnlyDisplaySlot(0, 43, 70));
-        addSlot(readOnlyDisplaySlot(1, 92, 70));
+        addSlot(readOnlyDisplaySlot(0, 43, 73));
+        addSlot(readOnlyDisplaySlot(1, 92, 73));
 
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 32 + column * 18, 117 + row * 18));
+                addSlot(new Slot(inventory, column + row * 9 + 9, 32 + column * 18, 135 + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 32 + column * 18, 175));
+            addSlot(new Slot(inventory, column, 32 + column * 18, 193));
         }
 
         data = inventory.player.level().isClientSide()
@@ -237,6 +248,9 @@ public abstract class AbstractItemChemicalToItemMeMachineMenu extends AbstractCo
         } else if (moving.is(ModItems.SPEED_CARD.get()) || moving.is(ModItems.PARALLEL_CARD.get())
                 || moving.is(ModItems.ENERGY_CARD.get())) {
             moved = moveItemStackTo(moving, AbstractItemChemicalToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT,
+                    AbstractItemChemicalToItemMeMachineBlockEntity.TIER_SLOT_INDEX, false);
+        } else if (moving.getItem() instanceof ItemTierInstaller) {
+            moved = moveItemStackTo(moving, AbstractItemChemicalToItemMeMachineBlockEntity.TIER_SLOT_INDEX,
                     REAL_MACHINE_SLOT_COUNT, false);
         }
         if (!moved) {

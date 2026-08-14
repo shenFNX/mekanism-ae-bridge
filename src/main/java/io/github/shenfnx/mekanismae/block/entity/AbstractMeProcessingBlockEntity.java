@@ -14,7 +14,9 @@ import io.github.shenfnx.mekanismae.registry.ModItems;
 import java.util.ArrayList;
 import java.util.List;
 import mekanism.api.energy.IStrictEnergyHandler;
+import mekanism.api.tier.BaseTier;
 import mekanism.common.integration.energy.forgeenergy.ForgeStrictEnergyHandler;
+import mekanism.common.item.ItemTierInstaller;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -42,6 +44,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         implements ICraftingProvider, Container, MenuProvider {
     public static final int PATTERN_SLOT_COUNT = 9;
     public static final int UPGRADE_SLOT_COUNT = 8;
+    public static final int TIER_SLOT_INDEX = PATTERN_SLOT_COUNT + UPGRADE_SLOT_COUNT;
     public static final int MAX_UPGRADES_PER_TYPE = 8;
 
     protected final MachineSettings settings;
@@ -51,6 +54,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
             NonNullList.withSize(PATTERN_SLOT_COUNT, ItemStack.EMPTY);
     protected final NonNullList<ItemStack> upgradeSlots =
             NonNullList.withSize(UPGRADE_SLOT_COUNT, ItemStack.EMPTY);
+    private ItemStack tierInstaller = ItemStack.EMPTY;
     protected int speedUpgrades;
     protected int parallelUpgrades;
     protected boolean networkEnabled = true;
@@ -143,7 +147,12 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     /** Server-owned task tick used by the common machine block ticker. */
     public abstract void tickServer();
 
-    /** True when breaking the block would discard patterns, upgrades, inputs, or outputs. */
+    /** True when breaking the block would discard an active or queued processing resource. */
+    public final boolean hasProcessingResources() {
+        return hasProcessingWork();
+    }
+
+    /** Legacy inventory-inclusive query retained for machine-family diagnostics. */
     public abstract boolean hasStoredContents();
 
     public abstract ContainerData getContainerData();
@@ -174,11 +183,11 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     public abstract long getBufferedOutputCount();
 
     public final long getBufferOperationLimit() {
-        return settings.maxBufferedOperations();
+        return settings.bufferOperationLimit(getTierIndex());
     }
 
     public final int getParallelMultiplier() {
-        return settings.parallelMultiplier(parallelUpgrades);
+        return settings.parallelMultiplier(parallelUpgrades, getTierIndex());
     }
 
     public final int getSpeedMultiplier() {
@@ -250,6 +259,15 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         return settings.energyPerOperation();
     }
 
+    protected final int getEnergyCostForOperations(long operations) {
+        if (operations <= 0) {
+            return 0;
+        }
+        int energyPerOperation = settings.energyPerOperation();
+        return operations > Integer.MAX_VALUE / (long) energyPerOperation
+                ? Integer.MAX_VALUE : (int) (operations * energyPerOperation);
+    }
+
     protected final boolean shouldPauseForRedstone() {
         return settings.redstonePausesProcessing() && level != null && level.hasNeighborSignal(worldPosition);
     }
@@ -280,6 +298,9 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
             }
         }
         tag.put("Upgrades", upgrades);
+        if (!tierInstaller.isEmpty()) {
+            tag.put("TierInstaller", tierInstaller.save(registries));
+        }
     }
 
     @Override
@@ -311,13 +332,18 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
                 }
             }
         }
+        tierInstaller = tag.contains("TierInstaller", net.minecraft.nbt.Tag.TAG_COMPOUND)
+                ? ItemStack.parseOptional(registries, tag.getCompound("TierInstaller")) : ItemStack.EMPTY;
+        if (!isTierInstaller(tierInstaller)) {
+            tierInstaller = ItemStack.EMPTY;
+        }
         recalculateUpgrades();
         energyStorage.loadEnergy(tag.getInt("Energy"));
     }
 
     @Override
     public final int getContainerSize() {
-        return PATTERN_SLOT_COUNT + UPGRADE_SLOT_COUNT;
+        return TIER_SLOT_INDEX + 1;
     }
 
     @Override
@@ -325,12 +351,15 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         if (patternSlots.stream().anyMatch(stack -> !stack.isEmpty())) {
             return false;
         }
-        return upgradeSlots.stream().allMatch(ItemStack::isEmpty);
+        return tierInstaller.isEmpty() && upgradeSlots.stream().allMatch(ItemStack::isEmpty);
     }
 
     @Override
     public final ItemStack getItem(int slot) {
-        return slot < PATTERN_SLOT_COUNT ? patternSlots.get(slot) : upgradeSlots.get(slot - PATTERN_SLOT_COUNT);
+        if (slot < PATTERN_SLOT_COUNT) {
+            return patternSlots.get(slot);
+        }
+        return slot == TIER_SLOT_INDEX ? tierInstaller : upgradeSlots.get(slot - PATTERN_SLOT_COUNT);
     }
 
     @Override
@@ -348,6 +377,9 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         }
         if (current.isEmpty()) {
             setItem(slot, ItemStack.EMPTY);
+        } else if (slot == TIER_SLOT_INDEX) {
+            tierInstaller = ItemStack.EMPTY;
+            recalculateUpgrades();
         } else {
             setChanged();
         }
@@ -366,6 +398,9 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
                 onPatternRemoved(result);
             }
             ICraftingProvider.requestUpdate(getMainNode());
+        } else if (slot == TIER_SLOT_INDEX) {
+            tierInstaller = ItemStack.EMPTY;
+            recalculateUpgrades();
         } else {
             upgradeSlots.set(slot - PATTERN_SLOT_COUNT, ItemStack.EMPTY);
             recalculateUpgrades();
@@ -382,6 +417,11 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
             }
             patternSlots.set(slot, stack.copyWithCount(Math.min(1, stack.getCount())));
             ICraftingProvider.requestUpdate(getMainNode());
+        } else if (slot == TIER_SLOT_INDEX) {
+            if (stack.isEmpty() || isTierInstaller(stack)) {
+                tierInstaller = stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1);
+                recalculateUpgrades();
+            }
         } else if (slot < getContainerSize()) {
             ItemStack accepted = stack.copy();
             accepted.setCount(Math.min(accepted.getCount(), getUpgradeLimitForSlot(slot, accepted)));
@@ -402,12 +442,38 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     }
 
     public final int getUpgradeLimitForSlot(int slot, ItemStack stack) {
-        if (slot < PATTERN_SLOT_COUNT || slot >= getContainerSize() || !isSupportedUpgrade(stack)) {
+        if (slot < PATTERN_SLOT_COUNT || slot >= TIER_SLOT_INDEX || !isSupportedUpgrade(stack)) {
             return 0;
         }
         ItemStack current = upgradeSlots.get(slot - PATTERN_SLOT_COUNT);
         int currentInSlot = ItemStack.isSameItemSameComponents(current, stack) ? current.getCount() : 0;
         return Math.max(0, MAX_UPGRADES_PER_TYPE - getUpgradeCount(stack.getItem()) + currentInSlot);
+    }
+
+    public final int getTierIndex() {
+        if (!(tierInstaller.getItem() instanceof ItemTierInstaller installer)) {
+            return -1;
+        }
+        return switch (installer.getToTier()) {
+            case BASIC -> 0;
+            case ADVANCED -> 1;
+            case ELITE -> 2;
+            case ULTIMATE -> 3;
+            default -> -1;
+        };
+    }
+
+    public final ItemStack getTierInstaller() {
+        return tierInstaller;
+    }
+
+    private static boolean isTierInstaller(ItemStack stack) {
+        if (!(stack.getItem() instanceof ItemTierInstaller installer)) {
+            return false;
+        }
+        BaseTier toTier = installer.getToTier();
+        return toTier == BaseTier.BASIC || toTier == BaseTier.ADVANCED
+                || toTier == BaseTier.ELITE || toTier == BaseTier.ULTIMATE;
     }
 
     private boolean isSupportedUpgrade(ItemStack stack) {
@@ -424,15 +490,28 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         }
         patternSlots.replaceAll(stack -> ItemStack.EMPTY);
         upgradeSlots.replaceAll(stack -> ItemStack.EMPTY);
+        tierInstaller = ItemStack.EMPTY;
         recalculateUpgrades();
         ICraftingProvider.requestUpdate(getMainNode());
         setChanged();
     }
 
+    /** Clears already-copied slot contents after a successful block removal. */
+    public final void clearInstalledItemsAfterBreak() {
+        patternSlots.replaceAll(stack -> ItemStack.EMPTY);
+        upgradeSlots.replaceAll(stack -> ItemStack.EMPTY);
+        tierInstaller = ItemStack.EMPTY;
+    }
+
     @Override
     public final boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot < PATTERN_SLOT_COUNT ? PatternDetailsHelper.isEncodedPattern(stack)
-                : isSupportedUpgrade(stack) && getUpgradeLimitForSlot(slot, stack) > 0;
+        if (slot < PATTERN_SLOT_COUNT) {
+            return PatternDetailsHelper.isEncodedPattern(stack);
+        }
+        if (slot == TIER_SLOT_INDEX) {
+            return isTierInstaller(stack) && tierInstaller.isEmpty();
+        }
+        return isSupportedUpgrade(stack) && getUpgradeLimitForSlot(slot, stack) > 0;
     }
 
     protected final class MachineEnergyStorage extends EnergyStorage {
@@ -445,8 +524,8 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         }
 
         private void updateUpgrades(int upgrades) {
-            capacity = settings.energyCapacity(upgrades);
-            maxReceive = settings.energyReceive(upgrades);
+            capacity = settings.energyCapacity(upgrades, getTierIndex());
+            maxReceive = settings.energyReceive(upgrades, getTierIndex());
             energy = Math.min(energy, capacity);
         }
 

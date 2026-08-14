@@ -14,19 +14,21 @@ public abstract class AbstractMultiItemMeMachineScreen<M extends AbstractMultiIt
 
     @Override
     protected void drawProcessingArea(GuiGraphics graphics, int left, int top) {
-        drawSlot(graphics, left + 34, top + 62);
-        drawSlot(graphics, left + 34, top + 80);
-        drawSlot(graphics, left + 91, top + 62);
-        drawSlot(graphics, left + 91, top + 80);
+        drawSlot(graphics, left + 34, top + 68);
+        drawSlot(graphics, left + 34, top + 86);
+        drawSlot(graphics, left + 91, top + 68);
+        drawSlot(graphics, left + 91, top + 86);
         int progressWidth = Math.min(26, Math.max(0, menu.progress() * 26 / menu.processingTicks()));
-        graphics.fill(left + 55, top + 75, left + 84, top + 84, 0xFF555555);
-        graphics.fill(left + 56, top + 76, left + 56 + progressWidth, top + 83, 0xFF23C987);
-        graphics.fill(left + 84, top + 73, left + 87, top + 86, 0xFF555555);
-        graphics.fill(left + 87, top + 76, left + 90, top + 83, 0xFF555555);
+        graphics.fill(left + 62, top + 84, left + 78, top + 87, 0xFF555555);
+        int compactProgressWidth = Math.min(15, progressWidth * 15 / 26);
+        graphics.fill(left + 63, top + 85, left + 63 + compactProgressWidth, top + 86, 0xFF23C987);
+        graphics.fill(left + 78, top + 83, left + 80, top + 88, 0xFF555555);
+        graphics.fill(left + 80, top + 84, left + 82, top + 87, 0xFF555555);
+        graphics.fill(left + 82, top + 85, left + 83, top + 86, 0xFF555555);
     }
 
     @Override
-    protected int progressLabelX() {
-        return 57;
+    protected int progressLabelY() {
+        return 108;
     }
 }
