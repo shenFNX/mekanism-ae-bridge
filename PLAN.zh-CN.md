@@ -847,3 +847,9 @@ JEI 不复制 Mekanism 配方或分类，而是复用官方分类：
 
 - 双资源键与可变资源账本机器的实际样板、投递和加工已经完成游戏内测试，当前未发现阻断发布的问题。
 - 模组版本提升为 `v0.2.0-beta.1`；README 明确列出 NeoForge、Mekanism、AE2、Applied Mekanistics 和 GuideME 强制前置，以及 JEI、AE2 JEI Integration 和 Jade 可选兼容。
+
+### 15.25 MIT 许可证（2026-08-17）
+
+- 项目采用标准 MIT License，版权人为 `shenFNX`。源码、自产资源和发布 JAR 允许使用、修改、分发、再授权及商业使用，但必须保留版权与许可文本，且作者不提供担保。
+- `neoforge.mods.toml` 的许可证字段改为 `MIT`，构建同时把许可证打包到 JAR 的 `META-INF/LICENSE`；README 明确贡献默认按 MIT 授权。
+- 由于已经发布的 `v0.2.0-beta.1` JAR 内仍声明 `All Rights Reserved`，不改写既有标签，改以 `v0.2.0-beta.2` 发布许可证修正版。
