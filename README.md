@@ -1,6 +1,10 @@
 # Mekanism AE Bridge
 
+![Mekanism AE Bridge cover](docs/images/mekanism-ae-bridge-cover.png)
+
 一个面向 Minecraft NeoForge 1.21.1 的开发中模组，目标是让 Mekanism 加工机器直接作为 AE2 处理样板提供器工作，并逐步实现类似 GTNH 样板总成的任务缓存与调度体验。
+
+发布页文案：[中文简介](docs/project-description.zh-CN.md) · [English description](docs/project-description.en.md)
 
 > 当前版本为 `v0.2.0-beta.2`。核心玩法已经可用，但存档格式、GUI 和加工调度仍可能继续调整，升级前请备份重要存档。
 
