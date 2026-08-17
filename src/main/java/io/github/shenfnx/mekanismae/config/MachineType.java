@@ -14,10 +14,10 @@ public enum MachineType {
     ME_CHEMICAL_CRYSTALLIZER("me_chemical_crystallizer"),
     ME_ANTIPROTONIC_NUCLEOSYNTHESIZER("me_antiprotonic_nucleosynthesizer"),
     ME_CHEMICAL_DISSOLUTION_CHAMBER("me_chemical_dissolution_chamber"),
-    ME_CHEMICAL_INFUSER("me_chemical_infuser", 20),
-    ME_ELECTROLYTIC_SEPARATOR("me_electrolytic_separator", 20),
-    ME_ROTARY_CONDENSENTRATOR("me_rotary_condensentrator", 20),
-    ME_CHEMICAL_WASHER("me_chemical_washer", 20),
+    ME_CHEMICAL_INFUSER("me_chemical_infuser", 1_000),
+    ME_ELECTROLYTIC_SEPARATOR("me_electrolytic_separator", 1_000),
+    ME_ROTARY_CONDENSENTRATOR("me_rotary_condensentrator", 1_000),
+    ME_CHEMICAL_WASHER("me_chemical_washer", 1_000),
     ME_NUTRITIONAL_LIQUIFIER("me_nutritional_liquifier"),
     ME_PRESSURIZED_REACTION_CHAMBER("me_pressurized_reaction_chamber");
 

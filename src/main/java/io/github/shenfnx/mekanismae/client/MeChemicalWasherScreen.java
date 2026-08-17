@@ -10,9 +10,4 @@ public final class MeChemicalWasherScreen
             MeChemicalWasherMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
     }
-
-    @Override
-    protected Diagram diagram() {
-        return Diagram.WASHER;
-    }
 }

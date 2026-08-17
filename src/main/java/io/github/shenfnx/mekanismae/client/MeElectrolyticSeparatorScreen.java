@@ -10,9 +10,4 @@ public final class MeElectrolyticSeparatorScreen
             MeElectrolyticSeparatorMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
     }
-
-    @Override
-    protected Diagram diagram() {
-        return Diagram.ELECTROLYSIS;
-    }
 }

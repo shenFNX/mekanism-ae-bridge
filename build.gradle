@@ -39,7 +39,8 @@ neoForge {
 
         gameTestServer {
             type = 'gameTestServer'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            // The tests reuse a tiny vanilla empty structure while exercising this mod's real blocks.
+            systemProperty 'neoforge.enabledGameTestNamespaces', "${project.mod_id},minecraft"
         }
 
         data {

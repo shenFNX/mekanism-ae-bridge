@@ -22,6 +22,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -58,6 +59,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     protected int speedUpgrades;
     protected int parallelUpgrades;
     protected boolean networkEnabled = true;
+    private boolean tearingDown;
 
     protected AbstractMeProcessingBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state,
             ItemLike visualRepresentation, MachineType machineType) {
@@ -79,9 +81,31 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
 
     @Override
     public final void onMainNodeStateChanged(IGridNodeListener.State state) {
+        if (tearingDown || isRemoved()
+                || level instanceof ServerLevel serverLevel && !serverLevel.getServer().isRunning()) {
+            return;
+        }
         ICraftingProvider.requestUpdate(getMainNode());
         updateVisualState();
         setChanged();
+    }
+
+    @Override
+    public void onChunkUnloaded() {
+        tearingDown = true;
+        super.onChunkUnloaded();
+    }
+
+    @Override
+    public void setRemoved() {
+        tearingDown = true;
+        super.setRemoved();
+    }
+
+    @Override
+    public void clearRemoved() {
+        super.clearRemoved();
+        tearingDown = false;
     }
 
     public final IEnergyStorage getEnergyStorage() {

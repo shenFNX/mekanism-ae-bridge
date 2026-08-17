@@ -6,6 +6,8 @@ import io.github.shenfnx.mekanismae.block.entity.AbstractItemToItemMeMachineBloc
 import io.github.shenfnx.mekanismae.registry.ModItems;
 import io.github.shenfnx.mekanismae.util.EnergyFormatter;
 import appeng.client.gui.Icon;
+import appeng.client.gui.widgets.OpenGuideButton;
+import guideme.GuidesCommon;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -32,6 +34,10 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends net.minecraft.
     private static final int ENERGY_TAB_Y = 142;
     private static final int TIER_SLOT_X = 7;
     private static final int TIER_SLOT_Y = 28;
+    private static final int GUIDE_BUTTON_X = 232;
+    private static final int GUIDE_BUTTON_Y = 5;
+
+    private OpenGuideButton guideButton;
 
     private static final ResourceLocation NORMAL_SLOT =
             ResourceLocation.fromNamespaceAndPath("mekanism", "gui/slot/normal.png");
@@ -46,6 +52,18 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends net.minecraft.
         imageHeight = 217;
         inventoryLabelX = 32;
         inventoryLabelY = 123;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        guideButton = new OpenGuideButton(button -> {
+            if (minecraft != null && minecraft.player != null) {
+                GuidesCommon.openGuide(minecraft.player, MekanismAeGuide.ID);
+            }
+        });
+        guideButton.setPosition(leftPos + GUIDE_BUTTON_X, topPos + GUIDE_BUTTON_Y);
+        addRenderableWidget(guideButton);
     }
 
     @Override
@@ -83,16 +101,24 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends net.minecraft.
     protected void drawProcessingArea(GuiGraphics graphics, int left, int top) {
         drawSlot(graphics, left + 42, top + 72);
         drawSlot(graphics, left + 91, top + 72);
-        int progressWidth = Math.min(22, Math.max(0,
-                menu.progress() * 22 / menu.processingTicks()));
-        // The arrow is constrained to the 31 px gap between the two slots.
-        graphics.fill(left + 69, top + 81, left + 82, top + 84, 0xFF555555);
-        int compactProgressWidth = Math.min(12, progressWidth * 12 / 22);
-        graphics.fill(left + 70, top + 82, left + 70 + compactProgressWidth, top + 83, 0xFF23C987);
-        graphics.fill(left + 82, top + 80, left + 84, top + 85, 0xFF555555);
-        graphics.fill(left + 84, top + 81, left + 86, top + 84, 0xFF555555);
-        graphics.fill(left + 86, top + 82, left + 87, top + 83, 0xFF555555);
+        drawProcessingArrow(graphics, left, top, 69, 87);
+    }
 
+    protected final void drawProcessingArrow(
+            GuiGraphics graphics, int left, int top, int startX, int endX) {
+        int length = endX - startX;
+        if (length < 8) {
+            return;
+        }
+        int shaftEnd = endX - 5;
+        graphics.fill(left + startX, top + 81, left + shaftEnd, top + 84, 0xFF555555);
+        int progressWidth = Math.max(0, shaftEnd - startX - 1)
+                * Math.min(menu.progress(), menu.processingTicks()) / menu.processingTicks();
+        graphics.fill(left + startX + 1, top + 82,
+                left + startX + 1 + progressWidth, top + 83, 0xFF23C987);
+        graphics.fill(left + shaftEnd, top + 80, left + shaftEnd + 2, top + 85, 0xFF555555);
+        graphics.fill(left + shaftEnd + 2, top + 81, left + shaftEnd + 4, top + 84, 0xFF555555);
+        graphics.fill(left + shaftEnd + 4, top + 82, left + endX, top + 83, 0xFF555555);
     }
 
     private void drawNetworkTab(GuiGraphics graphics, int left, int top) {
@@ -198,7 +224,9 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends net.minecraft.
     }
 
     private void renderCustomTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
-        if (isOver(mouseX, mouseY, NETWORK_TAB_X, NETWORK_TAB_Y, 26, 26)) {
+        if (guideButton != null && guideButton.isHovered()) {
+            graphics.renderTooltip(font, guideButton.getTooltipMessage(), Optional.empty(), mouseX, mouseY);
+        } else if (isOver(mouseX, mouseY, NETWORK_TAB_X, NETWORK_TAB_Y, 26, 26)) {
             Component state = !menu.networkEnabled()
                     ? Component.translatable("gui.mekanismae.network.disabled")
                     : menu.networkOnline()

@@ -5,6 +5,8 @@ import io.github.shenfnx.mekanismae.block.entity.AbstractItemChemicalToItemMeMac
 import io.github.shenfnx.mekanismae.registry.ModItems;
 import io.github.shenfnx.mekanismae.util.EnergyFormatter;
 import appeng.client.gui.Icon;
+import appeng.client.gui.widgets.OpenGuideButton;
+import guideme.GuidesCommon;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -31,6 +33,10 @@ public abstract class AbstractItemChemicalToItemMeMachineScreen<M extends Abstra
     private static final int ENERGY_TAB_Y = 142;
     private static final int TIER_SLOT_X = 7;
     private static final int TIER_SLOT_Y = 28;
+    private static final int GUIDE_BUTTON_X = 232;
+    private static final int GUIDE_BUTTON_Y = 5;
+
+    private OpenGuideButton guideButton;
 
     private static final ResourceLocation NORMAL_SLOT =
             ResourceLocation.fromNamespaceAndPath("mekanism", "gui/slot/normal.png");
@@ -45,6 +51,18 @@ public abstract class AbstractItemChemicalToItemMeMachineScreen<M extends Abstra
         imageHeight = 217;
         inventoryLabelX = 32;
         inventoryLabelY = 123;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        guideButton = new OpenGuideButton(button -> {
+            if (minecraft != null && minecraft.player != null) {
+                GuidesCommon.openGuide(minecraft.player, MekanismAeGuide.ID);
+            }
+        });
+        guideButton.setPosition(leftPos + GUIDE_BUTTON_X, topPos + GUIDE_BUTTON_Y);
+        addRenderableWidget(guideButton);
     }
 
     @Override
@@ -186,7 +204,9 @@ public abstract class AbstractItemChemicalToItemMeMachineScreen<M extends Abstra
     }
 
     private void renderCustomTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
-        if (isOver(mouseX, mouseY, NETWORK_TAB_X, NETWORK_TAB_Y, 26, 26)) {
+        if (guideButton != null && guideButton.isHovered()) {
+            graphics.renderTooltip(font, guideButton.getTooltipMessage(), Optional.empty(), mouseX, mouseY);
+        } else if (isOver(mouseX, mouseY, NETWORK_TAB_X, NETWORK_TAB_Y, 26, 26)) {
             Component state = !menu.networkEnabled()
                     ? Component.translatable("gui.mekanismae.network.disabled")
                     : menu.networkOnline()
