@@ -1,5 +1,5 @@
 {
-  "mod.mekanismae.name": "Mekanism AE Bridge",
+  "mod.mekanismae.name": "Mekanism ME Integration",
   "block.mekanismae.me_enrichment_chamber": "ME Enrichment Chamber",
   "block.mekanismae.me_crusher": "ME Crusher",
   "block.mekanismae.me_energized_smelter": "ME Energized Smelter",
@@ -22,7 +22,7 @@
   "item.mekanismae.speed_card": "ME Speed Card",
   "item.mekanismae.parallel_card": "ME Parallel Card",
   "item.mekanismae.energy_card": "ME Energy Card",
-  "itemGroup.mekanismae.main": "Mekanism AE Bridge",
+  "itemGroup.mekanismae.main": "Mekanism ME Integration",
   "gui.mekanismae.return_resources": "Return to ME",
   "gui.mekanismae.return_resources.hint": "Stop accepting jobs and return buffered resources to the network",
   "gui.mekanismae.network": "ME Network",

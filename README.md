@@ -1,12 +1,12 @@
-# Mekanism AE Bridge
+# Mekanism ME Integration
 
-![Mekanism AE Bridge cover](docs/images/mekanism-ae-bridge-cover.png)
+![Mekanism ME Integration cover](docs/images/mekanism-ae-bridge-cover.png)
 
 一个面向 Minecraft NeoForge 1.21.1 的开发中模组，目标是让 Mekanism 加工机器直接作为 AE2 处理样板提供器工作，并逐步实现类似 GTNH 样板总成的任务缓存与调度体验。
 
 发布页文案：[中文简介](docs/project-description.zh-CN.md) · [English description](docs/project-description.en.md)
 
-> 当前版本为 `v0.2.0-beta.3`。核心玩法已经可用，但存档格式、GUI 和加工调度仍可能继续调整，升级前请备份重要存档。
+> 当前版本为 `v0.2.0`。核心玩法已经可用，但存档格式、GUI 和加工调度仍可能继续调整，升级前请备份重要存档。
 
 ## 当前实现
 
@@ -95,7 +95,7 @@
 
 ## 配置
 
-在模组列表中选择 Mekanism AE Bridge 并点击“配置”，或直接编辑以下文件：
+在模组列表中选择 Mekanism ME Integration 并点击“配置”，或直接编辑以下文件：
 
 - 全局默认：`config/mekanismae-server.toml`。
 - 每存档覆盖：把全局文件复制到 `saves/<存档>/serverconfig/mekanismae-server.toml`，再修改该副本。NeoForge 只在同名副本存在时启用该存档的覆盖值。

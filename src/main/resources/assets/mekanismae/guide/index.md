@@ -1,14 +1,14 @@
 ---
 navigation:
-  title: Mekanism AE Bridge
+  title: Mekanism ME Integration
   position: 0
 ---
 
-# Mekanism AE Bridge
+# Mekanism ME Integration
 
 <ItemImage id="me_enrichment_chamber" scale="4" />
 
-Mekanism AE Bridge turns Mekanism processing machines into native AE2 processing-pattern providers. Each machine stores encoded patterns, accepts complete crafting jobs directly from AE2, processes items, fluids, and chemicals, and returns actual products to ME storage.
+Mekanism ME Integration turns Mekanism processing machines into native AE2 processing-pattern providers. Each machine stores encoded patterns, accepts complete crafting jobs directly from AE2, processes items, fluids, and chemicals, and returns actual products to ME storage.
 
 * [Getting Started](getting-started.md)
 * [Processing Patterns](processing-patterns.md)

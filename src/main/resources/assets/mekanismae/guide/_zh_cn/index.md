@@ -1,14 +1,14 @@
 ---
 navigation:
-  title: Mekanism AE Bridge
+  title: Mekanism ME Integration
   position: 0
 ---
 
-# Mekanism AE Bridge
+# Mekanism ME Integration
 
 <ItemImage id="me_enrichment_chamber" scale="4" />
 
-Mekanism AE Bridge 让 Mekanism 加工机器直接成为 AE2 处理样板提供器。每台机器都能保存编码样板、接收 AE2 一次性发配的完整任务，在内部处理物品、流体和化学品，并把实际产物送回 ME 存储。
+Mekanism ME Integration 让 Mekanism 加工机器直接成为 AE2 处理样板提供器。每台机器都能保存编码样板、接收 AE2 一次性发配的完整任务，在内部处理物品、流体和化学品，并把实际产物送回 ME 存储。
 
 * [快速开始](getting-started.md)
 * [处理样板](processing-patterns.md)

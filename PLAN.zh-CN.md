@@ -1,4 +1,4 @@
-# Mekanism AE Bridge 开发计划
+# Mekanism ME Integration 开发计划
 
 ## 1. 项目定位
 
@@ -6,7 +6,7 @@
 
 项目目录：`E:\mods\ae2fushu`
 
-暂定项目名称：`Mekanism AE Bridge`
+项目名称：`Mekanism ME Integration`
 
 暂定 Mod ID：`mekanismae`
 
@@ -888,3 +888,9 @@ JEI 不复制 Mekanism 配方或分类，而是复用官方分类：
 
 - ME 化学灌注器、ME 电解分离器、ME 回旋式气液转换机和 ME 化学清洗机的 `base_operations_per_cycle` 默认值由 20 统一提升为 1,000。
 - 当前开发环境配置同步为 1,000，避免已有配置文件继续覆盖新默认值。实际单周期并行仍受内部可用能量、任务缓存、等级安装器和并行卡共同约束。
+
+### 15.30 v0.2.0 正式版发布（2026-08-17）
+
+- 当前已完成功能、GuideME 指南、AE2 CPU 订单持久化修复、配置系统、19 台机器和自动化 GameTest 汇总为正式版 `v0.2.0`。
+- GUI 与方块材质重构暂不纳入本版本，后续单独评估；ME 机器监控终端也暂缓开发。
+- 发布前已完成 11 项 GameTest 和完整离线构建，正式 JAR 使用 Java 21、NeoForge 21.1.248、Mekanism 10.7.19、AE2 19.2.17、Applied Mekanistics 1.6.3 和 GuideME 21.1.17 验证。
