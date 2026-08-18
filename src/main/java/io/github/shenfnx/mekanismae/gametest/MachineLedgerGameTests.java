@@ -16,6 +16,7 @@ import io.github.shenfnx.mekanismae.block.entity.MeElectrolyticSeparatorBlockEnt
 import io.github.shenfnx.mekanismae.block.entity.MeEnrichmentChamberBlockEntity;
 import io.github.shenfnx.mekanismae.config.MachineSettings;
 import io.github.shenfnx.mekanismae.config.MachineType;
+import io.github.shenfnx.mekanismae.compat.mekanismextras.MekanismExtrasCompat;
 import io.github.shenfnx.mekanismae.registry.ModBlocks;
 import io.github.shenfnx.mekanismae.registry.ModItems;
 import java.util.List;
@@ -47,6 +48,12 @@ public final class MachineLedgerGameTests {
 
     @GameTest(templateNamespace = "minecraft", template = EMPTY_TEMPLATE)
     public static void machineSettingsClampAndSaturate(GameTestHelper helper) {
+        helper.assertValueEqual(ModItems.SPEED_CARD.get().getDefaultMaxStackSize(), 64,
+                "speed-card inventory stack size");
+        helper.assertValueEqual(ModItems.PARALLEL_CARD.get().getDefaultMaxStackSize(), 64,
+                "parallel-card inventory stack size");
+        helper.assertValueEqual(ModItems.ENERGY_CARD.get().getDefaultMaxStackSize(), 64,
+                "energy-card inventory stack size");
         helper.assertValueEqual(MachineType.ME_CHEMICAL_INFUSER.defaultBaseOperationsPerCycle(), 1_000,
                 "chemical infuser base throughput");
         helper.assertValueEqual(MachineType.ME_ELECTROLYTIC_SEPARATOR.defaultBaseOperationsPerCycle(), 1_000,
@@ -62,14 +69,16 @@ public final class MachineLedgerGameTests {
                 10_000, 20, 20, Long.MAX_VALUE / 2 + 1,
                 List.of(1, 2, 3, 4, 5, 6, 7, 8, 9),
                 List.of(1, 2, 3, 4, 6, 8, 10, 12, 16),
-                List.of(3, 6, 10, 16),
-                List.of(2, 4, 8, 256),
-                List.of(2, 4, 8, 256),
-                List.of(2, 4, 8, 16));
+                List.of(3, 6, 10, 16, 32, 64, 128, 256),
+                List.of(2, 4, 8, 16, 32, 64, 128, 256),
+                List.of(2, 4, 8, 16, 32, 64, 128, 256),
+                List.of(2, 4, 8, 16, 32, 64, 128, 256));
 
         helper.assertValueEqual(settings.speedMultiplier(-10), 1, "negative speed-card clamp");
         helper.assertValueEqual(settings.speedMultiplier(99), 9, "excess speed-card clamp");
         helper.assertValueEqual(settings.parallelMultiplier(8, 3), 5_120, "combined parallel multiplier");
+        helper.assertValueEqual(settings.parallelMultiplier(8, 7), 81_920,
+                "Mekanism Extras Infinite parallel multiplier");
         helper.assertValueEqual(settings.energyCapacity(8, 3), Integer.MAX_VALUE,
                 "saturated energy capacity");
         helper.assertValueEqual(settings.energyReceive(8, 3), Integer.MAX_VALUE,
@@ -122,6 +131,26 @@ public final class MachineLedgerGameTests {
                 "restored parallel multiplier");
         helper.assertValueEqual(restored.getBufferOperationLimit(), machine.getBufferOperationLimit(),
                 "restored buffer limit");
+        helper.succeed();
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = EMPTY_TEMPLATE)
+    public static void optionalMekanismExtrasTierInstallers(GameTestHelper helper) {
+        List<Item> installers = MekanismExtrasCompat.availableTierInstallers();
+        helper.assertTrue(installers.size() == 4 || installers.size() == 8,
+                "tier installer list must contain vanilla installers and optional Mekanism Extras installers");
+        if (installers.size() == 8) {
+            MeEnrichmentChamberBlockEntity machine = placeMachine(helper);
+            for (int index = 4; index < installers.size(); index++) {
+                ItemStack installer = new ItemStack(installers.get(index));
+                helper.assertValueEqual(MekanismExtrasCompat.getTierIndex(installer), index,
+                        "Mekanism Extras tier index");
+                machine.setItem(AbstractMeProcessingBlockEntity.TIER_SLOT_INDEX, installer);
+                helper.assertValueEqual(machine.getTierIndex(), index,
+                        "Mekanism Extras tier installer acceptance");
+                machine.removeItemNoUpdate(AbstractMeProcessingBlockEntity.TIER_SLOT_INDEX);
+            }
+        }
         helper.succeed();
     }
 

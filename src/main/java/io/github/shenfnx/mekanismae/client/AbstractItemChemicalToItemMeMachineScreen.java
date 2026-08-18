@@ -3,6 +3,7 @@ package io.github.shenfnx.mekanismae.client;
 import io.github.shenfnx.mekanismae.menu.AbstractItemChemicalToItemMeMachineMenu;
 import io.github.shenfnx.mekanismae.block.entity.AbstractItemChemicalToItemMeMachineBlockEntity;
 import io.github.shenfnx.mekanismae.registry.ModItems;
+import io.github.shenfnx.mekanismae.compat.mekanismextras.MekanismExtrasCompat;
 import io.github.shenfnx.mekanismae.util.EnergyFormatter;
 import appeng.client.gui.Icon;
 import appeng.client.gui.widgets.OpenGuideButton;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import mekanism.api.MekanismAPI;
-import mekanism.common.registries.MekanismItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -232,12 +232,11 @@ public abstract class AbstractItemChemicalToItemMeMachineScreen<M extends Abstra
                     Optional.empty(), mouseX, mouseY);
         } else if (isOver(mouseX, mouseY, TIER_SLOT_X, TIER_SLOT_Y, 18, 18)
                 && (hoveredSlot == null || !hoveredSlot.hasItem())) {
-            graphics.renderTooltip(font, List.of(
-                    Component.translatable("gui.mekanismae.tier_slot").withStyle(ChatFormatting.AQUA),
-                    upgradeAvailability(MekanismItems.BASIC_TIER_INSTALLER.get().getDescription(), 1),
-                    upgradeAvailability(MekanismItems.ADVANCED_TIER_INSTALLER.get().getDescription(), 1),
-                    upgradeAvailability(MekanismItems.ELITE_TIER_INSTALLER.get().getDescription(), 1),
-                    upgradeAvailability(MekanismItems.ULTIMATE_TIER_INSTALLER.get().getDescription(), 1)),
+            List<Component> tierTooltip = new java.util.ArrayList<>();
+            tierTooltip.add(Component.translatable("gui.mekanismae.tier_slot").withStyle(ChatFormatting.AQUA));
+            MekanismExtrasCompat.availableTierInstallers().forEach(item ->
+                    tierTooltip.add(upgradeAvailability(item.getDescription(), 1)));
+            graphics.renderTooltip(font, tierTooltip,
                     Optional.empty(), mouseX, mouseY);
         } else if (isOver(mouseX, mouseY, UPGRADE_PANEL_X, 4, 32, 153)
                 && (hoveredSlot == null || !hoveredSlot.hasItem())) {

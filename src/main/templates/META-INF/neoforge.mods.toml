@@ -31,6 +31,13 @@ ordering="AFTER"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
+modId="mekanism_extras"
+type="optional"
+versionRange="[1.4.0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
 modId="ae2"
 type="required"
 versionRange="[${ae2_version},)"

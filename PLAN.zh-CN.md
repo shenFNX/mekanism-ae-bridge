@@ -894,3 +894,21 @@ JEI 不复制 Mekanism 配方或分类，而是复用官方分类：
 - 当前已完成功能、GuideME 指南、AE2 CPU 订单持久化修复、配置系统、19 台机器和自动化 GameTest 汇总为正式版 `v0.2.0`。
 - GUI 与方块材质重构暂不纳入本版本，后续单独评估；ME 机器监控终端也暂缓开发。
 - 发布前已完成 11 项 GameTest 和完整离线构建，正式 JAR 使用 Java 21、NeoForge 21.1.248、Mekanism 10.7.19、AE2 19.2.17、Applied Mekanistics 1.6.3 和 GuideME 21.1.17 验证。
+
+### 15.31 升级卡堆叠与独立材质（2026-08-18）
+
+- ME 速度卡、ME 并行卡和 ME 能量卡在玩家物品栏中的最大堆叠数由 16 提升为 64；机器内每类最多安装八张的限制保持不变。
+- 三张卡继续使用独立的 `mekanismae:item/*_card` 资源；最终贴图由用户提供的 AE2 风格 16×16 PNG 接入，速度、能量和并行分别对应 `card_speed.png`、`card_energy.png` 和 `card_并行.png`。
+- GameTest 新增三种卡默认堆叠上限断言，GuideME 中英文升级页同步说明物品栏与机器槽位的不同限制。
+
+### 15.32 Mekanism Extras 可选联动（2026-08-18）
+
+- 新增基于注册名的可选兼容层；未安装 `mekanism_extras` 时保留原版四级安装器行为，安装后自动识别 Absolute、Supreme、Cosmic 和 Infinite 四张工厂安装器。
+- 统一等级索引扩展为八级：原版 Basic/Advanced/Elite/Ultimate 为 0～3，Mekanism Extras Absolute/Supreme/Cosmic/Infinite 为 4～7。扩展安装器可放入与原版相同的左上等级槽，并随机器拆除掉落、NBT 保存和能量/缓存重算。
+- 等级并行默认倍率扩展为 `3/6/10/16/32/64/128/256`，能量容量、FE 输入和任务缓存默认倍率扩展为 `2/4/8/16/32/64/128/256`；旧版只配置四项的存档会对新增四级使用新的内置默认值。
+- GUI 等级安装器提示在检测到 Mekanism Extras 时动态追加四个可用安装器；模组元数据将 Mekanism Extras 声明为可选依赖。
+
+### 15.33 v0.2.1 正式版（2026-08-19）
+
+- 正式版包含 Mekanism Extras 可选联动、八级高并行等级曲线，以及用户确认后的速度卡、能量卡和并行卡 16×16 材质。
+- 发布前完成无附属和带 Mekanism Extras 1.4.0 两种运行环境的 12 项 GameTest，完整离线构建通过。

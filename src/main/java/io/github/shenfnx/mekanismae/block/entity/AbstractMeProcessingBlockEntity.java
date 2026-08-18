@@ -7,6 +7,7 @@ import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.blockentity.grid.AENetworkedBlockEntity;
 import io.github.shenfnx.mekanismae.block.AbstractMeMachineBlock;
+import io.github.shenfnx.mekanismae.compat.mekanismextras.MekanismExtrasCompat;
 import io.github.shenfnx.mekanismae.config.MachineSettings;
 import io.github.shenfnx.mekanismae.config.MachineType;
 import io.github.shenfnx.mekanismae.config.MekanismAeConfig;
@@ -14,9 +15,7 @@ import io.github.shenfnx.mekanismae.registry.ModItems;
 import java.util.ArrayList;
 import java.util.List;
 import mekanism.api.energy.IStrictEnergyHandler;
-import mekanism.api.tier.BaseTier;
 import mekanism.common.integration.energy.forgeenergy.ForgeStrictEnergyHandler;
-import mekanism.common.item.ItemTierInstaller;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -475,16 +474,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     }
 
     public final int getTierIndex() {
-        if (!(tierInstaller.getItem() instanceof ItemTierInstaller installer)) {
-            return -1;
-        }
-        return switch (installer.getToTier()) {
-            case BASIC -> 0;
-            case ADVANCED -> 1;
-            case ELITE -> 2;
-            case ULTIMATE -> 3;
-            default -> -1;
-        };
+        return MekanismExtrasCompat.getTierIndex(tierInstaller);
     }
 
     public final ItemStack getTierInstaller() {
@@ -492,12 +482,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     }
 
     private static boolean isTierInstaller(ItemStack stack) {
-        if (!(stack.getItem() instanceof ItemTierInstaller installer)) {
-            return false;
-        }
-        BaseTier toTier = installer.getToTier();
-        return toTier == BaseTier.BASIC || toTier == BaseTier.ADVANCED
-                || toTier == BaseTier.ELITE || toTier == BaseTier.ULTIMATE;
+        return MekanismExtrasCompat.isTierInstaller(stack);
     }
 
     private boolean isSupportedUpgrade(ItemStack stack) {

@@ -6,7 +6,7 @@
 
 发布页文案：[中文简介](docs/project-description.zh-CN.md) · [English description](docs/project-description.en.md)
 
-> 当前版本为 `v0.2.0`。核心玩法已经可用，但存档格式、GUI 和加工调度仍可能继续调整，升级前请备份重要存档。
+> 当前版本为 `v0.2.1`。核心玩法已经可用，但存档格式、GUI 和加工调度仍可能继续调整，升级前请备份重要存档。
 
 ## 当前实现
 
