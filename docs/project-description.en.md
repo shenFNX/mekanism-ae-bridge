@@ -1,5 +1,27 @@
 # Mekanism ME Integration
 
-Mekanism ME Integration is an automation mod for Minecraft 1.21.1 on NeoForge that turns Mekanism processing machines into native AE2 processing-pattern providers. Instead of building separate input, output, and return logistics around every machine, encoded patterns, items, fluids, chemicals, and finished products can all be scheduled through a single ME network.
+Mekanism ME Integration brings Mekanism's processing line into Applied Energistics 2. It adds ME-connected versions of 19 Mekanism machines, allowing you to encode their recipes as AE2 processing patterns, request jobs from an AE2 crafting CPU, and send the finished products back to ME storage.
 
-The mod currently provides 19 ME-integrated Mekanism machines, each with nine pattern slots, GTNH-style bulk pre-delivery buffering, strict per-pattern isolation, recipe-affinity processing, and unified ledgers for items, fluids, and chemicals. Speed, Parallel, and Energy Cards work alongside Mekanism Tier Installers, while integration with GuideME, JEI, AE2 JEI Integration, and Jade keeps learning, pattern encoding, and machine monitoring straightforward. A flexible configuration system also lets players and modpack authors tune throughput, energy costs, buffer limits, and upgrade multipliers.
+## Highlights
+
+- Nine processing-pattern slots on every machine.
+- Direct AE2 delivery with a large internal job buffer, so crafting CPUs can dispatch many operations at once.
+- Strict isolation for every encoded pattern, including item, fluid, and chemical inputs.
+- Continuous processing of the active recipe instead of unnecessary recipe swapping.
+- FE and Mekanism energy support with a readable machine status screen.
+- Speed, Parallel, and Energy Cards, plus Mekanism tier installers. Each card type supports up to eight installed cards; the items stack to 64 in player inventories.
+- Optional compatibility with Mekanism Extras tier installers.
+- JEI recipe catalysts, AE2 JEI Integration pattern transfer, Jade status information, and a GuideME manual in English and Chinese.
+- Configurable processing speed, energy, buffer capacity, throughput, card curves, and tier multipliers.
+
+## How to use it
+
+Craft the ME version of a Mekanism machine by combining the original machine with an AE2 Pattern Provider in a shapeless recipe. Connect the block to an AE2 cable and provide FE separately. Encode a processing pattern for a recipe supported by that machine, place it in one of the nine top slots, and start the craft from an AE2 terminal.
+
+The machine keeps delivered work in its internal buffer and returns actual recipe products to ME storage. Different patterns have separate resource ledgers, so similar item or chemical recipes cannot cross-contaminate one another.
+
+## Requirements
+
+Minecraft 1.21.1, NeoForge, Mekanism, Applied Energistics 2, Applied Mekanistics, and GuideME are required. JEI, AE2 JEI Integration, Jade, and Mekanism Extras are optional integrations.
+
+For installation details and the complete machine list, see the [project README](../README.md). Downloads are available on the [GitHub Releases page](https://github.com/shenFNX/mekanism-ae-bridge/releases).
