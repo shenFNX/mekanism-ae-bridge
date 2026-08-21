@@ -2,10 +2,16 @@ package io.github.shenfnx.mekanismae.block.entity;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.crafting.PatternDetailsHelper;
+import appeng.api.implementations.blockentities.PatternContainerGroup;
+import appeng.api.inventories.BaseInternalInventory;
+import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.GridFlags;
+import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.crafting.ICraftingProvider;
+import appeng.api.stacks.AEItemKey;
 import appeng.blockentity.grid.AENetworkedBlockEntity;
+import appeng.helpers.patternprovider.PatternContainer;
 import io.github.shenfnx.mekanismae.block.AbstractMeMachineBlock;
 import io.github.shenfnx.mekanismae.compat.appliedflux.AppliedFluxCompat;
 import io.github.shenfnx.mekanismae.compat.mekanismextras.MekanismExtrasCompat;
@@ -42,8 +48,8 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
  * share resources.
  */
 public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEntity
-        implements ICraftingProvider, Container, MenuProvider {
-    public static final int PATTERN_SLOT_COUNT = 9;
+        implements ICraftingProvider, PatternContainer, Container, MenuProvider {
+    public static final int PATTERN_SLOT_COUNT = 27;
     public static final int UPGRADE_SLOT_COUNT = 8;
     public static final int TIER_SLOT_INDEX = PATTERN_SLOT_COUNT + UPGRADE_SLOT_COUNT;
     public static final int MAX_UPGRADES_PER_TYPE = 8;
@@ -55,6 +61,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
             NonNullList.withSize(PATTERN_SLOT_COUNT, ItemStack.EMPTY);
     protected final NonNullList<ItemStack> upgradeSlots =
             NonNullList.withSize(UPGRADE_SLOT_COUNT, ItemStack.EMPTY);
+    private final InternalInventory terminalPatternInventory = new TerminalPatternInventory();
     private ItemStack tierInstaller = ItemStack.EMPTY;
     protected int speedUpgrades;
     protected int parallelUpgrades;
@@ -149,6 +156,34 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
 
     public final boolean canTakePattern() {
         return !hasProcessingWork();
+    }
+
+    @Override
+    public final IGrid getGrid() {
+        return getMainNode().getGrid();
+    }
+
+    @Override
+    public final boolean isVisibleInTerminal() {
+        // The pattern access terminal has no read-only slot state. Hide a busy
+        // machine so it cannot bypass the same ledger-safety lock as our menu.
+        return canTakePattern();
+    }
+
+    @Override
+    public final InternalInventory getTerminalPatternInventory() {
+        return terminalPatternInventory;
+    }
+
+    @Override
+    public final long getTerminalSortOrder() {
+        return worldPosition.asLong();
+    }
+
+    @Override
+    public final PatternContainerGroup getTerminalGroup() {
+        return new PatternContainerGroup(
+                AEItemKey.of(getBlockState().getBlock()), getDisplayName(), List.of());
     }
 
     @Override
@@ -577,6 +612,53 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
                 setChanged();
             }
             return extracted;
+        }
+    }
+
+    /** Bridges the machine's real pattern slots into AE2's pattern access terminal. */
+    private final class TerminalPatternInventory extends BaseInternalInventory {
+        @Override
+        public int size() {
+            return PATTERN_SLOT_COUNT;
+        }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            return 1;
+        }
+
+        @Override
+        public ItemStack getStackInSlot(int slot) {
+            if (slot < 0 || slot >= PATTERN_SLOT_COUNT || !canTakePattern()) {
+                return ItemStack.EMPTY;
+            }
+            return patternSlots.get(slot);
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return slot >= 0 && slot < PATTERN_SLOT_COUNT
+                    && canTakePattern()
+                    && PatternDetailsHelper.isEncodedPattern(stack);
+        }
+
+        @Override
+        public void setItemDirect(int slot, ItemStack stack) {
+            if (slot < 0 || slot >= PATTERN_SLOT_COUNT || !canTakePattern()) {
+                return;
+            }
+            if (stack.isEmpty()) {
+                removeItemNoUpdate(slot);
+                return;
+            }
+            if (!PatternDetailsHelper.isEncodedPattern(stack)) {
+                return;
+            }
+            ItemStack current = patternSlots.get(slot);
+            if (!current.isEmpty() && !ItemStack.isSameItemSameComponents(current, stack)) {
+                removeItemNoUpdate(slot);
+            }
+            setItem(slot, stack.copyWithCount(1));
         }
     }
 

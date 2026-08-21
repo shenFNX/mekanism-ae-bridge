@@ -24,6 +24,6 @@ With Applied Flux and AE2 Lightning Tech installed, an Overloaded Power Supply c
 
 ## Install a Pattern
 
-Encode a processing pattern for the matching Mekanism recipe and place it in one of the nine pattern slots across the top of the machine. With JEI and AE2 JEI Integration installed, the JEI `+` button can fill the Pattern Encoding Terminal directly.
+Encode a processing pattern for the matching Mekanism recipe and place it in one of the 27 pattern slots across the top of the machine. With JEI and AE2 JEI Integration installed, the JEI `+` button can fill the Pattern Encoding Terminal directly.
 
 Once the pattern is installed, the machine publishes it to AE2. Start the craft from an AE terminal; ingredients are delivered into the machine's internal task buffer rather than visible inventory slots.

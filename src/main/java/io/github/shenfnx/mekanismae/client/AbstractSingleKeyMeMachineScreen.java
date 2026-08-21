@@ -30,17 +30,19 @@ public abstract class AbstractSingleKeyMeMachineScreen<M extends AbstractSingleK
         super.renderLabels(graphics, mouseX, mouseY);
         Component chemicalLine = chemicalLine();
         if (chemicalLine != null) {
-            graphics.drawString(font, chemicalLine, 121, 99, 0xFFE0E0E0, false);
+            graphics.drawString(font, chemicalLine, 121, 99 + CONTENT_Y_OFFSET, 0xFFE0E0E0, false);
         }
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        if (isOver(mouseX, mouseY, 42, 72, 18, 18) && menu.inputChemicalRegistryId() >= 0) {
+        if (isOver(mouseX, mouseY, 42, 72 + CONTENT_Y_OFFSET, 18, 18)
+                && menu.inputChemicalRegistryId() >= 0) {
             renderChemicalTooltip(graphics, mouseX, mouseY,
                     menu.inputChemicalRegistryId(), menu.inputChemicalAmount());
-        } else if (isOver(mouseX, mouseY, 91, 72, 18, 18) && menu.outputChemicalRegistryId() >= 0) {
+        } else if (isOver(mouseX, mouseY, 91, 72 + CONTENT_Y_OFFSET, 18, 18)
+                && menu.outputChemicalRegistryId() >= 0) {
             renderChemicalTooltip(graphics, mouseX, mouseY,
                     menu.outputChemicalRegistryId(), menu.outputChemicalAmount());
         }
@@ -84,8 +86,8 @@ public abstract class AbstractSingleKeyMeMachineScreen<M extends AbstractSingleK
             return;
         }
         graphics.renderTooltip(font, List.of(
-                chemical.getTextComponent().copy().withStyle(ChatFormatting.AQUA),
-                Component.literal(formatAmount(amount))), Optional.empty(), mouseX, mouseY);
+                chemical.getTextComponent().copy().withStyle(ChatFormatting.AQUA)),
+                Optional.empty(), mouseX, mouseY);
     }
 
     private boolean isOver(double mouseX, double mouseY, int x, int y, int width, int height) {

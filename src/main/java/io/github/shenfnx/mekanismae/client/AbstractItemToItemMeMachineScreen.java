@@ -29,10 +29,11 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends net.minecraft.
         extends AbstractContainerScreen<M> {
     private static final int MAIN_WIDTH = 256;
     private static final int UPGRADE_PANEL_X = 256;
+    protected static final int CONTENT_Y_OFFSET = 36;
     private static final int NETWORK_TAB_X = -26;
-    private static final int NETWORK_TAB_Y = 55;
-    private static final int RETURN_TAB_Y = 84;
-    private static final int ENERGY_TAB_Y = 142;
+    private static final int NETWORK_TAB_Y = 55 + CONTENT_Y_OFFSET;
+    private static final int RETURN_TAB_Y = 84 + CONTENT_Y_OFFSET;
+    private static final int ENERGY_TAB_Y = 142 + CONTENT_Y_OFFSET;
     private static final int TIER_SLOT_X = 7;
     private static final int TIER_SLOT_Y = 28;
     private static final int GUIDE_BUTTON_X = 232;
@@ -50,9 +51,9 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends net.minecraft.
     protected AbstractItemToItemMeMachineScreen(M menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         imageWidth = 288;
-        imageHeight = 217;
+        imageHeight = 253;
         inventoryLabelX = 32;
-        inventoryLabelY = 123;
+        inventoryLabelY = 159;
     }
 
     @Override
@@ -72,24 +73,24 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends net.minecraft.
         int left = leftPos;
         int top = topPos;
         drawMekanismPanel(graphics, left, top, MAIN_WIDTH, imageHeight);
-        drawInset(graphics, left + 24, top + 52, 226, 67, 0xFF9A9A9A);
-        drawDigitalScreen(graphics, left + 116, top + 55, 132, 61);
+        drawInset(graphics, left + 24, top + 52 + CONTENT_Y_OFFSET, 226, 67, 0xFF9A9A9A);
+        drawDigitalScreen(graphics, left + 116, top + 55 + CONTENT_Y_OFFSET, 132, 61);
 
-        // Nine processing-pattern slots across the top.
+        // Twenty-seven processing-pattern slots in three rows.
         drawSlot(graphics, left + TIER_SLOT_X, top + TIER_SLOT_Y);
         for (int index = 0; index < AbstractItemToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT; index++) {
-            drawSlot(graphics, left + 30 + index * 18, top + 28);
+            drawSlot(graphics, left + 30 + index % 9 * 18, top + 28 + index / 9 * 18);
         }
 
-        drawProcessingArea(graphics, left, top);
+        drawProcessingArea(graphics, left, top + CONTENT_Y_OFFSET);
 
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                drawSlot(graphics, left + 31 + column * 18, top + 134 + row * 18);
+                drawSlot(graphics, left + 31 + column * 18, top + 170 + row * 18);
             }
         }
         for (int column = 0; column < 9; column++) {
-            drawSlot(graphics, left + 31 + column * 18, top + 192);
+            drawSlot(graphics, left + 31 + column * 18, top + 228);
         }
 
         drawNetworkTab(graphics, left, top);
@@ -193,20 +194,22 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends net.minecraft.
         graphics.drawString(font, title, 8, 6, 0xFF404040, false);
         graphics.drawString(font, Component.translatable("gui.mekanismae.patterns"), 31, 17, 0xFF404040, false);
         Component currentProcess = Component.translatable("gui.mekanismae.current_process");
-        graphics.drawString(font, currentProcess, 70 - font.width(currentProcess) / 2, 57, 0xFF404040, false);
+        graphics.drawString(font, currentProcess, 70 - font.width(currentProcess) / 2,
+                57 + CONTENT_Y_OFFSET, 0xFF404040, false);
         graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFF404040, false);
 
         int statusColor = menu.processingFaulted() ? 0xFFFF6868
                 : !menu.networkEnabled() ? 0xFFFFB347
                 : menu.networkOnline() && !menu.processingFaulted() ? 0xFF53E2AC : 0xFFFF6868;
-        graphics.drawString(font, menu.statusText(), 121, 59, statusColor, false);
+        graphics.drawString(font, menu.statusText(), 121, 59 + CONTENT_Y_OFFSET, statusColor, false);
         graphics.drawString(font, Component.translatable("gui.mekanismae.buffer_info",
                 formatAmount(menu.bufferOps()), formatAmount(menu.bufferOpsCap())),
-                121, 72, 0xFFE0E0E0, false);
-        graphics.drawString(font, compactEnergyLine(), 121, 85, 0xFFE0E0E0, false);
+                121, 72 + CONTENT_Y_OFFSET, 0xFFE0E0E0, false);
+        graphics.drawString(font, compactEnergyLine(), 121, 85 + CONTENT_Y_OFFSET, 0xFFE0E0E0, false);
         Component progressText = Component.literal(Math.min(100,
                 menu.progress() * 100 / menu.processingTicks()) + "%");
-        graphics.drawString(font, progressText, progressLabelX(progressText), progressLabelY(), 0xFF404040, false);
+        graphics.drawString(font, progressText, progressLabelX(progressText),
+                progressLabelY() + CONTENT_Y_OFFSET, 0xFF404040, false);
     }
 
     protected int progressLabelX(Component progressText) {
@@ -222,6 +225,7 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends net.minecraft.
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         renderCustomTooltip(graphics, mouseX, mouseY);
+        renderTooltip(graphics, mouseX, mouseY);
     }
 
     private void renderCustomTooltip(GuiGraphics graphics, int mouseX, int mouseY) {

@@ -37,7 +37,7 @@
   "gui.mekanismae.status.processing": "Processing",
   "gui.mekanismae.status.idle": "Idle",
   "gui.mekanismae.pattern": "Processing Pattern",
-  "gui.mekanismae.patterns": "Processing Patterns (9)",
+  "gui.mekanismae.patterns": "Processing Patterns",
   "gui.mekanismae.current_process": "Current Process",
   "gui.mekanismae.pending": "Queue: %s",
   "gui.mekanismae.buffer_info": "Buf: %s/%s",

@@ -14,7 +14,8 @@ The goal is simple: keep Mekanism's recipes and machines, while letting AE2 hand
 ## What it adds
 
 - **19 ME-connected Mekanism machines**, covering item processing, item + chemical recipes, fluid processing, and chemical processing.
-- **Nine encoded-pattern slots per machine**, so one block can serve multiple recipes.
+- **27 encoded-pattern slots per machine**, arranged in three rows so one block can serve many recipes.
+- **AE2 Pattern Access Terminal support** for viewing and managing the patterns of connected idle machines from one place.
 - **Direct AE2 crafting integration**: patterns are published to the network and jobs are delivered from an AE2 crafting CPU.
 - **Large internal job buffers** inspired by the GTNH pattern-provider workflow. A crafting CPU can dispatch many operations at once instead of stopping at the machine's current parallel amount.
 - **Per-pattern resource isolation** for items, fluids, and chemicals. Inputs and products from different encoded patterns cannot be mixed together.
@@ -46,7 +47,7 @@ Each machine exposes the recipes of its corresponding Mekanism machine. Multi-ou
 1. Craft an ME machine by combining the matching Mekanism machine with an AE2 Pattern Provider in a shapeless recipe.
 2. Connect the machine to an AE2 cable. By default, it uses one ME channel.
 3. Supply the machine with FE through a compatible cable, such as a Mekanism Universal Cable. The AE2 connection and the machine's internal FE buffer are separate systems.
-4. Encode an **AE2 processing pattern** for a recipe supported by that machine, then place it in one of the nine pattern slots across the top.
+4. Encode an **AE2 processing pattern** for a recipe supported by that machine, then place it in one of the 27 pattern slots across the top.
 5. Start the craft from an AE2 terminal. AE2 sends the complete job into the machine's internal buffer; the materials do not need to appear in ordinary item slots.
 6. Install cards or a Mekanism tier installer when more speed, energy capacity, input rate, buffer space, or parallel processing is needed.
 

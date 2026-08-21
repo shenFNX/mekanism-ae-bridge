@@ -14,7 +14,9 @@ navigation:
 
 ## Machine Panel
 
-The top row contains nine processing-pattern slots. The upper-left slot holds one Mekanism tier installer. The right drawer contains Speed, Parallel, and Energy Cards. The center display shows status, buffered operations, energy, current resources, progress, and the player-facing parallel multiplier.
+The three top rows contain 27 processing-pattern slots. The upper-left slot holds one Mekanism tier installer. The right drawer contains Speed, Parallel, and Energy Cards. The center display shows status, buffered operations, energy, current resources, progress, and the player-facing parallel multiplier.
+
+Hover the current-processing resource slots to identify displayed items, fluids, and chemicals by name.
 
 The question-mark button opens this guide. GuideME's configurable guide hotkey can also open it directly.
 

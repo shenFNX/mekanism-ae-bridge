@@ -37,7 +37,8 @@ public abstract class AbstractMultiKeyMeMachineMenu extends AbstractContainerMen
         machine = expectedType.cast(inventory.player.level().getBlockEntity(pos));
         for (int index = 0; index < AbstractMultiKeyMeMachineBlockEntity.PATTERN_SLOT_COUNT; index++) {
             int slotIndex = index;
-            addSlot(new Slot(machine, slotIndex, 31 + index * 18, 29) {
+            addSlot(new Slot(machine, slotIndex,
+                    31 + index % 9 * 18, 29 + index / 9 * 18) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return PatternDetailsHelper.isEncodedPattern(stack);
@@ -86,11 +87,11 @@ public abstract class AbstractMultiKeyMeMachineMenu extends AbstractContainerMen
         }
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 32 + column * 18, 135 + row * 18));
+                addSlot(new Slot(inventory, column + row * 9 + 9, 32 + column * 18, 171 + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 32 + column * 18, 193));
+            addSlot(new Slot(inventory, column, 32 + column * 18, 229));
         }
 
         data = inventory.player.level().isClientSide()
@@ -161,16 +162,16 @@ public abstract class AbstractMultiKeyMeMachineMenu extends AbstractContainerMen
                 return -100;
             }
             return switch (inputSlotCount()) {
-                case 1 -> 73;
-                case 2 -> slot == 0 ? 64 : 84;
-                default -> slot == 0 ? 61 : slot == 1 ? 85 : 73;
+                case 1 -> 109;
+                case 2 -> slot == 0 ? 100 : 120;
+                default -> slot == 0 ? 97 : slot == 1 ? 121 : 109;
             };
         }
         int output = slot - AbstractMultiKeyMeMachineBlockEntity.MAX_INPUT_SLOTS;
         if (output >= outputSlotCount()) {
             return -100;
         }
-        return outputSlotCount() == 1 ? 73 : output == 0 ? 64 : 84;
+        return outputSlotCount() == 1 ? 109 : output == 0 ? 100 : 120;
     }
 
     public int resourceType(int slot) {

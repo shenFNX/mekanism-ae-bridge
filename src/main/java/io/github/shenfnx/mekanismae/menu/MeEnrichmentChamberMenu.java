@@ -46,7 +46,8 @@ public class MeEnrichmentChamberMenu extends AbstractContainerMenu implements Me
         chamber = expectedType.cast(inventory.player.level().getBlockEntity(pos));
         for (int index = 0; index < AbstractItemToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT; index++) {
             int slotIndex = index;
-            addSlot(new Slot(chamber, slotIndex, 31 + index * 18, 29) {
+            addSlot(new Slot(chamber, slotIndex,
+                    31 + index % 9 * 18, 29 + index / 9 * 18) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return PatternDetailsHelper.isEncodedPattern(stack);
@@ -92,16 +93,16 @@ public class MeEnrichmentChamberMenu extends AbstractContainerMenu implements Me
 
         processingDisplay.setItem(0, chamber.getProcessingInputDisplay());
         processingDisplay.setItem(1, chamber.getProcessingOutputDisplay());
-        addSlot(readOnlyDisplaySlot(0, 43, 73));
-        addSlot(readOnlyDisplaySlot(1, 92, 73));
+        addSlot(readOnlyDisplaySlot(0, 43, 109));
+        addSlot(readOnlyDisplaySlot(1, 92, 109));
 
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 32 + column * 18, 135 + row * 18));
+                addSlot(new Slot(inventory, column + row * 9 + 9, 32 + column * 18, 171 + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 32 + column * 18, 193));
+            addSlot(new Slot(inventory, column, 32 + column * 18, 229));
         }
 
         data = inventory.player.level().isClientSide()

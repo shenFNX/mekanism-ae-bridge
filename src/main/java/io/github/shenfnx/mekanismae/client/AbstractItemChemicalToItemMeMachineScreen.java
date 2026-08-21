@@ -28,10 +28,11 @@ public abstract class AbstractItemChemicalToItemMeMachineScreen<M extends Abstra
         extends AbstractContainerScreen<M> {
     private static final int MAIN_WIDTH = 256;
     private static final int UPGRADE_PANEL_X = 256;
+    private static final int CONTENT_Y_OFFSET = 36;
     private static final int NETWORK_TAB_X = -26;
-    private static final int NETWORK_TAB_Y = 55;
-    private static final int RETURN_TAB_Y = 84;
-    private static final int ENERGY_TAB_Y = 142;
+    private static final int NETWORK_TAB_Y = 55 + CONTENT_Y_OFFSET;
+    private static final int RETURN_TAB_Y = 84 + CONTENT_Y_OFFSET;
+    private static final int ENERGY_TAB_Y = 142 + CONTENT_Y_OFFSET;
     private static final int TIER_SLOT_X = 7;
     private static final int TIER_SLOT_Y = 28;
     private static final int GUIDE_BUTTON_X = 232;
@@ -49,9 +50,9 @@ public abstract class AbstractItemChemicalToItemMeMachineScreen<M extends Abstra
     protected AbstractItemChemicalToItemMeMachineScreen(M menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         imageWidth = 288;
-        imageHeight = 217;
+        imageHeight = 253;
         inventoryLabelX = 32;
-        inventoryLabelY = 123;
+        inventoryLabelY = 159;
     }
 
     @Override
@@ -71,35 +72,40 @@ public abstract class AbstractItemChemicalToItemMeMachineScreen<M extends Abstra
         int left = leftPos;
         int top = topPos;
         drawMekanismPanel(graphics, left, top, MAIN_WIDTH, imageHeight);
-        drawInset(graphics, left + 24, top + 52, 226, 67, 0xFF9A9A9A);
-        drawDigitalScreen(graphics, left + 116, top + 55, 132, 61);
+        drawInset(graphics, left + 24, top + 52 + CONTENT_Y_OFFSET, 226, 67, 0xFF9A9A9A);
+        drawDigitalScreen(graphics, left + 116, top + 55 + CONTENT_Y_OFFSET, 132, 61);
 
-        // Nine processing-pattern slots across the top.
+        // Twenty-seven processing-pattern slots in three rows.
         drawSlot(graphics, left + TIER_SLOT_X, top + TIER_SLOT_Y);
         for (int index = 0; index < AbstractItemChemicalToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT; index++) {
-            drawSlot(graphics, left + 30 + index * 18, top + 28);
+            drawSlot(graphics, left + 30 + index % 9 * 18, top + 28 + index / 9 * 18);
         }
 
         // Read-only input and expected/finished output for the active operation.
-        drawSlot(graphics, left + 42, top + 72);
-        drawSlot(graphics, left + 91, top + 72);
+        drawSlot(graphics, left + 42, top + 72 + CONTENT_Y_OFFSET);
+        drawSlot(graphics, left + 91, top + 72 + CONTENT_Y_OFFSET);
         int progressWidth = Math.min(22, Math.max(0,
                 menu.progress() * 22 / menu.processingTicks()));
         // The arrow is constrained to the 31 px gap between the two slots.
-        graphics.fill(left + 69, top + 81, left + 82, top + 84, 0xFF555555);
+        graphics.fill(left + 69, top + 81 + CONTENT_Y_OFFSET,
+                left + 82, top + 84 + CONTENT_Y_OFFSET, 0xFF555555);
         int compactProgressWidth = Math.min(12, progressWidth * 12 / 22);
-        graphics.fill(left + 70, top + 82, left + 70 + compactProgressWidth, top + 83, 0xFF23C987);
-        graphics.fill(left + 82, top + 80, left + 84, top + 85, 0xFF555555);
-        graphics.fill(left + 84, top + 81, left + 86, top + 84, 0xFF555555);
-        graphics.fill(left + 86, top + 82, left + 87, top + 83, 0xFF555555);
+        graphics.fill(left + 70, top + 82 + CONTENT_Y_OFFSET,
+                left + 70 + compactProgressWidth, top + 83 + CONTENT_Y_OFFSET, 0xFF23C987);
+        graphics.fill(left + 82, top + 80 + CONTENT_Y_OFFSET,
+                left + 84, top + 85 + CONTENT_Y_OFFSET, 0xFF555555);
+        graphics.fill(left + 84, top + 81 + CONTENT_Y_OFFSET,
+                left + 86, top + 84 + CONTENT_Y_OFFSET, 0xFF555555);
+        graphics.fill(left + 86, top + 82 + CONTENT_Y_OFFSET,
+                left + 87, top + 83 + CONTENT_Y_OFFSET, 0xFF555555);
 
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                drawSlot(graphics, left + 31 + column * 18, top + 134 + row * 18);
+                drawSlot(graphics, left + 31 + column * 18, top + 170 + row * 18);
             }
         }
         for (int column = 0; column < 9; column++) {
-            drawSlot(graphics, left + 31 + column * 18, top + 192);
+            drawSlot(graphics, left + 31 + column * 18, top + 228);
         }
 
         drawNetworkTab(graphics, left, top);
@@ -179,29 +185,31 @@ public abstract class AbstractItemChemicalToItemMeMachineScreen<M extends Abstra
         graphics.drawString(font, title, 8, 6, 0xFF404040, false);
         graphics.drawString(font, Component.translatable("gui.mekanismae.patterns"), 31, 17, 0xFF404040, false);
         Component currentProcess = Component.translatable("gui.mekanismae.current_process");
-        graphics.drawString(font, currentProcess, 70 - font.width(currentProcess) / 2, 57, 0xFF404040, false);
+        graphics.drawString(font, currentProcess, 70 - font.width(currentProcess) / 2,
+                57 + CONTENT_Y_OFFSET, 0xFF404040, false);
         graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFF404040, false);
 
         int statusColor = menu.processingFaulted() ? 0xFFFF6868
                 : !menu.networkEnabled() ? 0xFFFFB347
                 : menu.networkOnline() && !menu.processingFaulted() ? 0xFF53E2AC : 0xFFFF6868;
-        graphics.drawString(font, menu.statusText(), 121, 57, statusColor, false);
+        graphics.drawString(font, menu.statusText(), 121, 57 + CONTENT_Y_OFFSET, statusColor, false);
         graphics.drawString(font, Component.translatable("gui.mekanismae.buffer_info",
                 formatAmount(menu.bufferOps()), formatAmount(menu.bufferOpsCap())),
-                121, 68, 0xFFE0E0E0, false);
-        graphics.drawString(font, compactChemicalLine(), 121, 79, 0xFFE0E0E0, false);
-        graphics.drawString(font, compactEnergyLine(), 121, 90, 0xFFE0E0E0, false);
+                121, 68 + CONTENT_Y_OFFSET, 0xFFE0E0E0, false);
+        graphics.drawString(font, compactChemicalLine(), 121, 79 + CONTENT_Y_OFFSET, 0xFFE0E0E0, false);
+        graphics.drawString(font, compactEnergyLine(), 121, 90 + CONTENT_Y_OFFSET, 0xFFE0E0E0, false);
         Component progressText = Component.literal(Math.min(100,
                 menu.progress() * 100 / menu.processingTicks()) + "%");
         int progressWidth = font.width(progressText);
         int progressX = Math.max(26, Math.min(112 - progressWidth, 70 - progressWidth / 2));
-        graphics.drawString(font, progressText, progressX, 96, 0xFF404040, false);
+        graphics.drawString(font, progressText, progressX, 96 + CONTENT_Y_OFFSET, 0xFF404040, false);
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         renderCustomTooltip(graphics, mouseX, mouseY);
+        renderTooltip(graphics, mouseX, mouseY);
     }
 
     private void renderCustomTooltip(GuiGraphics graphics, int mouseX, int mouseY) {

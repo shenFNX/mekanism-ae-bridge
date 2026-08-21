@@ -12,6 +12,7 @@ import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
 import appeng.core.definitions.AEBlocks;
+import appeng.helpers.patternprovider.PatternContainer;
 import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.block.entity.AbstractMeProcessingBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.AbstractMultiKeyMeMachineBlockEntity;
@@ -63,6 +64,8 @@ public final class MachineLedgerGameTests {
 
     @GameTest(templateNamespace = "minecraft", template = EMPTY_TEMPLATE)
     public static void machineSettingsClampAndSaturate(GameTestHelper helper) {
+        helper.assertValueEqual(AbstractMeProcessingBlockEntity.PATTERN_SLOT_COUNT, 27,
+                "processing-pattern slot count");
         helper.assertValueEqual(ModItems.SPEED_CARD.get().getDefaultMaxStackSize(), 64,
                 "speed-card inventory stack size");
         helper.assertValueEqual(ModItems.PARALLEL_CARD.get().getDefaultMaxStackSize(), 64,
@@ -130,6 +133,16 @@ public final class MachineLedgerGameTests {
         machine.setItem(firstUpgradeSlot + 2, new ItemStack(ModItems.ENERGY_CARD.get(), 16));
         machine.setItem(AbstractMeProcessingBlockEntity.TIER_SLOT_INDEX,
                 new ItemStack(MekanismItems.ULTIMATE_TIER_INSTALLER.get(), 4));
+        ItemStack lastPattern = PatternDetailsHelper.encodeProcessingPattern(
+                List.of(new GenericStack(AEItemKey.of(Items.SAND), 1)),
+                List.of(new GenericStack(AEItemKey.of(Items.REDSTONE), 1)));
+        PatternContainer terminalContainer = machine;
+        helper.assertValueEqual(terminalContainer.getTerminalPatternInventory().size(), 27,
+                "pattern access terminal inventory size");
+        helper.assertTrue(terminalContainer.getTerminalGroup().icon() != null,
+                "pattern access terminal machine icon");
+        terminalContainer.getTerminalPatternInventory().setItemDirect(
+                AbstractMeProcessingBlockEntity.PATTERN_SLOT_COUNT - 1, lastPattern);
         machine.getEnergyStorage().receiveEnergy(123_456, false);
         machine.toggleNetworkEnabled();
 
@@ -156,6 +169,8 @@ public final class MachineLedgerGameTests {
         helper.assertValueEqual(restored.getUpgradeCount(ModItems.ENERGY_CARD.get()), 8,
                 "restored energy cards");
         helper.assertValueEqual(restored.getTierIndex(), 3, "restored ultimate tier");
+        helper.assertFalse(restored.getItem(AbstractMeProcessingBlockEntity.PATTERN_SLOT_COUNT - 1).isEmpty(),
+                "restored twenty-seventh processing pattern");
         helper.assertFalse(restored.isNetworkEnabled(), "network toggle should survive reload");
         helper.assertValueEqual(restored.getEnergyStorage().getEnergyStored(), 123_456,
                 "restored energy");
@@ -216,6 +231,8 @@ public final class MachineLedgerGameTests {
                 "total isolated operations");
         helper.assertTrue(machine.getProcessingInputDisplay().is(Items.SAND),
                 "the active pattern must remain sand until it drains");
+        helper.assertFalse(machine.isVisibleInTerminal(),
+                "busy machines must not expose removable patterns in the access terminal");
 
         CompoundTag saved = machine.saveWithoutMetadata(helper.getLevel().registryAccess());
         MeEnrichmentChamberBlockEntity restored = new MeEnrichmentChamberBlockEntity(

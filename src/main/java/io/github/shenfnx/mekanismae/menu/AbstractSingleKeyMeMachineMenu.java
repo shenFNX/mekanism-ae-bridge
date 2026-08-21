@@ -37,7 +37,8 @@ public abstract class AbstractSingleKeyMeMachineMenu extends AbstractContainerMe
         machine = expectedType.cast(inventory.player.level().getBlockEntity(pos));
         for (int index = 0; index < AbstractSingleKeyMeMachineBlockEntity.PATTERN_SLOT_COUNT; index++) {
             int slotIndex = index;
-            addSlot(new Slot(machine, slotIndex, 31 + index * 18, 29) {
+            addSlot(new Slot(machine, slotIndex,
+                    31 + index % 9 * 18, 29 + index / 9 * 18) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return PatternDetailsHelper.isEncodedPattern(stack);
@@ -82,15 +83,15 @@ public abstract class AbstractSingleKeyMeMachineMenu extends AbstractContainerMe
         });
 
         refreshDisplay();
-        addSlot(readOnlyDisplaySlot(0, 43, 73));
-        addSlot(readOnlyDisplaySlot(1, 92, 73));
+        addSlot(readOnlyDisplaySlot(0, 43, 109));
+        addSlot(readOnlyDisplaySlot(1, 92, 109));
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(inventory, column + row * 9 + 9, 32 + column * 18, 135 + row * 18));
+                addSlot(new Slot(inventory, column + row * 9 + 9, 32 + column * 18, 171 + row * 18));
             }
         }
         for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(inventory, column, 32 + column * 18, 193));
+            addSlot(new Slot(inventory, column, 32 + column * 18, 229));
         }
 
         data = inventory.player.level().isClientSide()

@@ -47,20 +47,23 @@ public abstract class AbstractDualKeyMeMachineScreen<M extends AbstractDualKeyMe
                             formatAmount(menu.outputChemicalAmount()))
                     : Component.translatable("gui.mekanismae.chemical_output",
                             chemical.getTextComponent(), formatAmount(menu.outputChemicalAmount()));
-            graphics.drawString(font, output, 121, 99, 0xFFE0E0E0, false);
+            graphics.drawString(font, output, 121, 99 + CONTENT_Y_OFFSET, 0xFFE0E0E0, false);
         }
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        if (isOver(mouseX, mouseY, 30, 72, 18, 18) && menu.firstChemicalRegistryId() >= 0) {
+        if (isOver(mouseX, mouseY, 30, 72 + CONTENT_Y_OFFSET, 18, 18)
+                && menu.firstChemicalRegistryId() >= 0) {
             renderChemicalTooltip(graphics, mouseX, mouseY,
                     menu.firstChemicalRegistryId(), menu.firstChemicalAmount());
-        } else if (isOver(mouseX, mouseY, 55, 72, 18, 18) && menu.secondChemicalRegistryId() >= 0) {
+        } else if (isOver(mouseX, mouseY, 55, 72 + CONTENT_Y_OFFSET, 18, 18)
+                && menu.secondChemicalRegistryId() >= 0) {
             renderChemicalTooltip(graphics, mouseX, mouseY,
                     menu.secondChemicalRegistryId(), menu.secondChemicalAmount());
-        } else if (isOver(mouseX, mouseY, 91, 72, 18, 18) && menu.outputChemicalRegistryId() >= 0) {
+        } else if (isOver(mouseX, mouseY, 91, 72 + CONTENT_Y_OFFSET, 18, 18)
+                && menu.outputChemicalRegistryId() >= 0) {
             renderChemicalTooltip(graphics, mouseX, mouseY,
                     menu.outputChemicalRegistryId(), menu.outputChemicalAmount());
         }
@@ -82,8 +85,8 @@ public abstract class AbstractDualKeyMeMachineScreen<M extends AbstractDualKeyMe
         Chemical chemical = MekanismAPI.CHEMICAL_REGISTRY.byId(registryId);
         if (chemical != null) {
             graphics.renderTooltip(font, List.of(
-                    chemical.getTextComponent().copy().withStyle(ChatFormatting.AQUA),
-                    Component.literal(formatAmount(amount))), Optional.empty(), mouseX, mouseY);
+                    chemical.getTextComponent().copy().withStyle(ChatFormatting.AQUA)),
+                    Optional.empty(), mouseX, mouseY);
         }
     }
 

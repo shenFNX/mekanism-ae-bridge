@@ -3,7 +3,6 @@ package io.github.shenfnx.mekanismae.client;
 import io.github.shenfnx.mekanismae.block.entity.AbstractMultiKeyMeMachineBlockEntity;
 import io.github.shenfnx.mekanismae.menu.AbstractMultiKeyMeMachineMenu;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
@@ -24,11 +23,12 @@ public abstract class AbstractMultiKeyMeMachineScreen<M extends AbstractMultiKey
 
     @Override
     protected final void drawProcessingArea(GuiGraphics graphics, int left, int top) {
+        int unshiftedTop = top - CONTENT_Y_OFFSET;
         for (int slot = 0; slot < AbstractMultiKeyMeMachineBlockEntity.RESOURCE_DISPLAY_SLOTS; slot++) {
             int x = menu.displaySlotX(slot);
             int y = menu.displaySlotY(slot);
             if (x >= 0) {
-                drawSlot(graphics, left + x, top + y);
+                drawSlot(graphics, left + x, unshiftedTop + y);
             }
         }
         drawProcessingArrow(graphics, left, top, arrowStartX(), arrowEndX());
@@ -36,7 +36,7 @@ public abstract class AbstractMultiKeyMeMachineScreen<M extends AbstractMultiKey
             int x = menu.displaySlotX(slot);
             int y = menu.displaySlotY(slot);
             if (x >= 0) {
-                drawResourceSwatch(graphics, left + x, top + y,
+                drawResourceSwatch(graphics, left + x, unshiftedTop + y,
                         menu.resourceType(slot), menu.resourceRegistryId(slot));
             }
         }
@@ -108,8 +108,7 @@ public abstract class AbstractMultiKeyMeMachineScreen<M extends AbstractMultiKey
         }
         if (name != null) {
             graphics.renderTooltip(font, List.of(
-                    name.copy().withStyle(ChatFormatting.AQUA),
-                    Component.literal(formatAmount(menu.resourceAmount(slot)) + " mB")),
+                    name.copy().withStyle(ChatFormatting.AQUA)),
                     Optional.empty(), mouseX, mouseY);
         }
     }
@@ -126,15 +125,4 @@ public abstract class AbstractMultiKeyMeMachineScreen<M extends AbstractMultiKey
         return 0xFF000000 | red << 16 | green << 8 | blue;
     }
 
-    private static String formatAmount(long amount) {
-        if (amount >= 1_000_000) {
-            return amount % 1_000_000 == 0 ? amount / 1_000_000 + "M"
-                    : String.format(Locale.ROOT, "%.2fM", amount / 1_000_000.0);
-        }
-        if (amount >= 1_000) {
-            return amount % 1_000 == 0 ? amount / 1_000 + "k"
-                    : String.format(Locale.ROOT, "%.1fk", amount / 1_000.0);
-        }
-        return Long.toString(Math.max(0, amount));
-    }
 }

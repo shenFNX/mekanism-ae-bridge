@@ -16,7 +16,7 @@ Confirm that it is an encoded processing pattern, is installed in a top slot, an
 
 ## A Large Multiplied Pattern Will Not Dispatch
 
-The multiplier must represent complete operations. Also check the configured task-buffer limit and available CPU ingredients. The nine pattern slots are not a nine-operation dispatch limit.
+The multiplier must represent complete operations. Also check the configured task-buffer limit and available CPU ingredients. The 27 pattern slots are not a 27-operation dispatch limit.
 
 ## Crafting Is Waiting
 

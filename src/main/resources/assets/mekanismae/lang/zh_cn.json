@@ -36,7 +36,7 @@
   "gui.mekanismae.status.processing": "处理中",
   "gui.mekanismae.status.idle": "空闲",
   "gui.mekanismae.pattern": "处理样板",
-  "gui.mekanismae.patterns": "处理样板（9）",
+  "gui.mekanismae.patterns": "处理样板",
   "gui.mekanismae.current_process": "当前加工",
   "gui.mekanismae.pending": "队列：%s",
   "gui.mekanismae.buffer_info": "缓存：%s/%s",
