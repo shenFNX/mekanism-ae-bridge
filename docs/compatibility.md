@@ -48,6 +48,8 @@ The 19 ME machines are registered as recipe catalysts for their corresponding Me
 
 Applied Flux normally rejects energy targets that expose an AE2 grid node belonging to the same grid as its accessor. All Mekanism ME Integration machines are receive-only energy consumers, so the optional compatibility mixin exempts only these block entities from that loop-prevention check. This lets Applied Flux accessors and AE2 Lightning Tech's Overloaded Power Supply feed the machines without allowing energy extraction from them. The mixin is pseudo-targeted and optional; neither Applied Flux nor AE2 Lightning Tech is required to launch the mod.
 
+The same optional integration accepts one `appflux:induction_card` in the shared upgrade drawer. While the machine's AE node is online, it extracts `FluxKey.of(EnergyType.FE)` from the grid storage service into the local receive-only buffer. Each transfer is capped by the lower of the machine's current FE receive limit and Applied Flux's configured flux-accessor I/O limit. A full local buffer performs no grid-storage operation.
+
 Release sources:
 
 - [JEI official source](https://github.com/mezz/JustEnoughItems)

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "ae2:energy_card"
+    },
+    {
+      "item": "mekanism:upgrade_energy"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "mekanismae:energy_card"
+  }
+}

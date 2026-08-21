@@ -274,8 +274,7 @@ public abstract class AbstractSingleKeyMeMachineMenu extends AbstractContainerMe
         boolean moved = false;
         if (PatternDetailsHelper.isEncodedPattern(moving)) {
             moved = moveItemStackTo(moving, 0, AbstractSingleKeyMeMachineBlockEntity.PATTERN_SLOT_COUNT, false);
-        } else if (moving.is(ModItems.SPEED_CARD.get()) || moving.is(ModItems.PARALLEL_CARD.get())
-                || moving.is(ModItems.ENERGY_CARD.get())) {
+        } else if (ModItems.isMachineUpgrade(moving)) {
             moved = moveItemStackTo(moving, AbstractSingleKeyMeMachineBlockEntity.PATTERN_SLOT_COUNT,
                     AbstractSingleKeyMeMachineBlockEntity.TIER_SLOT_INDEX, false);
         } else if (moving.getItem() instanceof ItemTierInstaller) {

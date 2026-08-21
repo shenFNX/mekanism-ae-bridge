@@ -284,6 +284,7 @@ public abstract class AbstractDualKeyMeMachineBlockEntity extends AbstractMeProc
         if (level == null || level.isClientSide()) {
             return;
         }
+        chargeFromNetwork();
         flushOutput();
         finishActiveJobIfDrained();
         activateNextJobIfIdle();

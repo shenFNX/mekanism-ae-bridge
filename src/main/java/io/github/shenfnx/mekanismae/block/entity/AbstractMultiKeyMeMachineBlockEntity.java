@@ -299,6 +299,7 @@ public abstract class AbstractMultiKeyMeMachineBlockEntity extends AbstractMePro
         if (level == null || level.isClientSide()) {
             return;
         }
+        chargeFromNetwork();
         flushOutputs();
         finishActiveJobIfDrained();
         activateNextJobIfIdle();

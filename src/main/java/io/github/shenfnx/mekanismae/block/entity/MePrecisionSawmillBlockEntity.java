@@ -318,6 +318,7 @@ public final class MePrecisionSawmillBlockEntity extends AbstractMeProcessingBlo
     @Override
     public void tickServer() {
         if (level == null || level.isClientSide()) return;
+        chargeFromNetwork();
         flushOutputs();
         finishActiveIfDrained();
         activateNextJobIfIdle();

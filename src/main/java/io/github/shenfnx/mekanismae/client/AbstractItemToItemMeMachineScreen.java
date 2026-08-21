@@ -3,6 +3,7 @@ package io.github.shenfnx.mekanismae.client;
 import io.github.shenfnx.mekanismae.menu.MeEnrichmentChamberMenu;
 import io.github.shenfnx.mekanismae.menu.MeProcessingMachineMenu;
 import io.github.shenfnx.mekanismae.block.entity.AbstractItemToItemMeMachineBlockEntity;
+import io.github.shenfnx.mekanismae.compat.appliedflux.AppliedFluxCompat;
 import io.github.shenfnx.mekanismae.registry.ModItems;
 import io.github.shenfnx.mekanismae.compat.mekanismextras.MekanismExtrasCompat;
 import io.github.shenfnx.mekanismae.util.EnergyFormatter;
@@ -260,16 +261,23 @@ public abstract class AbstractItemToItemMeMachineScreen<M extends net.minecraft.
                     Optional.empty(), mouseX, mouseY);
         } else if (isOver(mouseX, mouseY, UPGRADE_PANEL_X, 4, 32, 153)
                 && (hoveredSlot == null || !hoveredSlot.hasItem())) {
-            graphics.renderTooltip(font, List.of(
-                    Component.translatable("gui.mekanismae.available_upgrades").withStyle(ChatFormatting.AQUA),
-                    upgradeAvailability(ModItems.SPEED_CARD.get().getDescription(),
-                            AbstractItemToItemMeMachineBlockEntity.MAX_UPGRADES_PER_TYPE),
-                    upgradeAvailability(ModItems.PARALLEL_CARD.get().getDescription(),
-                            AbstractItemToItemMeMachineBlockEntity.MAX_UPGRADES_PER_TYPE),
-                    upgradeAvailability(ModItems.ENERGY_CARD.get().getDescription(),
-                            AbstractItemToItemMeMachineBlockEntity.MAX_UPGRADES_PER_TYPE)),
+            graphics.renderTooltip(font, availableUpgradeTooltip(),
                     Optional.empty(), mouseX, mouseY);
         }
+    }
+
+    private List<Component> availableUpgradeTooltip() {
+        List<Component> tooltip = new java.util.ArrayList<>();
+        tooltip.add(Component.translatable("gui.mekanismae.available_upgrades").withStyle(ChatFormatting.AQUA));
+        tooltip.add(upgradeAvailability(ModItems.SPEED_CARD.get().getDescription(),
+                AbstractItemToItemMeMachineBlockEntity.MAX_UPGRADES_PER_TYPE));
+        tooltip.add(upgradeAvailability(ModItems.PARALLEL_CARD.get().getDescription(),
+                AbstractItemToItemMeMachineBlockEntity.MAX_UPGRADES_PER_TYPE));
+        tooltip.add(upgradeAvailability(ModItems.ENERGY_CARD.get().getDescription(),
+                AbstractItemToItemMeMachineBlockEntity.MAX_UPGRADES_PER_TYPE));
+        AppliedFluxCompat.inductionCard().ifPresent(item ->
+                tooltip.add(upgradeAvailability(item.getDescription(), AppliedFluxCompat.MAX_INDUCTION_CARDS)));
+        return tooltip;
     }
 
     private Component upgradeAvailability(Component itemName, int maximum) {

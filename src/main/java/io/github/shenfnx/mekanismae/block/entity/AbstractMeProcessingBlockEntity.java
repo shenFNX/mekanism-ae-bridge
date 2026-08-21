@@ -7,6 +7,7 @@ import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.blockentity.grid.AENetworkedBlockEntity;
 import io.github.shenfnx.mekanismae.block.AbstractMeMachineBlock;
+import io.github.shenfnx.mekanismae.compat.appliedflux.AppliedFluxCompat;
 import io.github.shenfnx.mekanismae.compat.mekanismextras.MekanismExtrasCompat;
 import io.github.shenfnx.mekanismae.config.MachineSettings;
 import io.github.shenfnx.mekanismae.config.MachineType;
@@ -57,6 +58,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     private ItemStack tierInstaller = ItemStack.EMPTY;
     protected int speedUpgrades;
     protected int parallelUpgrades;
+    private boolean inductionCardInstalled;
     protected boolean networkEnabled = true;
     private boolean tearingDown;
 
@@ -458,6 +460,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         speedUpgrades = getUpgradeCount(ModItems.SPEED_CARD.get());
         parallelUpgrades = getUpgradeCount(ModItems.PARALLEL_CARD.get());
         energyStorage.updateUpgrades(getUpgradeCount(ModItems.ENERGY_CARD.get()));
+        inductionCardInstalled = upgradeSlots.stream().anyMatch(AppliedFluxCompat::isInductionCard);
     }
 
     public final int getUpgradeCount(Item item) {
@@ -470,7 +473,8 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
         }
         ItemStack current = upgradeSlots.get(slot - PATTERN_SLOT_COUNT);
         int currentInSlot = ItemStack.isSameItemSameComponents(current, stack) ? current.getCount() : 0;
-        return Math.max(0, MAX_UPGRADES_PER_TYPE - getUpgradeCount(stack.getItem()) + currentInSlot);
+        int maximum = ModItems.getMachineUpgradeLimit(stack);
+        return Math.max(0, maximum - getUpgradeCount(stack.getItem()) + currentInSlot);
     }
 
     public final int getTierIndex() {
@@ -486,8 +490,14 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     }
 
     private boolean isSupportedUpgrade(ItemStack stack) {
-        return stack.is(ModItems.SPEED_CARD.get()) || stack.is(ModItems.PARALLEL_CARD.get())
-                || stack.is(ModItems.ENERGY_CARD.get());
+        return ModItems.isMachineUpgrade(stack);
+    }
+
+    /** Pulls FE stored by Applied Flux into the local buffer when its induction card is installed. */
+    protected final void chargeFromNetwork() {
+        if (inductionCardInstalled) {
+            AppliedFluxCompat.chargeFromNetwork(this);
+        }
     }
 
     @Override

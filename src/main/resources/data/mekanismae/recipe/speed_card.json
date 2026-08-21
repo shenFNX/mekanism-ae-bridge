@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "ae2:speed_card"
+    },
+    {
+      "item": "mekanism:upgrade_speed"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "mekanismae:speed_card"
+  }
+}

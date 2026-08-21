@@ -245,8 +245,7 @@ public abstract class AbstractItemChemicalToItemMeMachineMenu extends AbstractCo
         boolean moved = false;
         if (PatternDetailsHelper.isEncodedPattern(moving)) {
             moved = moveItemStackTo(moving, 0, AbstractItemChemicalToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT, false);
-        } else if (moving.is(ModItems.SPEED_CARD.get()) || moving.is(ModItems.PARALLEL_CARD.get())
-                || moving.is(ModItems.ENERGY_CARD.get())) {
+        } else if (ModItems.isMachineUpgrade(moving)) {
             moved = moveItemStackTo(moving, AbstractItemChemicalToItemMeMachineBlockEntity.PATTERN_SLOT_COUNT,
                     AbstractItemChemicalToItemMeMachineBlockEntity.TIER_SLOT_INDEX, false);
         } else if (moving.getItem() instanceof ItemTierInstaller) {

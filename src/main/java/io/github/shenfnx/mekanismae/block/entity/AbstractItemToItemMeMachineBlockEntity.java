@@ -265,6 +265,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
         if (level == null || level.isClientSide()) {
             return;
         }
+        chargeFromNetwork();
 
         flushOutput();
         finishActiveJobIfDrained();

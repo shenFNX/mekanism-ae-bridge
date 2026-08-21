@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "ae2:capacity_card"
+    },
+    {
+      "item": "mekanism:upgrade_speed"
+    },
+    {
+      "item": "mekanism:advanced_control_circuit"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "mekanismae:parallel_card"
+  }
+}

@@ -244,6 +244,7 @@ public abstract class AbstractSingleKeyMeMachineBlockEntity extends AbstractMePr
         if (level == null || level.isClientSide()) {
             return;
         }
+        chargeFromNetwork();
         flushOutput();
         finishActiveJobIfDrained();
         activateNextJobIfIdle();

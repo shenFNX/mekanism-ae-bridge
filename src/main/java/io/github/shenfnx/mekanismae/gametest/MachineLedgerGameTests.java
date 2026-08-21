@@ -1,12 +1,17 @@
 package io.github.shenfnx.mekanismae.gametest;
 
+import appeng.api.config.Actionable;
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.crafting.PatternDetailsHelper;
+import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEFluidKey;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
 import appeng.api.stacks.KeyCounter;
+import appeng.api.storage.IStorageProvider;
+import appeng.api.storage.MEStorage;
+import appeng.core.definitions.AEBlocks;
 import io.github.shenfnx.mekanismae.MekanismAeMod;
 import io.github.shenfnx.mekanismae.block.entity.AbstractMeProcessingBlockEntity;
 import io.github.shenfnx.mekanismae.block.entity.AbstractMultiKeyMeMachineBlockEntity;
@@ -22,6 +27,7 @@ import io.github.shenfnx.mekanismae.registry.ModItems;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import me.ramidzkh.mekae2.ae2.MekanismKey;
 import mekanism.common.registries.MekanismChemicals;
@@ -31,6 +37,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -92,6 +100,16 @@ public final class MachineLedgerGameTests {
                 "saturated receive limit");
         helper.assertValueEqual(settings.bufferOperationLimit(3), Long.MAX_VALUE,
                 "saturated task-buffer limit");
+        helper.succeed();
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = EMPTY_TEMPLATE)
+    public static void upgradeCardsHaveCraftingRecipes(GameTestHelper helper) {
+        var recipes = helper.getLevel().getRecipeManager();
+        for (String path : List.of("speed_card", "parallel_card", "energy_card")) {
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(MekanismAeMod.MOD_ID, path);
+            helper.assertTrue(recipes.byKey(id).isPresent(), path + " crafting recipe must be loaded");
+        }
         helper.succeed();
     }
 
@@ -443,6 +461,78 @@ public final class MachineLedgerGameTests {
                     }
                 })
                 .thenSucceed();
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = EMPTY_TEMPLATE, timeoutTicks = 60)
+    public static void appliedFluxInductionCardDrawsStoredFe(GameTestHelper helper) {
+        if (!ModList.get().isLoaded("appflux")) {
+            helper.succeed();
+            return;
+        }
+
+        MeEnrichmentChamberBlockEntity machine = placeMachine(helper);
+        helper.setBlock(MACHINE_POS.relative(Direction.NORTH), AEBlocks.CREATIVE_ENERGY_CELL.block());
+        helper.startSequence()
+                .thenIdle(3)
+                .thenExecute(() -> {
+                    helper.assertTrue(machine.isNetworkOnline(), "the induction-card machine must be online");
+                    try {
+                        AEKey feKey = appliedFluxFeKey();
+                        AtomicLong stored = new AtomicLong(1_000_000);
+                        MEStorage energyBank = new MEStorage() {
+                            @Override
+                            public long extract(AEKey what, long amount, Actionable mode, IActionSource source) {
+                                if (!feKey.equals(what) || amount <= 0) {
+                                    return 0;
+                                }
+                                long extracted = Math.min(amount, stored.get());
+                                if (mode == Actionable.MODULATE) {
+                                    stored.addAndGet(-extracted);
+                                }
+                                return extracted;
+                            }
+
+                            @Override
+                            public void getAvailableStacks(KeyCounter out) {
+                                out.add(feKey, stored.get());
+                            }
+
+                            @Override
+                            public Component getDescription() {
+                                return Component.literal("GameTest FE storage");
+                            }
+                        };
+                        IStorageProvider provider = mounts -> mounts.mount(energyBank);
+                        machine.getMainNode().getGrid().getStorageService().addGlobalStorageProvider(provider);
+
+                        Item inductionCard = net.minecraft.core.registries.BuiltInRegistries.ITEM
+                                .get(ResourceLocation.fromNamespaceAndPath("appflux", "induction_card"));
+                        int firstUpgradeSlot = AbstractMeProcessingBlockEntity.PATTERN_SLOT_COUNT;
+                        machine.setItem(firstUpgradeSlot, new ItemStack(inductionCard, 8));
+                        helper.assertValueEqual(machine.getItem(firstUpgradeSlot).getCount(), 1,
+                                "induction-card slot clamp");
+                        helper.assertValueEqual(machine.getUpgradeLimitForSlot(firstUpgradeSlot + 1,
+                                new ItemStack(inductionCard)), 0, "global induction-card cap");
+
+                        machine.tickServer();
+                        helper.assertTrue(machine.getEnergyStorage().getEnergyStored() > 0,
+                                "induction card must fill the local buffer from ME-stored FE");
+                        helper.assertTrue(stored.get() < 1_000_000,
+                                "induction card must extract FE from the ME storage service");
+                    } catch (ReflectiveOperationException exception) {
+                        throw new AssertionError("Unable to create the Applied Flux FE key", exception);
+                    }
+                })
+                .thenSucceed();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static AEKey appliedFluxFeKey() throws ReflectiveOperationException {
+        Class<? extends Enum> energyType = (Class<? extends Enum>) Class.forName(
+                "com.glodblock.github.appflux.common.me.key.type.EnergyType");
+        Object fe = Enum.valueOf(energyType, "FE");
+        Class<?> fluxKey = Class.forName("com.glodblock.github.appflux.common.me.key.FluxKey");
+        return (AEKey) fluxKey.getMethod("of", energyType).invoke(null, fe);
     }
 
     private static MeEnrichmentChamberBlockEntity placeMachine(GameTestHelper helper) {

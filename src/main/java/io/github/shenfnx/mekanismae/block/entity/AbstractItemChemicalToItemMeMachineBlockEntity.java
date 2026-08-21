@@ -369,6 +369,7 @@ public abstract class AbstractItemChemicalToItemMeMachineBlockEntity extends Abs
         if (level == null || level.isClientSide()) {
             return;
         }
+        chargeFromNetwork();
 
         flushOutput();
         finishActiveJobIfDrained();

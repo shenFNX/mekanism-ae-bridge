@@ -344,6 +344,7 @@ public abstract class AbstractTwoItemToItemMeMachineBlockEntity extends Abstract
         if (level == null || level.isClientSide()) {
             return;
         }
+        chargeFromNetwork();
         flushOutput();
         finishActiveJobIfDrained();
         activateNextJobIfIdle();

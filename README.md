@@ -22,7 +22,7 @@ The goal is simple: keep Mekanism's recipes and machines, while letting AE2 hand
 - **FE and Mekanism energy support**, with a separate energy buffer shown in the GUI.
 - **Speed, Parallel, and Energy Cards**, up to eight of each per machine. The cards can be tuned in configuration and work together with Mekanism tier installers.
 - **Optional Mekanism Extras support** for Absolute, Supreme, Cosmic, and Infinite tier installers.
-- **Optional Applied Flux and AE2 Lightning Tech support**. An Overloaded Power Supply can power these machines even when it and the machine belong to the same ME network.
+- **Optional Applied Flux and AE2 Lightning Tech support**. Install an Applied Flux Induction Card to draw FE directly from ME storage, or use an Overloaded Power Supply even when it and the machine belong to the same ME network.
 - **GuideME, JEI, AE2 JEI Integration, and Jade support** for in-game documentation, recipe lookup, pattern transfer, and machine status inspection.
 
 ## Included machines
