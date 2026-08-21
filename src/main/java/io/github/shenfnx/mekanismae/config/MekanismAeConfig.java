@@ -12,10 +12,13 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public final class MekanismAeConfig {
     private static final int CURVE_SIZE = 9;
     private static final int TIER_CURVE_SIZE = 8;
-    private static final int MAX_MULTIPLIER = 256;
+    private static final int MAX_SPEED_MULTIPLIER = 256;
+    private static final int MAX_PARALLEL_MULTIPLIER = 65_536;
+    private static final int MAX_TIER_MULTIPLIER = 256;
     private static final long MAX_BUFFERED_OPERATIONS = 16_777_216L;
     private static final List<Integer> DEFAULT_SPEED_CURVE = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
-    private static final List<Integer> DEFAULT_PARALLEL_CURVE = List.of(1, 2, 3, 4, 6, 8, 10, 12, 16);
+    private static final List<Integer> DEFAULT_PARALLEL_CURVE =
+            List.of(1, 4, 16, 64, 256, 1_024, 4_096, 16_384, 65_536);
     private static final List<Integer> DEFAULT_TIER_PARALLEL_CURVE = List.of(3, 6, 10, 16, 32, 64, 128, 256);
     private static final List<Integer> DEFAULT_TIER_ENERGY_CURVE = List.of(2, 4, 8, 16, 32, 64, 128, 256);
     private static final List<Integer> DEFAULT_TIER_BUFFER_CURVE = List.of(2, 4, 8, 16, 32, 64, 128, 256);
@@ -91,13 +94,15 @@ public final class MekanismAeConfig {
                     .translation("config.mekanismae.speed_multipliers")
                     .worldRestart()
                     .defineList("speed_multipliers", DEFAULT_SPEED_CURVE, () -> 1,
-                            value -> value instanceof Integer integer && integer >= 1 && integer <= MAX_MULTIPLIER);
+                            value -> value instanceof Integer integer
+                                    && integer >= 1 && integer <= MAX_SPEED_MULTIPLIER);
             parallelMultipliers = builder
                     .comment("Parallel multipliers for 0 through 8 parallel cards. Missing entries repeat the last value; extra entries are ignored.")
                     .translation("config.mekanismae.parallel_multipliers")
                     .worldRestart()
                     .defineList("parallel_multipliers", DEFAULT_PARALLEL_CURVE, () -> 1,
-                            value -> value instanceof Integer integer && integer >= 1 && integer <= MAX_MULTIPLIER);
+                            value -> value instanceof Integer integer
+                                    && integer >= 1 && integer <= MAX_PARALLEL_MULTIPLIER);
             tierParallelMultipliers = tierCurve(builder, "tier_parallel_multipliers",
                     "Parallel multipliers for Basic through Ultimate tier installers, followed by Mekanism Extras Absolute, Supreme, Cosmic, and Infinite installers.",
                     "config.mekanismae.tier_parallel_multipliers", DEFAULT_TIER_PARALLEL_CURVE);
@@ -136,8 +141,10 @@ public final class MekanismAeConfig {
                     selected.processingTicks.get(),
                     machine.baseOperationsPerCycle.get(),
                     selected.maxBufferedOperations.get(),
-                    normalizeCurve(speedMultipliers.get(), DEFAULT_SPEED_CURVE, CURVE_SIZE),
-                    normalizeCurve(parallelMultipliers.get(), DEFAULT_PARALLEL_CURVE, CURVE_SIZE),
+                    normalizeCurve(speedMultipliers.get(), DEFAULT_SPEED_CURVE,
+                            CURVE_SIZE, MAX_SPEED_MULTIPLIER),
+                    normalizeCurve(parallelMultipliers.get(), DEFAULT_PARALLEL_CURVE,
+                            CURVE_SIZE, MAX_PARALLEL_MULTIPLIER),
                     normalizeTierCurve(tierParallelMultipliers.get(), DEFAULT_TIER_PARALLEL_CURVE),
                     normalizeTierCurve(tierEnergyCapacityMultipliers.get(), DEFAULT_TIER_ENERGY_CURVE),
                     normalizeTierCurve(tierEnergyReceiveMultipliers.get(), DEFAULT_TIER_ENERGY_CURVE),
@@ -150,7 +157,8 @@ public final class MekanismAeConfig {
                     .translation(translation)
                     .worldRestart()
                     .defineList(name, defaults, () -> 1,
-                            value -> value instanceof Integer integer && integer >= 1 && integer <= MAX_MULTIPLIER);
+                            value -> value instanceof Integer integer
+                                    && integer >= 1 && integer <= MAX_TIER_MULTIPLIER);
         }
     }
 
@@ -209,7 +217,8 @@ public final class MekanismAeConfig {
         }
     }
 
-    private static List<Integer> normalizeCurve(List<? extends Integer> configured, List<Integer> defaults, int size) {
+    private static List<Integer> normalizeCurve(List<? extends Integer> configured, List<Integer> defaults,
+            int size, int maximum) {
         List<Integer> result = new ArrayList<>(size);
         for (int index = 0; index < size; index++) {
             int value;
@@ -220,7 +229,7 @@ public final class MekanismAeConfig {
             } else {
                 value = configured.getLast();
             }
-            result.add(Math.min(MAX_MULTIPLIER, Math.max(1, value)));
+            result.add(Math.min(maximum, Math.max(1, value)));
         }
         return List.copyOf(result);
     }
@@ -229,7 +238,7 @@ public final class MekanismAeConfig {
         List<Integer> result = new ArrayList<>(TIER_CURVE_SIZE);
         for (int index = 0; index < TIER_CURVE_SIZE; index++) {
             int value = index < configured.size() ? configured.get(index) : defaults.get(index);
-            result.add(Math.min(MAX_MULTIPLIER, Math.max(1, value)));
+            result.add(Math.min(MAX_TIER_MULTIPLIER, Math.max(1, value)));
         }
         return List.copyOf(result);
     }

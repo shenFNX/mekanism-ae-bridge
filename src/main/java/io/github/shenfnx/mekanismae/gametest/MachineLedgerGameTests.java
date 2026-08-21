@@ -81,9 +81,9 @@ public final class MachineLedgerGameTests {
         MachineSettings settings = new MachineSettings(
                 true, 2.0, true,
                 2_000_000_000, 2_000_000_000, 250_000_000, 250_000_000,
-                10_000, 20, 20, Long.MAX_VALUE / 2 + 1,
+                10_000, 20, 1_000, Long.MAX_VALUE / 2 + 1,
                 List.of(1, 2, 3, 4, 5, 6, 7, 8, 9),
-                List.of(1, 2, 3, 4, 6, 8, 10, 12, 16),
+                List.of(1, 4, 16, 64, 256, 1_024, 4_096, 16_384, 65_536),
                 List.of(3, 6, 10, 16, 32, 64, 128, 256),
                 List.of(2, 4, 8, 16, 32, 64, 128, 256),
                 List.of(2, 4, 8, 16, 32, 64, 128, 256),
@@ -91,9 +91,16 @@ public final class MachineLedgerGameTests {
 
         helper.assertValueEqual(settings.speedMultiplier(-10), 1, "negative speed-card clamp");
         helper.assertValueEqual(settings.speedMultiplier(99), 9, "excess speed-card clamp");
-        helper.assertValueEqual(settings.parallelMultiplier(8, 3), 5_120, "combined parallel multiplier");
-        helper.assertValueEqual(settings.parallelMultiplier(8, 7), 81_920,
-                "Mekanism Extras Infinite parallel multiplier");
+        helper.assertValueEqual(settings.parallelMultiplier(4, 3), 4_096,
+                "player-visible parallel multiplier excludes the internal batch base");
+        helper.assertValueEqual(settings.processingOperationsPerCycle(4, 3), 4_096_000,
+                "chemical processing retains the internal batch base");
+        helper.assertValueEqual(settings.parallelMultiplier(8, 3), 1_048_576,
+                "eight-card Ultimate parallel multiplier");
+        helper.assertValueEqual(settings.parallelMultiplier(8, 7), 16_777_216,
+                "Mekanism Extras Infinite visible parallel multiplier");
+        helper.assertValueEqual(settings.processingOperationsPerCycle(8, 7), Integer.MAX_VALUE,
+                "processing operation count saturates safely");
         helper.assertValueEqual(settings.energyCapacity(8, 3), Integer.MAX_VALUE,
                 "saturated energy capacity");
         helper.assertValueEqual(settings.energyReceive(8, 3), Integer.MAX_VALUE,

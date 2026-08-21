@@ -13,7 +13,7 @@ All three card items stack to 64 in player inventories. A machine still accepts 
 All three cards have shapeless recipes. The Speed Card combines an AE2 Speed Card with a Mekanism Speed Upgrade; the Energy Card combines the corresponding AE2 and Mekanism energy upgrades; and the Parallel Card combines an AE2 Capacity Card, a Mekanism Speed Upgrade, and an Advanced Control Circuit. The recipes are visible in JEI.
 
 * Speed Cards shorten the processing cycle. The default 0-8 card curve is `1/2/3/4/5/6/7/8/9`.
-* Parallel Cards multiply operations completed per cycle. The default curve is `1/2/3/4/6/8/10/12/16`.
+* Parallel Cards multiply operations completed per cycle. The default 0-8 card curve uses powers of four: `1/4/16/64/256/1024/4096/16384/65536`.
 * Energy Cards add FE capacity and FE input rate. By default, each card adds 500,000 FE capacity and 200,000 FE/t input.
 
 With Applied Flux installed, the upgrade drawer also accepts up to one Applied Flux Induction Card. While the machine is online, it fills its internal buffer directly from FE stored on the current ME network. Transfer is limited by both the machine's FE input rate and Applied Flux's accessor limit.
@@ -36,4 +36,4 @@ Basic through Ultimate and then Mekanism Extras Absolute through Infinite.
 Energy capacity, FE input, and task-buffer multipliers use the same tier curve
 with `2/4/8/16/32/64/128/256`. Tier installers do not change processing time.
 
-Final parallel throughput is the machine's base operations per cycle multiplied by the Parallel Card multiplier and the tier multiplier. The GUI and Jade show this final value directly. With default settings, an Ultimate Tier Installer and eight Parallel Cards give item machines 256 operations per cycle.
+The GUI and Jade show the Parallel Card multiplier multiplied by the tier multiplier. Some low-volume fluid and chemical recipes also use an internal machine batch base (1,000 by default), but that implementation detail is no longer multiplied into the player-facing parallel number. With default settings, an Ultimate Tier Installer shows `4096` with four Parallel Cards and `1048576` with eight.

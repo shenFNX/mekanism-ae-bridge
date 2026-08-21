@@ -273,7 +273,7 @@ public abstract class AbstractMeProcessingBlockEntity extends AENetworkedBlockEn
     protected abstract boolean isVisuallyWorking();
 
     protected final int getParallelBatchSize() {
-        return getParallelMultiplier();
+        return settings.processingOperationsPerCycle(parallelUpgrades, getTierIndex());
     }
 
     protected final int getProcessingTicks() {

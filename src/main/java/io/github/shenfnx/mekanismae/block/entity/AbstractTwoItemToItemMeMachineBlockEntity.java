@@ -95,7 +95,7 @@ public abstract class AbstractTwoItemToItemMeMachineBlockEntity extends Abstract
                     case 9 -> getUpgradeCount(ModItems.ENERGY_CARD.get());
                     case 10 -> energyStorage.getReceiveLimit();
                     case 12 -> (int) Math.min(Integer.MAX_VALUE, getBufferOperationLimit());
-                    case 13 -> getParallelBatchSize();
+                    case 13 -> getParallelMultiplier();
                     case 14 -> (int) Math.min(Integer.MAX_VALUE, pendingOutputCount);
                     case 15 -> processingFaulted ? 1 : 0;
                     case 16 -> getSpeedMultiplier();

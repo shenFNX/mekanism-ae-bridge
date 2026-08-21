@@ -85,7 +85,7 @@ public abstract class AbstractItemToItemMeMachineBlockEntity extends AbstractMeP
                     case 10 -> energyStorage.getReceiveLimit();
                     case 11 -> (int) Math.min(Integer.MAX_VALUE, getTotalQueuedOperations());
                     case 12 -> (int) Math.min(Integer.MAX_VALUE, getBufferOperationLimit());
-                    case 13 -> getParallelBatchSize();
+                    case 13 -> getParallelMultiplier();
                     case 14 -> (int) Math.min(Integer.MAX_VALUE, pendingOutputCount);
                     case 15 -> processingFaulted ? 1 : 0;
                     case 16 -> getSpeedMultiplier();

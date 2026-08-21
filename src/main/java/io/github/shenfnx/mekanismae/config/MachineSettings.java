@@ -45,9 +45,12 @@ public record MachineSettings(
     }
 
     public int parallelMultiplier(int installedCards, int tierIndex) {
-        int upgradeMultiplier = safeIntProduct(parallelMultiplier(installedCards),
+        return safeIntProduct(parallelMultiplier(installedCards),
                 tierMultiplier(tierParallelMultipliers, tierIndex));
-        return safeIntProduct(baseOperationsPerCycle, upgradeMultiplier);
+    }
+
+    public int processingOperationsPerCycle(int installedCards, int tierIndex) {
+        return safeIntProduct(baseOperationsPerCycle, parallelMultiplier(installedCards, tierIndex));
     }
 
     public int energyCapacity(int installedCards, int tierIndex) {

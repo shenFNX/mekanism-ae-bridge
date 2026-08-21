@@ -192,7 +192,7 @@ public abstract class AbstractMultiKeyMeMachineBlockEntity extends AbstractMePro
                     case 9 -> getUpgradeCount(ModItems.ENERGY_CARD.get());
                     case 10 -> energyStorage.getReceiveLimit();
                     case 12 -> clampToInt(getBufferOperationLimit());
-                    case 13 -> getParallelBatchSize();
+                    case 13 -> getParallelMultiplier();
                     case 14 -> clampToInt(getBufferedOutputCount());
                     case 15 -> processingFaulted ? 1 : 0;
                     case 16 -> getSpeedMultiplier();
