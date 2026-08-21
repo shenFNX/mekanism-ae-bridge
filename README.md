@@ -22,6 +22,7 @@ The goal is simple: keep Mekanism's recipes and machines, while letting AE2 hand
 - **FE and Mekanism energy support**, with a separate energy buffer shown in the GUI.
 - **Speed, Parallel, and Energy Cards**, up to eight of each per machine. The cards can be tuned in configuration and work together with Mekanism tier installers.
 - **Optional Mekanism Extras support** for Absolute, Supreme, Cosmic, and Infinite tier installers.
+- **Optional Applied Flux and AE2 Lightning Tech support**. An Overloaded Power Supply can power these machines even when it and the machine belong to the same ME network.
 - **GuideME, JEI, AE2 JEI Integration, and Jade support** for in-game documentation, recipe lookup, pattern transfer, and machine status inspection.
 
 ## Included machines
@@ -77,7 +78,7 @@ The following mods are required on both the client and the server:
 | Applied Mekanistics | `1.6.3` | AE2 storage and transport for Mekanism chemicals |
 | GuideME | `21.1.17` | In-game guide pages |
 
-Recommended client-side integrations:
+Optional integrations:
 
 | Optional mod | Purpose |
 | --- | --- |
@@ -85,6 +86,8 @@ Recommended client-side integrations:
 | AE2 JEI Integration | Fill AE2 processing patterns from JEI |
 | Jade | View machine status, energy, buffer, and parallel value |
 | Mekanism Extras | Additional high-tier installers |
+| Applied Flux | Store and move FE through the ME network |
+| AE2 Lightning Tech | Power machines wirelessly with the Overloaded Power Supply; requires Applied Flux for this feature |
 
 This project targets **Java 21** and **NeoForge 1.21.1**.
 

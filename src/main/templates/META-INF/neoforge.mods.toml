@@ -9,6 +9,9 @@ displayName="${mod_name}"
 authors="shenFNX"
 description='''ME-connected Mekanism processing machines.'''
 
+[[mixins]]
+config="mekanismae.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId="neoforge"
 type="required"
@@ -71,3 +74,17 @@ type="optional"
 versionRange="[19.27.0,)"
 ordering="AFTER"
 side="CLIENT"
+
+[[dependencies.${mod_id}]]
+modId="appflux"
+type="optional"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="ae2lt"
+type="optional"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"

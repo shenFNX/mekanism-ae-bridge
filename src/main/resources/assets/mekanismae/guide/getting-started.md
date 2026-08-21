@@ -20,6 +20,8 @@ Every ME machine has a shapeless crafting recipe: combine the corresponding Meka
 
 AE power and machine FE are separate. A machine can appear in the AE network while its internal energy remains at zero.
 
+With Applied Flux and AE2 Lightning Tech installed, an Overloaded Power Supply can feed the machine wirelessly. Same-grid delivery is supported: the supply and this machine may belong to the same ME network.
+
 ## Install a Pattern
 
 Encode a processing pattern for the matching Mekanism recipe and place it in one of the nine pattern slots across the top of the machine. With JEI and AE2 JEI Integration installed, the JEI `+` button can fill the Pattern Encoding Terminal directly.

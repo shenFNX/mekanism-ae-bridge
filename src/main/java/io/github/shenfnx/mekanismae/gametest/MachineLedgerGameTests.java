@@ -19,11 +19,15 @@ import io.github.shenfnx.mekanismae.config.MachineType;
 import io.github.shenfnx.mekanismae.compat.mekanismextras.MekanismExtrasCompat;
 import io.github.shenfnx.mekanismae.registry.ModBlocks;
 import io.github.shenfnx.mekanismae.registry.ModItems;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Supplier;
 import me.ramidzkh.mekae2.ae2.MekanismKey;
 import mekanism.common.registries.MekanismChemicals;
 import mekanism.common.registries.MekanismItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -34,6 +38,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -396,6 +403,46 @@ public final class MachineLedgerGameTests {
         helper.assertItemEntityCountIs(ModItems.PARALLEL_CARD.get(), MACHINE_POS, 2.0, 8);
         helper.assertItemEntityCountIs(tierInstaller, MACHINE_POS, 2.0, 1);
         helper.succeed();
+    }
+
+    @GameTest(templateNamespace = "minecraft", template = EMPTY_TEMPLATE, timeoutTicks = 40)
+    public static void appliedFluxCanPowerMachineOnSameGrid(GameTestHelper helper) {
+        if (!ModList.get().isLoaded("appflux")) {
+            helper.succeed();
+            return;
+        }
+
+        MeEnrichmentChamberBlockEntity machine = placeMachine(helper);
+        helper.startSequence()
+                .thenIdle(2)
+                .thenExecute(() -> {
+                    helper.assertTrue(machine.getMainNode().getGrid() != null,
+                            "the test machine must have an AE2 grid");
+                    try {
+                        Class<?> cacheType = Class.forName(
+                                "com.glodblock.github.appflux.common.me.energy.EnergyCapCache");
+                        Constructor<?> constructor = cacheType.getConstructor(
+                                net.minecraft.server.level.ServerLevel.class,
+                                BlockPos.class,
+                                Supplier.class);
+                        Method getEnergyCap = cacheType.getMethod(
+                                "getEnergyCap", BlockCapability.class, Direction.class);
+
+                        BlockPos machinePos = helper.absolutePos(MACHINE_POS);
+                        BlockPos virtualAccessorPos = machinePos.relative(Direction.NORTH);
+                        Supplier<Object> sameGrid = () -> machine.getMainNode().getGrid();
+                        Object cache = constructor.newInstance(
+                                helper.getLevel(), virtualAccessorPos, sameGrid);
+                        Object energy = getEnergyCap.invoke(
+                                cache, Capabilities.EnergyStorage.BLOCK, Direction.SOUTH);
+
+                        helper.assertTrue(energy == machine.getEnergyStorage(),
+                                "Applied Flux must expose the machine's receive-only FE capability on the same grid");
+                    } catch (ReflectiveOperationException exception) {
+                        throw new AssertionError("Unable to exercise the Applied Flux energy cache", exception);
+                    }
+                })
+                .thenSucceed();
     }
 
     private static MeEnrichmentChamberBlockEntity placeMachine(GameTestHelper helper) {
